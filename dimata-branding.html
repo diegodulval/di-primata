@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Di Mata — Branding · Ecossistema de Rastreabilidade</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,300;1,600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --f1:#1F3D2B;--f2:#4E7C59;--f3:#A7C49A;--f4:#E8E2D3;--f5:#6B4E34;
+  --o1:#556B2F;--o2:#8A9A3A;--o3:#C8C27A;--o4:#F0EAD6;--o5:#5E513E;
+  --t1:#7A4E2D;--t2:#B87333;--t3:#D6B38A;--t4:#F2E7D5;--t5:#5B4636;
+  --b1:#234D4D;--b2:#3E7D7A;--b3:#8DBDB6;--b4:#DCEBE7;--b5:#53635C;
+  --ink:#0f1a14;--muted:rgba(15,26,20,.52);--line:rgba(15,26,20,.1);
+  --bg:#F5F2EC;--white:#FDFCFA;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);overflow-x:hidden;}
+
+/* cursor */
+.cursor{width:8px;height:8px;border-radius:50%;background:var(--b2);position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:multiply;transition:left .05s,top .05s;}
+
+/* nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;background:rgba(15,26,20,.97);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.05);}
+.nav-logo{font-weight:800;font-size:18px;color:#fff;letter-spacing:-.02em;display:flex;align-items:center;gap:10px;}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:var(--b3);animation:blink 2.5s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.nav-links{display:flex;list-style:none;}
+.nav-links a{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);text-decoration:none;padding:0 18px;height:64px;display:flex;align-items:center;border-left:1px solid rgba(255,255,255,.05);transition:color .2s,background .2s;}
+.nav-links a:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.03);}
+.nav-pill{font-family:'Fira Code',monospace;font-size:10px;font-weight:500;background:var(--b2);color:#fff;padding:6px 16px;border-radius:100px;letter-spacing:.08em;}
+
+/* hero */
+.hero{min-height:100vh;background:var(--ink);display:flex;flex-direction:column;justify-content:flex-end;padding:80px 64px;position:relative;overflow:hidden;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(62,125,122,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(62,125,122,.07) 1px,transparent 1px);background-size:64px 64px;animation:gridDrift 24s linear infinite;}
+@keyframes gridDrift{from{background-position:0 0}to{background-position:0 64px}}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;}
+.orb-a{width:700px;height:700px;top:-250px;right:-150px;background:radial-gradient(circle,rgba(62,125,122,.16) 0%,transparent 70%);animation:float 14s ease-in-out infinite;}
+.orb-b{width:500px;height:500px;bottom:-150px;left:5%;background:radial-gradient(circle,rgba(31,61,43,.28) 0%,transparent 70%);animation:float 18s ease-in-out infinite reverse;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-40px)}}
+
+.hero-badge{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(141,189,182,.22);border-radius:100px;padding:8px 18px;font-family:'Fira Code',monospace;font-size:10px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--b3);margin-bottom:40px;width:fit-content;position:relative;animation:fadeUp .9s ease both;}
+.bp{width:6px;height:6px;border-radius:50%;background:var(--b3);animation:blink 2s infinite;}
+
+.hero-h{font-weight:900;font-size:clamp(52px,9vw,108px);line-height:.92;letter-spacing:-.035em;color:#fff;position:relative;animation:fadeUp .9s .1s ease both;}
+.hero-h .fluid{color:var(--b3);font-style:italic;font-weight:300;}
+.hero-h .ghost{-webkit-text-stroke:1px rgba(255,255,255,.18);color:transparent;}
+
+.hero-sub{margin-top:28px;font-size:clamp(14px,1.6vw,18px);font-weight:300;color:rgba(255,255,255,.4);max-width:540px;line-height:1.75;position:relative;animation:fadeUp .9s .2s ease both;}
+
+.hero-cta{margin-top:44px;display:flex;align-items:center;gap:20px;position:relative;animation:fadeUp .9s .3s ease both;}
+.btn-p{background:var(--b2);color:#fff;padding:13px 30px;border-radius:100px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;transition:transform .2s,box-shadow .2s;}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(62,125,122,.4);}
+.btn-g{font-size:12px;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.06em;cursor:pointer;transition:color .2s;}
+.btn-g:hover{color:rgba(255,255,255,.8);}
+
+.hero-stats{position:absolute;right:64px;bottom:80px;display:flex;flex-direction:column;gap:22px;animation:fadeUp .9s .4s ease both;}
+.stat{text-align:right;border-right:2px solid rgba(141,189,182,.25);padding-right:20px;}
+.stat-n{font-size:30px;font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1;}
+.stat-l{font-family:'Fira Code',monospace;font-size:9px;font-weight:400;color:rgba(255,255,255,.25);letter-spacing:.2em;text-transform:uppercase;margin-top:3px;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* positioning */
+.pos{background:var(--ink);padding:80px 64px;display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.pos-l{padding-right:72px;border-right:1px solid rgba(255,255,255,.07);}
+.pos-r{padding-left:72px;}
+.pos-tag{font-family:'Fira Code',monospace;font-size:10px;letter-spacing:.25em;color:rgba(255,255,255,.22);margin-bottom:20px;}
+.vs{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:rgba(255,255,255,.25);margin-bottom:18px;}
+.pos-title{font-weight:900;font-size:28px;letter-spacing:-.02em;color:#fff;margin-bottom:14px;line-height:1.1;}
+.pos-body{font-size:15px;line-height:1.8;color:rgba(255,255,255,.4);font-weight:300;}
+.pos-body strong{color:rgba(255,255,255,.8);font-weight:700;}
+
+/* section shell */
+.sec{padding:96px 64px;max-width:1240px;margin:0 auto;}
+.s-lbl{display:inline-flex;align-items:center;gap:10px;font-family:'Fira Code',monospace;font-size:10px;font-weight:400;letter-spacing:.3em;text-transform:uppercase;color:var(--b2);margin-bottom:20px;}
+.s-lbl::before{content:'';display:block;width:22px;height:1.5px;background:var(--b2);}
+.s-ttl{font-weight:900;font-size:clamp(28px,4vw,48px);line-height:1.05;letter-spacing:-.025em;color:var(--ink);margin-bottom:16px;}
+.s-body{font-size:16px;line-height:1.8;color:var(--muted);max-width:600px;font-weight:300;}
+.divider{border:none;border-top:1px solid var(--line);}
+
+/* logo */
+.logo-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:52px;}
+.logo-stage{background:var(--ink);border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px;gap:36px;min-height:380px;}
+.logo-disp{display:flex;align-items:center;gap:18px;}
+.lw strong{display:block;font-weight:900;font-size:40px;letter-spacing:-.03em;color:#fff;line-height:1;}
+.lw small{display:block;font-family:'Fira Code',monospace;font-size:9.5px;letter-spacing:.15em;color:rgba(255,255,255,.3);margin-top:5px;}
+.logo-vars{display:flex;gap:10px;}
+.lv{width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.06);}
+.logo-notes{display:flex;flex-direction:column;gap:16px;justify-content:center;}
+.ni{display:flex;gap:14px;align-items:flex-start;padding:18px 22px;background:var(--white);border-radius:16px;border:1px solid var(--line);}
+.ni-ico{width:34px;height:34px;border-radius:9px;background:var(--b4);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
+.ni h4{font-size:13px;font-weight:800;color:var(--ink);margin-bottom:3px;letter-spacing:-.01em;}
+.ni p{font-size:12px;line-height:1.65;color:var(--muted);font-weight:300;}
+
+/* palettes */
+.pal-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:52px;}
+.pc{border-radius:22px;overflow:hidden;border:1px solid var(--line);background:var(--white);transition:transform .3s,box-shadow .3s;}
+.pc:hover{transform:translateY(-5px);box-shadow:0 28px 56px rgba(0,0,0,.09);}
+.pt{padding:32px;color:#fff;position:relative;overflow:hidden;}
+.pt::after{content:'';position:absolute;top:-50px;right:-50px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.06);}
+.pn{font-family:'Fira Code',monospace;font-size:10px;letter-spacing:.18em;opacity:.45;margin-bottom:7px;}
+.pname{font-weight:900;font-size:24px;letter-spacing:-.02em;margin-bottom:5px;}
+.pkw{font-size:11px;font-weight:300;opacity:.6;letter-spacing:.05em;}
+.swatches{display:flex;height:60px;}
+.sw{flex:1;cursor:pointer;transition:flex .3s;position:relative;}
+.sw:hover{flex:2;}
+.sw-lbl{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);font-family:'Fira Code',monospace;font-size:8px;color:#fff;opacity:0;transition:opacity .2s;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.5);}
+.sw:hover .sw-lbl{opacity:1;}
+.pb{padding:24px 32px;}
+.pd{font-size:13.5px;line-height:1.75;color:var(--muted);margin-bottom:16px;font-weight:300;}
+.pr{display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:100px;border:1px solid var(--line);color:var(--muted);margin:3px 3px 0 0;}
+
+/* ecosystem */
+.eco-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:52px;}
+.ec{border-radius:20px;padding:28px 22px;background:var(--white);border:1px solid var(--line);position:relative;overflow:hidden;transition:transform .3s;}
+.ec:hover{transform:translateY(-4px);}
+.ec::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+.ec:nth-child(1)::after{background:var(--f2);}
+.ec:nth-child(2)::after{background:var(--o2);}
+.ec:nth-child(3)::after{background:var(--b2);}
+.ec:nth-child(4)::after{background:var(--t2);}
+.ec-num{font-family:'Fira Code',monospace;font-size:9.5px;letter-spacing:.2em;color:var(--muted);margin-bottom:18px;}
+.ec-ico{font-size:26px;margin-bottom:14px;}
+.ec h3{font-weight:800;font-size:16px;letter-spacing:-.01em;color:var(--ink);margin-bottom:8px;}
+.ec p{font-size:12.5px;line-height:1.7;color:var(--muted);font-weight:300;}
+.ec-tag{display:inline-block;font-family:'Fira Code',monospace;font-size:9.5px;letter-spacing:.08em;color:var(--b2);background:rgba(62,125,122,.1);border:1px solid rgba(62,125,122,.18);padding:2px 9px;border-radius:4px;margin-top:12px;}
+
+/* tech */
+.tech{background:var(--ink);padding:96px 64px;}
+.tech-in{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1fr 1.3fr;gap:80px;align-items:start;}
+.tech .s-lbl{color:var(--b3);}
+.tech .s-lbl::before{background:var(--b3);}
+.tech .s-ttl{color:#fff;}
+.tech .s-body{color:rgba(255,255,255,.38);}
+.mods{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.mod{border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:22px;transition:border-color .3s,background .3s;}
+.mod:hover{border-color:rgba(62,125,122,.4);background:rgba(62,125,122,.05);}
+.mod-ico{font-size:20px;margin-bottom:12px;}
+.mod h4{font-weight:800;font-size:13px;letter-spacing:-.01em;color:#fff;margin-bottom:5px;}
+.mod p{font-size:11.5px;line-height:1.65;color:rgba(255,255,255,.3);font-weight:300;}
+
+/* strategy */
+.stab{margin-top:52px;border:1px solid var(--line);border-radius:20px;overflow:hidden;}
+.sr{display:grid;grid-template-columns:170px 1fr 1fr;border-bottom:1px solid var(--line);}
+.sr:last-child{border-bottom:none;}
+.sr.hd{background:var(--ink);}
+.sc{padding:18px 26px;font-size:13.5px;line-height:1.65;border-right:1px solid var(--line);font-weight:300;}
+.sc:last-child{border-right:none;}
+.sr.hd .sc{font-family:'Fira Code',monospace;font-size:9.5px;font-weight:400;letter-spacing:.15em;color:rgba(255,255,255,.25);border-right-color:rgba(255,255,255,.05);}
+.sr:nth-child(even) .sc{background:rgba(0,0,0,.018);}
+.sl{font-weight:800;font-size:13px;color:var(--ink);letter-spacing:-.01em;}
+.dp{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;vertical-align:middle;}
+
+/* manifesto */
+.mani{background:var(--b1);border-radius:28px;margin:0 64px 80px;padding:88px;position:relative;overflow:hidden;text-align:center;}
+.mani::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 20% 20%,rgba(62,125,122,.22) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 80%,rgba(31,61,43,.38) 0%,transparent 60%);}
+.mani-lbl{position:relative;font-family:'Fira Code',monospace;font-size:9.5px;letter-spacing:.3em;color:var(--b3);opacity:.6;text-transform:uppercase;margin-bottom:28px;}
+.mani h2{position:relative;font-weight:900;font-size:clamp(24px,4vw,50px);color:#fff;line-height:1.18;letter-spacing:-.025em;margin-bottom:22px;}
+.mani h2 em{font-style:italic;font-weight:300;color:var(--b3);}
+.mani p{position:relative;font-size:15px;color:rgba(255,255,255,.38);max-width:540px;margin:0 auto;line-height:1.8;font-weight:300;}
+.mani-code{position:relative;margin-top:36px;font-family:'Fira Code',monospace;font-size:12px;color:rgba(141,189,182,.5);letter-spacing:.05em;}
+
+/* footer */
+footer{background:var(--ink);padding:52px 64px;display:flex;align-items:center;justify-content:space-between;}
+.f-brand{font-weight:900;font-size:20px;color:#fff;letter-spacing:-.02em;}
+.f-meta{font-family:'Fira Code',monospace;font-size:10px;color:rgba(255,255,255,.18);letter-spacing:.1em;}
+
+@media(max-width:900px){
+  nav{padding:0 24px;}.nav-links{display:none;}
+  .hero{padding:80px 28px 64px;}.hero-stats{display:none;}
+  .sec{padding:60px 28px;}
+  .pos{grid-template-columns:1fr;padding:60px 28px;}
+  .pos-l{padding-right:0;border-right:none;padding-bottom:44px;border-bottom:1px solid rgba(255,255,255,.07);}
+  .pos-r{padding-left:0;padding-top:44px;}
+  .logo-grid,.pal-grid{grid-template-columns:1fr;}
+  .eco-grid{grid-template-columns:1fr 1fr;}
+  .tech{padding:60px 28px;}.tech-in{grid-template-columns:1fr;}
+  .mods{grid-template-columns:1fr;}
+  .sr{grid-template-columns:1fr;}.sr.hd{display:none;}.sc{border-right:none;}
+  .mani{margin:0 20px 60px;padding:52px 28px;}
+  footer{flex-direction:column;gap:14px;text-align:center;padding:44px 28px;}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cur"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><span class="nav-dot"></span>Di Mata</div>
+  <ul class="nav-links">
+    <li><a href="#pos">Posicionamento</a></li>
+    <li><a href="#logo">Identidade</a></li>
+    <li><a href="#pal">Paletas</a></li>
+    <li><a href="#eco">Ecossistema</a></li>
+    <li><a href="#tech">Tecnologia</a></li>
+  </ul>
+  <div class="nav-pill">branding_v2</div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+
+  <div class="hero-badge"><span class="bp"></span>Ecossistema de Rastreabilidade & IA — B2B</div>
+
+  <h1 class="hero-h">
+    Di<br><span class="fluid">Mata</span><br><span class="ghost">Branding</span>
+  </h1>
+
+  <p class="hero-sub">
+    Não é uma marca de alimento. É a infraestrutura inteligente que transforma dados do campo em decisões de negócio — para produtores, cooperativas e gestores de cadeias produtivas.
+  </p>
+
+  <div class="hero-cta">
+    <button class="btn-p">Explorar identidade</button>
+    <span class="btn-g">↓ Rolar para ver</span>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-n">4</div><div class="stat-l">paletas cromáticas</div></div>
+    <div class="stat"><div class="stat-n">B2B</div><div class="stat-l">mercado-alvo</div></div>
+    <div class="stat"><div class="stat-n">IA</div><div class="stat-l">core da plataforma</div></div>
+  </div>
+</div>
+
+<!-- POSICIONAMENTO -->
+<div class="pos" id="pos">
+  <div class="pos-l">
+    <div class="pos-tag">// o que Di Mata NÃO é</div>
+    <div class="vs">✕</div>
+    <div class="pos-title">Marca de produto alimentar</div>
+    <p class="pos-body">O branding verde e orgânico pode sugerir isso à primeira leitura — mas é uma leitura rasa. A estética do campo é <strong>deliberada</strong>: fala a língua do produtor rural sem intimidar com jargão tech.</p>
+  </div>
+  <div class="pos-r">
+    <div class="pos-tag">// o que Di Mata É</div>
+    <div class="vs" style="background:rgba(62,125,122,.15);border-color:rgba(62,125,122,.3);">✓</div>
+    <div class="pos-title">Plataforma de dados,<br>rastreabilidade e IA</div>
+    <p class="pos-body">Software B2B que entrega <strong>rastreabilidade end-to-end</strong>, <strong>insights de inteligência artificial</strong> e <strong>dashboards de gestão</strong> para quem opera ou gerencia cadeias produtivas agrícolas.</p>
+  </div>
+</div>
+
+<!-- LOGO -->
+<section class="sec" id="logo">
+  <div class="s-lbl">02 · Identidade visual</div>
+  <h2 class="s-ttl">O símbolo como arquitetura de dados</h2>
+  <p class="s-body">O logo tem dupla leitura: ao produtor diz natureza e origem; ao gestor diz sistema, precisão e fluxo. A mesma forma, dois discursos simultâneos.</p>
+
+  <div class="logo-grid">
+    <div class="logo-stage">
+      <div class="logo-disp">
+        <svg width="62" height="62" viewBox="0 0 70 70" fill="none">
+          <path d="M8 8H34C52 8 62 19 62 35C62 51 52 62 34 62H8Z" fill="#DCEBE7"/>
+          <path d="M35 20L35 50" stroke="#234D4D" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M35 35L25 25" stroke="#234D4D" stroke-width="3" stroke-linecap="round"/>
+          <path d="M35 28L45 20" stroke="#234D4D" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <div class="lw">
+          <strong>Di Mata</strong>
+          <small>de onde vem o alimento</small>
+        </div>
+      </div>
+
+      <div class="logo-vars">
+        <div class="lv" style="background:#1F3D2B">
+          <svg width="32" height="32" viewBox="0 0 70 70" fill="none"><path d="M8 8H34C52 8 62 19 62 35C62 51 52 62 34 62H8Z" fill="#E8E2D3"/><path d="M35 20L35 50" stroke="#1F3D2B" stroke-width="4" stroke-linecap="round"/><path d="M35 35L25 25" stroke="#1F3D2B" stroke-width="3.5" stroke-linecap="round"/><path d="M35 28L45 20" stroke="#1F3D2B" stroke-width="3.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="lv" style="background:#556B2F">
+          <svg width="32" height="32" viewBox="0 0 70 70" fill="none"><path d="M8 8H34C52 8 62 19 62 35C62 51 52 62 34 62H8Z" fill="#F0EAD6"/><path d="M35 20L35 50" stroke="#556B2F" stroke-width="4" stroke-linecap="round"/><path d="M35 35L25 25" stroke="#556B2F" stroke-width="3.5" stroke-linecap="round"/><path d="M35 28L45 20" stroke="#556B2F" stroke-width="3.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="lv" style="background:#7A4E2D">
+          <svg width="32" height="32" viewBox="0 0 70 70" fill="none"><path d="M8 8H34C52 8 62 19 62 35C62 51 52 62 34 62H8Z" fill="#F2E7D5"/><path d="M35 20L35 50" stroke="#7A4E2D" stroke-width="4" stroke-linecap="round"/><path d="M35 35L25 25" stroke="#7A4E2D" stroke-width="3.5" stroke-linecap="round"/><path d="M35 28L45 20" stroke="#7A4E2D" stroke-width="3.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="lv" style="background:#234D4D">
+          <svg width="32" height="32" viewBox="0 0 70 70" fill="none"><path d="M8 8H34C52 8 62 19 62 35C62 51 52 62 34 62H8Z" fill="#DCEBE7"/><path d="M35 20L35 50" stroke="#234D4D" stroke-width="4" stroke-linecap="round"/><path d="M35 35L25 25" stroke="#234D4D" stroke-width="3.5" stroke-linecap="round"/><path d="M35 28L45 20" stroke="#234D4D" stroke-width="3.5" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+      <p style="font-family:'Fira Code',monospace;font-size:9px;color:rgba(255,255,255,.18);letter-spacing:.15em;text-transform:uppercase;">symbol · 4 palettes · all contexts</p>
+    </div>
+
+    <div class="logo-notes">
+      <div class="ni">
+        <div class="ni-ico">⬤</div>
+        <div><h4>"D" fechado — Sistema completo</h4><p>A forma sólida comunica que a Di Mata é infraestrutura — um sistema fechado, robusto, não um ponto isolado numa cadeia.</p></div>
+      </div>
+      <div class="ni">
+        <div class="ni-ico">🌿</div>
+        <div><h4>Folha em negativo — Grafo de dados</h4><p>As ramificações lembram um grafo ou um fluxo de rastreabilidade. A natureza é o idioma visual; os dados são a estrutura real.</p></div>
+      </div>
+      <div class="ni">
+        <div class="ni-ico">Aa</div>
+        <div><h4>Nunito — Fluida, não serifada</h4><p>Sem serifa rígida: a plataforma é digital e precisa de agilidade tipográfica. Nunito combina peso forte (B2B) com curvas abertas (onboarding acessível).</p></div>
+      </div>
+      <div class="ni">
+        <div class="ni-ico">⌨</div>
+        <div><h4>Fira Code no tagline — Voz de sistema</h4><p>"de onde vem o alimento" em monospace é um log de dados. Dois mundos no mesmo símbolo: campo e tecnologia.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PALETAS -->
+<section class="sec" id="pal">
+  <div class="s-lbl">03 · Sistema cromático</div>
+  <h2 class="s-ttl">4 paletas, 4 camadas do produto</h2>
+  <p class="s-body">Cada paleta é um módulo do ecossistema — da interface do produtor rural ao dashboard do gestor corporativo, cada cor tem papel funcional.</p>
+
+  <div class="pal-grid">
+    <div class="pc">
+      <div class="pt" style="background:linear-gradient(135deg,#1F3D2B,#4E7C59)">
+        <div class="pn">palette · 01</div><div class="pname">Floresta</div><div class="pkw">Clàssica · Confiança · Equilíbrio</div>
+      </div>
+      <div class="swatches">
+        <div class="sw" style="background:#1F3D2B"><span class="sw-lbl">#1F3D2B</span></div>
+        <div class="sw" style="background:#4E7C59"><span class="sw-lbl">#4E7C59</span></div>
+        <div class="sw" style="background:#A7C49A"><span class="sw-lbl">#A7C49A</span></div>
+        <div class="sw" style="background:#E8E2D3"><span class="sw-lbl">#E8E2D3</span></div>
+        <div class="sw" style="background:#6B4E34"><span class="sw-lbl">#6B4E34</span></div>
+      </div>
+      <div class="pb">
+        <p class="pd">Voz institucional da marca — usada em pitch para investidores, contratos, homepage B2B e qualquer contexto onde autoridade e solidez precisam ser comunicados.</p>
+        <span class="pr">Pitch & investidores</span><span class="pr">Contratos</span><span class="pr">Homepage B2B</span><span class="pr">App · tela principal</span>
+      </div>
+    </div>
+
+    <div class="pc">
+      <div class="pt" style="background:linear-gradient(135deg,#556B2F,#8A9A3A)">
+        <div class="pn">palette · 02</div><div class="pname">Oliva</div><div class="pkw">Acessível · Contraste · Natural</div>
+      </div>
+      <div class="swatches">
+        <div class="sw" style="background:#556B2F"><span class="sw-lbl">#556B2F</span></div>
+        <div class="sw" style="background:#8A9A3A"><span class="sw-lbl">#8A9A3A</span></div>
+        <div class="sw" style="background:#C8C27A"><span class="sw-lbl">#C8C27A</span></div>
+        <div class="sw" style="background:#F0EAD6"><span class="sw-lbl">#F0EAD6</span></div>
+        <div class="sw" style="background:#5E513E"><span class="sw-lbl">#5E513E</span></div>
+      </div>
+      <div class="pb">
+        <p class="pd">Alta legibilidade para interfaces de gestão de cadeia. Contraste oliva + creme garante dashboards limpos, gráficos legíveis e conforto visual em sessões longas de análise.</p>
+        <span class="pr">Dashboard gestor</span><span class="pr">Relatórios PDF</span><span class="pr">Interface de análise</span><span class="pr">PDV / sinalização</span>
+      </div>
+    </div>
+
+    <div class="pc">
+      <div class="pt" style="background:linear-gradient(135deg,#7A4E2D,#B87333)">
+        <div class="pn">palette · 03</div><div class="pname">Terra</div><div class="pkw">Acolhedora · Artesanal · Raízes</div>
+      </div>
+      <div class="swatches">
+        <div class="sw" style="background:#7A4E2D"><span class="sw-lbl">#7A4E2D</span></div>
+        <div class="sw" style="background:#B87333"><span class="sw-lbl">#B87333</span></div>
+        <div class="sw" style="background:#D6B38A"><span class="sw-lbl">#D6B38A</span></div>
+        <div class="sw" style="background:#F2E7D5"><span class="sw-lbl">#F2E7D5</span></div>
+        <div class="sw" style="background:#5B4636"><span class="sw-lbl">#5B4636</span></div>
+      </div>
+      <div class="pb">
+        <p class="pd">Interface de adoção para o produtor rural. Tons quentes reduzem a fricção de onboarding com públicos menos digitalizados — o app parece familiar, não intimidador.</p>
+        <span class="pr">App mobile produtor</span><span class="pr">QR code físico</span><span class="pr">Material de campo</span><span class="pr">Treinamento</span>
+      </div>
+    </div>
+
+    <div class="pc">
+      <div class="pt" style="background:linear-gradient(135deg,#234D4D,#3E7D7A)">
+        <div class="pn">palette · 04</div><div class="pname">Brisa</div><div class="pkw">Moderna · Fresca · Transparência</div>
+      </div>
+      <div class="swatches">
+        <div class="sw" style="background:#234D4D"><span class="sw-lbl">#234D4D</span></div>
+        <div class="sw" style="background:#3E7D7A"><span class="sw-lbl">#3E7D7A</span></div>
+        <div class="sw" style="background:#8DBDB6"><span class="sw-lbl">#8DBDB6</span></div>
+        <div class="sw" style="background:#DCEBE7"><span class="sw-lbl">#DCEBE7</span></div>
+        <div class="sw" style="background:#53635C"><span class="sw-lbl">#53635C</span></div>
+      </div>
+      <div class="pb">
+        <p class="pd">Camada tech da plataforma. Tons frios comunicam precisão analítica e IA — a interface onde vivem os modelos preditivos, alertas inteligentes e integrações de API.</p>
+        <span class="pr">AI insights</span><span class="pr">API docs</span><span class="pr">Alertas de sistema</span><span class="pr">Landing tech</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ECOSSISTEMA -->
+<section class="sec" id="eco">
+  <div class="s-lbl">04 · Módulos do ecossistema</div>
+  <h2 class="s-ttl">Os 4 atributos visuais = 4 módulos do produto</h2>
+  <p class="s-body">Os valores no rodapé do brand guide (Origem, Rastreabilidade, Confiança, Natureza) não são conceitos abstratos — são os módulos funcionais da plataforma.</p>
+
+  <div class="eco-grid">
+    <div class="ec">
+      <div class="ec-num">module · 01</div>
+      <div class="ec-ico">🗺️</div>
+      <h3>Origem</h3>
+      <p>Registro digital de cada lote — talhão, produtor, coordenadas GPS, data de colheita. A história do produto começa aqui.</p>
+      <div class="ec-tag">geo_tagging</div>
+    </div>
+    <div class="ec">
+      <div class="ec-num">module · 02</div>
+      <div class="ec-ico">📡</div>
+      <h3>Rastreabilidade</h3>
+      <p>QR codes, blockchain-ready ou API — cada etapa da cadeia registrada e auditável. Do campo ao destino, sem lacunas.</p>
+      <div class="ec-tag">chain_events</div>
+    </div>
+    <div class="ec">
+      <div class="ec-num">module · 03</div>
+      <div class="ec-ico">🤖</div>
+      <h3>IA & Insights</h3>
+      <p>Modelos preditivos de produtividade, alertas de anomalia, benchmarks e recomendações acionáveis para o gestor tomar decisões.</p>
+      <div class="ec-tag">ai_inference</div>
+    </div>
+    <div class="ec">
+      <div class="ec-num">module · 04</div>
+      <div class="ec-ico">🛡️</div>
+      <h3>Confiança</h3>
+      <p>Certificações digitais, auditorias automatizadas e relatórios de compliance — credibilidade como produto entregável.</p>
+      <div class="ec-tag">compliance_api</div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH -->
+<div class="tech" id="tech">
+  <div class="tech-in">
+    <div>
+      <div class="s-lbl">05 · Camada tecnológica</div>
+      <h2 class="s-ttl">Por que o branding importa para B2B?</h2>
+      <p class="s-body">Em mercados B2B agrícola, identidade visual é argumento de venda. A Di Mata comunica sofisticação técnica e proximidade com o campo ao mesmo tempo — reduzindo resistência de adoção em ambos os públicos.</p>
+    </div>
+    <div class="mods">
+      <div class="mod"><div class="mod-ico">🧬</div><h4>Design para dois públicos</h4><p>O branding orgânico converte o produtor. A estrutura de dados e tipografia monospace converte o CTO e o CFO.</p></div>
+      <div class="mod"><div class="mod-ico">📊</div><h4>Brisa = UI de dados</h4><p>Os tons teal frios são deliberados para dashboards de IA — reduzem fadiga visual e comunicam precisão analítica.</p></div>
+      <div class="mod"><div class="mod-ico">🔗</div><h4>Símbolo + QR integrado</h4><p>O "D + folha" foi concebido para funcionar dentro de QR codes customizados — o produto físico carrega a identidade digital.</p></div>
+      <div class="mod"><div class="mod-ico">⚙️</div><h4>Sistema escalável</h4><p>4 paletas, 1 símbolo, 2 fontes — o sistema cresce com o roadmap de produto sem fragmentar a identidade.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- STRATEGY TABLE -->
+<section class="sec">
+  <div class="s-lbl">06 · Aplicação estratégica</div>
+  <h2 class="s-ttl">Cada paleta, seu canal no produto</h2>
+  <p class="s-body">O sistema cromático funciona como um roteador visual — a cor certa no contexto certo elimina ruído e acelera conversão e adoção.</p>
+
+  <div class="stab">
+    <div class="sr hd">
+      <div class="sc">paleta</div>
+      <div class="sc">canais & contextos</div>
+      <div class="sc">mensagem central</div>
+    </div>
+    <div class="sr">
+      <div class="sc"><span class="sl"><span class="dp" style="background:#1F3D2B"></span>Floresta</span></div>
+      <div class="sc">Pitch a investidores, homepage B2B, contratos, materiais institucionais, apresentações comerciais</div>
+      <div class="sc">Somos infraestrutura crítica — solidez e autoridade que justificam o contrato</div>
+    </div>
+    <div class="sr">
+      <div class="sc"><span class="sl"><span class="dp" style="background:#8A9A3A"></span>Oliva</span></div>
+      <div class="sc">Dashboard do gestor de cadeia, relatórios automáticos, exportações, interface de análise de dados</div>
+      <div class="sc">Clareza operacional — os dados precisam ser lidos sem esforço, em qualquer dispositivo</div>
+    </div>
+    <div class="sr">
+      <div class="sc"><span class="sl"><span class="dp" style="background:#B87333"></span>Terra</span></div>
+      <div class="sc">App mobile para produtor rural, QR codes físicos, material impresso de campo, suporte e treinamento</div>
+      <div class="sc">Adoção sem atrito — a tecnologia deve parecer próxima, não intimidadora</div>
+    </div>
+    <div class="sr">
+      <div class="sc"><span class="sl"><span class="dp" style="background:#3E7D7A"></span>Brisa</span></div>
+      <div class="sc">Camada de IA, API docs, alertas inteligentes, landing page técnica, comunicação com CTOs e devs</div>
+      <div class="sc">Precisão e inovação — aqui vivem os modelos, os dados e a inteligência da plataforma</div>
+    </div>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<div class="mani">
+  <p class="mani-lbl">// manifesto · di mata · ecossistema</p>
+  <h2>O campo sempre soube.<br><em>Nós fazemos o mercado saber também.</em></h2>
+  <p>Rastreabilidade não é compliance — é vantagem competitiva. Cada dado coletado no campo é um insight que o gestor ainda não tem. Di Mata é a ponte entre a terra que produz e a inteligência que transforma produção em estratégia.</p>
+  <div class="mani-code">> dimata.run --mode ecosystem --ai true --chain full --output insights</div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="f-brand">Di Mata</div>
+  <div class="f-meta">branding_analysis · v2.0 · ecosystem_b2b_positioning</div>
+</footer>
+
+<script>
+const cur = document.getElementById('cur');
+document.addEventListener('mousemove', e => {
+  cur.style.left = e.clientX + 'px';
+  cur.style.top = e.clientY + 'px';
+});
+
+const items = document.querySelectorAll('.ec,.ni,.pc,.mod');
+const io = new IntersectionObserver(entries => {
+  entries.forEach((e,i) => {
+    if(e.isIntersecting){
+      setTimeout(()=>{
+        e.target.style.animation = 'fadeUp .55s ease both';
+        e.target.style.opacity = '1';
+      }, i * 70);
+      io.unobserve(e.target);
+    }
+  });
+},{threshold:.12});
+items.forEach(el => { el.style.opacity='0'; io.observe(el); });
+</script>
+</body>
+</html>
