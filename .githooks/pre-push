@@ -1,0 +1,44 @@
+#!/bin/sh
+# Valida o nome da branch antes de fazer push.
+#
+# Padrão permitido:
+#   main
+#   develop
+#   feat/<descricao>
+#   fix/<descricao>
+#   chore/<descricao>
+#   docs/<descricao>
+#   test/<descricao>
+#   refactor/<descricao>
+#   ci/<descricao>
+#   release/<versao>
+#
+# Descrição: kebab-case, mínimo 2 caracteres.
+
+BRANCH=$(git symbolic-ref HEAD 2>/dev/null | sed 's|refs/heads/||')
+
+if [ -z "$BRANCH" ]; then
+  echo "⚠️   Não foi possível determinar a branch atual. Push permitido."
+  exit 0
+fi
+
+PATTERN='^(main|develop|(feat|fix|chore|docs|test|refactor|ci|release)/[a-z0-9][a-z0-9_-]{1,60})$'
+
+if ! echo "$BRANCH" | grep -qE "$PATTERN"; then
+  echo ""
+  echo "❌  Nome de branch inválido: '$BRANCH'"
+  echo ""
+  echo "   Padrão:  <tipo>/<descricao-kebab-case>"
+  echo "   Tipos:   feat | fix | chore | docs | test | refactor | ci | release"
+  echo "   Fixo:    main | develop"
+  echo ""
+  echo "   Exemplos:"
+  echo "     feat/autenticacao-jwt"
+  echo "     fix/geracao-qr-vazia"
+  echo "     chore/atualizar-deps"
+  echo "     release/1.2.0"
+  echo ""
+  exit 1
+fi
+
+echo "✅  Branch '$BRANCH' OK"

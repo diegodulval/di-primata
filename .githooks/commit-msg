@@ -1,0 +1,36 @@
+#!/bin/sh
+# Valida o formato Conventional Commits.
+# Ref: https://www.conventionalcommits.org/
+#
+# Formato:  <tipo>(<escopo opcional>): <descrição>
+# Exemplos:
+#   feat(auth): adicionar login com JWT
+#   fix: corrigir geração de QR code
+#   chore(deps): atualizar ruff para 0.5
+
+MSG=$(cat "$1")
+
+# ignora merge commits e fixups
+case "$MSG" in
+  Merge*|Revert*|fixup!*|squash!*) exit 0 ;;
+esac
+
+PATTERN='^(feat|fix|docs|style|refactor|test|chore|ci|perf|build|revert)(\(.{1,40}\))?: .{1,120}$'
+
+if ! echo "$MSG" | grep -qE "$PATTERN"; then
+  echo ""
+  echo "❌  Mensagem de commit fora do padrão Conventional Commits."
+  echo ""
+  echo "   Formato:  <tipo>(<escopo>): <descrição>"
+  echo "   Tipos:    feat | fix | docs | style | refactor | test | chore | ci | perf | build | revert"
+  echo ""
+  echo "   Exemplos:"
+  echo "     feat(auth): adicionar refresh token"
+  echo "     fix(lot): corrigir geração de QR vazia"
+  echo "     chore: atualizar dependências"
+  echo ""
+  echo "   Mensagem recebida:"
+  echo "     $MSG"
+  echo ""
+  exit 1
+fi

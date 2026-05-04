@@ -1,0 +1,23 @@
+#!/bin/sh
+# Executado antes de cada commit.
+# Falha se lint, formatação ou testes falharem.
+
+set -e
+
+VENV=".venv/bin"
+
+if [ ! -d ".venv" ]; then
+  echo "❌  Virtualenv não encontrado. Rode: make dev"
+  exit 1
+fi
+
+echo "🔍  lint (ruff check)..."
+$VENV/ruff check app tests
+
+echo "🎨  format (ruff format --check)..."
+$VENV/ruff format --check app tests
+
+echo "🧪  testes (pytest -q)..."
+$VENV/pytest -q --tb=short
+
+echo "✅  pre-commit OK"
