@@ -22,22 +22,31 @@ function LoginPage() {
     setLoading(true);
 
     try {
+      const isDev = import.meta.env.DEV;
+      if (isDev) console.debug("[login] POST /api/auth/login", { email });
+
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, senha: password }),
       });
 
       if (!res.ok) {
+        if (isDev) {
+          const body = await res.json().catch(() => null);
+          console.warn("[login] falhou", { status: res.status, body });
+        }
         setError("E-mail ou senha inválidos.");
         return;
       }
 
       const { access_token } = (await res.json()) as { access_token: string };
+      if (isDev) console.debug("[login] ok, navegando para /dashboard");
       sessionStorage.setItem("access_token", access_token);
       setAuthToken(access_token);
       void navigate({ to: "/dashboard" });
-    } catch {
+    } catch (err) {
+      if (import.meta.env.DEV) console.error("[login] erro de conexão", err);
       setError("Erro de conexão. Tente novamente.");
     } finally {
       setLoading(false);
