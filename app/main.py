@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -9,9 +11,16 @@ app = FastAPI(
     description="Plataforma de rastreabilidade de cadeia produtiva",
 )
 
+_FRONTEND_URL = os.getenv("FRONTEND_URL", "")
+_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    *([_FRONTEND_URL] if _FRONTEND_URL else []),
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

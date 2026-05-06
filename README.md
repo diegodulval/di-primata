@@ -7,16 +7,26 @@ API REST em FastAPI · armazenamento in-memory · pronta para plugar ORM.
 
 ## Pré-requisitos
 
-| Ferramenta | Versão mínima |
-|---|---|
-| Python | 3.12 |
-| [uv](https://docs.astral.sh/uv/) | qualquer |
-| Docker + Compose | opcional |
+| Ferramenta | Versão mínima | Usado por |
+|---|---|---|
+| Python | 3.12 | API |
+| [uv](https://docs.astral.sh/uv/) | qualquer | API |
+| Node.js | 22 LTS | Frontend |
+| pnpm | 9 | Frontend |
+| Docker + Compose | opcional | Ambos |
 
 Instalar `uv` (caso não tenha):
 ```bash
 wget -qO- https://astral.sh/uv/install.sh | sh
 source $HOME/.local/bin/env
+```
+
+Instalar Node.js 22 + pnpm via nvm (caso não tenha):
+```bash
+wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+source ~/.bashrc
+nvm install 22
+corepack enable && corepack prepare pnpm@latest --activate
 ```
 
 ---
@@ -27,6 +37,10 @@ source $HOME/.local/bin/env
 # clone e entre no diretório
 git clone <repo> di-mata && cd di-mata
 
+# copiar arquivo de variáveis de ambiente
+cp .env.example .env
+
+# ── API ────────────────────────────────────────────────────────────────────────
 # criar virtualenv Python 3.12 + instalar dependências de produção
 make install
 
@@ -36,24 +50,38 @@ make dev
 # instalar git hooks (obrigatório após clonar)
 make hooks
 
-# copiar arquivo de variáveis de ambiente
-cp .env.example .env
+# ── Frontend ───────────────────────────────────────────────────────────────────
+make web-install
 ```
 
 ---
 
 ## Rodando localmente
 
+Execute cada ambiente em um terminal separado:
+
+**Terminal 1 — API:**
 ```bash
 make run
-# ou diretamente:
-.venv/bin/uvicorn app.main:app --reload --port 8000
 ```
 
-Acesse:
-- **Swagger UI** → `http://localhost:8000/docs`
-- **ReDoc** → `http://localhost:8000/redoc`
-- **Health check** → `http://localhost:8000/health`
+**Terminal 2 — Frontend:**
+```bash
+make web-dev
+```
+
+**Na primeira vez**, gere o cliente tipado da API (API deve estar no ar):
+```bash
+make web-generate
+```
+
+| Interface | URL | Descrição |
+|---|---|---|
+| Dashboard | `http://localhost:5173` | SPA autenticado (admin / manager / operador) |
+| Portal QR | `http://localhost:5174/p/{hash}` | Portal público do consumidor |
+| Swagger UI | `http://localhost:8000/docs` | Documentação interativa da API |
+| ReDoc | `http://localhost:8000/redoc` | Documentação da API em formato ReDoc |
+| Health check | `http://localhost:8000/health` | Status da API |
 
 ---
 
@@ -63,7 +91,24 @@ Acesse:
 docker compose up --build
 ```
 
-A API sobe na porta `8000`. Não há banco de dados externo — o estado vive em memória no processo.
+Sobe a API na porta `8000` e o frontend nas portas `5173` (dashboard) e `5174` (portal).  
+Não há banco de dados externo — o estado vive em memória no processo.
+
+---
+
+## Seed de desenvolvimento
+
+Popula a API com 3 tenants, usuários, ciclos e um lote publicado com QR escaneável.  
+Execute sempre que reiniciar a API (o estado é in-memory).
+
+```bash
+make run     # Terminal 1 — API
+make seed    # Terminal 2 — seed (aguarda API subir)
+make web-dev # Terminal 3 — frontend
+```
+
+O seed imprime no terminal todas as credenciais e a URL do portal QR público.  
+Documentação completa em [`docs/dev-access.md`](docs/dev-access.md).
 
 ---
 
@@ -192,11 +237,23 @@ Configuração completa em `pyproject.toml` → `[tool.ruff]`.
 
 ## Variáveis de ambiente
 
+Copie `.env.example` para `.env` e ajuste os valores.
+
+**API (`/.env`):**
+
 | Variável | Padrão | Descrição |
 |---|---|---|
 | `APP_ENV` | `development` | Ambiente de execução |
 | `SECRET_KEY` | *(inseguro)* | Chave de assinatura JWT — **trocar em produção** |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | `60` | Validade do token |
+| `FRONT
+POST /END_URL` | *(vazio)* | URL do frontend em produção — adicionada ao CORS |
+
+**Frontend (`/web/apps/dashboard/.env.local` e `/web/apps/portal/.env.local`):**
+
+| Variável | Padrão | Descrição |
+|---|---|---|
+| `VITE_API_URL` | `http://localhost:8000` | URL base da API |
 
 ---
 

@@ -1,0 +1,30 @@
+/* Paleta Brisa — Documentação técnica, AI insights, portal dev, Primata API
+   Mensagem: precisão, automação, inovação */
+.theme-brisa {
+  --color-primary-900: #234D4D;
+  --color-primary-800: #2C6060;
+  --color-primary-700: #357373;
+  --color-primary-600: #3E8686;
+  --color-primary-500: #479999;
+  --color-primary-400: #6CAFAF;
+  --color-primary-300: #91C5C5;
+  --color-primary-200: #B6DBDB;
+  --color-primary-100: #CEEAEA;
+  --color-primary-50:  #8DBDB6;
+
+  --color-primary:     var(--color-primary-700);
+  --color-primary-fg:  #FFFFFF;
+
+  --color-background:  #F2F7F7;
+  --color-surface:     #FFFFFF;
+  --color-border:      #C5DADA;
+
+  --color-text-primary:   #162E2E;
+  --color-text-secondary: #234D4D;
+  --color-text-muted:     #4A7A7A;
+
+  --color-success: #357373;
+  --color-warning: #D4A017;
+  --color-error:   #C0392B;
+  --color-info:    #2980B9;
+}

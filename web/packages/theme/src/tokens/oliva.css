@@ -1,0 +1,30 @@
+/* Paleta Oliva — Dashboard admin/manager, relatórios, análise
+   Mensagem: clareza operacional, alto contraste para sessões longas */
+.theme-oliva {
+  --color-primary-900: #556B2F;
+  --color-primary-800: #637D37;
+  --color-primary-700: #718F3F;
+  --color-primary-600: #7FA147;
+  --color-primary-500: #8DB350;
+  --color-primary-400: #A4C26B;
+  --color-primary-300: #BBD186;
+  --color-primary-200: #D2E0A2;
+  --color-primary-100: #E3EDBF;
+  --color-primary-50:  #C8C27A;
+
+  --color-primary:     var(--color-primary-700);
+  --color-primary-fg:  #FFFFFF;
+
+  --color-background:  #F5F5F0;
+  --color-surface:     #FFFFFF;
+  --color-border:      #D5D5C0;
+
+  --color-text-primary:   #3A4A20;
+  --color-text-secondary: #556B2F;
+  --color-text-muted:     #7A8A5A;
+
+  --color-success: #718F3F;
+  --color-warning: #D4A017;
+  --color-error:   #C0392B;
+  --color-info:    #2980B9;
+}

@@ -1,0 +1,22 @@
+{
+  "name": "di-mata-web",
+  "private": true,
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "dev": "pnpm --filter dashboard dev & pnpm --filter portal dev",
+    "build": "pnpm -r build",
+    "check": "biome check .",
+    "fmt": "biome format --write .",
+    "typecheck": "pnpm -r typecheck",
+    "generate:api": "pnpm --filter api-client generate"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@biomejs/biome", "esbuild"]
+  }
+}

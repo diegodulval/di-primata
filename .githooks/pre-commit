@@ -20,4 +20,13 @@ $VENV/ruff format --check app tests
 echo "🧪  testes (pytest -q)..."
 $VENV/pytest -q --tb=short
 
+if [ -d "web/node_modules" ]; then
+  echo "🔍  web: biome check..."
+  cd web && pnpm check
+  cd ..
+  echo "📐  web: typecheck..."
+  cd web && pnpm typecheck
+  cd ..
+fi
+
 echo "✅  pre-commit OK"

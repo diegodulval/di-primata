@@ -7,3 +7,18 @@ services:
       - .:/app
     env_file: .env
     restart: unless-stopped
+
+  web:
+    image: node:22-alpine
+    working_dir: /app/web
+    command: sh -c "corepack enable && pnpm install && pnpm dev"
+    ports:
+      - "5173:5173"   # dashboard
+      - "5174:5174"   # portal
+    volumes:
+      - .:/app
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - api
+    restart: unless-stopped

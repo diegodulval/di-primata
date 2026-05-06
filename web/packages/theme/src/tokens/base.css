@@ -1,0 +1,23 @@
+/* Base tokens — aplicados em todas as paletas */
+@layer base {
+  :root {
+    /* Tipografia — Nunito (corpo) + Fira Code (técnico) */
+    --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "Fira Code", ui-monospace, monospace;
+
+    /* Espaçamento */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+
+    /* Sombras */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+    /* Transições */
+    --transition-fast: 150ms ease;
+    --transition-base: 250ms ease;
+  }
+}

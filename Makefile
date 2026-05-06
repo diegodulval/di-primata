@@ -1,4 +1,5 @@
-.PHONY: install dev hooks run test cov lint fmt check clean
+.PHONY: install dev hooks run test cov lint fmt check clean \
+        web-install web-dev web-build web-check web-generate seed
 
 VENV   = .venv
 PYTHON = $(VENV)/bin/python
@@ -37,3 +38,23 @@ check: lint
 clean:
 	rm -rf .venv __pycache__ .pytest_cache htmlcov .coverage
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+
+# ── Web (frontend) ─────────────────────────────────────────────────────────────
+
+web-install:
+	cd web && pnpm install
+
+web-dev:
+	cd web && pnpm dev
+
+web-build:
+	cd web && pnpm build
+
+web-check:
+	cd web && pnpm check && pnpm typecheck
+
+web-generate:
+	cd web && pnpm generate:api
+
+seed:
+	$(VENV)/bin/python scripts/seed.py
