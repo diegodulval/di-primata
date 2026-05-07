@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Di Mata × Primata — Plano de Negócio & Pitch</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --f1:#1F3D2B; --f2:#4E7C59; --f3:#A7C49A; --f4:#E8E2D3; --f5:#6B4E34;
+  --b1:#234D4D; --b2:#3E7D7A; --b3:#8DBDB6; --b4:#DCEBE7;
+  --ouro:#C8971E; --ouro-lt:#E8C84A; --ouro-dk:#8B6410;
+  --ink:#0A0F0A; --ink2:#141A14;
+  --bg:#F2F0EA; --cream:#FAFAF6;
+  --muted:rgba(10,15,10,.52);
+  --line:rgba(10,15,10,.09);
+  --mono:'DM Mono',monospace;
+  --sans:'Instrument Sans',sans-serif;
+  --serif:'Playfair Display',serif;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);overflow-x:hidden;}
+
+/* PROGRESS */
+#prog{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--ouro),var(--b2));z-index:9999;transition:width .1s;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:62px;background:rgba(10,15,10,.96);backdrop-filter:blur(20px);border-bottom:1px solid rgba(200,151,30,.12);}
+.nav-brand{display:flex;align-items:center;gap:12px;}
+.nav-logo-mark{width:32px;height:32px;background:var(--f1);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.nav-logo-mark svg{width:20px;height:20px;}
+.nav-name{font-family:var(--serif);font-size:16px;font-weight:700;color:#fff;letter-spacing:-.01em;}
+.nav-name span{color:var(--ouro-lt);font-style:italic;}
+.nav-links{display:flex;gap:2px;}
+.nav-lnk{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.3);padding:6px 14px;border:1px solid transparent;border-radius:4px;cursor:pointer;text-decoration:none;transition:all .2s;}
+.nav-lnk:hover{color:var(--ouro-lt);border-color:rgba(200,151,30,.25);}
+.nav-badge{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--b3);background:rgba(35,77,77,.35);border:1px solid rgba(141,189,182,.2);padding:5px 14px;border-radius:100px;}
+
+/* HERO */
+.hero{min-height:100vh;background:var(--ink);display:grid;grid-template-rows:1fr auto;padding-top:62px;position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(200,151,30,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(200,151,30,.035) 1px,transparent 1px);background-size:48px 48px;}
+.hero-orb1{position:absolute;width:800px;height:800px;border-radius:50%;top:-300px;right:-200px;background:radial-gradient(circle,rgba(31,61,43,.22) 0%,transparent 65%);filter:blur(60px);}
+.hero-orb2{position:absolute;width:500px;height:500px;border-radius:50%;bottom:-100px;left:5%;background:radial-gradient(circle,rgba(62,125,122,.15) 0%,transparent 65%);filter:blur(80px);}
+.hero-content{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:end;padding:80px 64px 64px;}
+.hero-left{}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:var(--ouro-lt);border:1px solid rgba(200,151,30,.2);padding:7px 16px;border-radius:2px;margin-bottom:32px;}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--ouro);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-h1{font-family:var(--serif);font-size:clamp(48px,6.5vw,88px);line-height:.92;letter-spacing:-.025em;color:#fff;margin-bottom:24px;}
+.hero-h1 em{color:var(--ouro-lt);font-weight:400;}
+.hero-h1 .ghost{-webkit-text-stroke:1px rgba(255,255,255,.15);color:transparent;}
+.hero-sub{font-size:15px;font-weight:300;line-height:1.8;color:rgba(255,255,255,.45);max-width:500px;margin-bottom:40px;}
+.hero-sub strong{color:rgba(255,255,255,.8);font-weight:500;}
+.hero-actions{display:flex;align-items:center;gap:16px;}
+.btn-primary{background:var(--ouro);color:var(--ink);font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;padding:13px 28px;border:none;border-radius:2px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all .2s;}
+.btn-primary:hover{background:var(--ouro-lt);transform:translateY(-1px);}
+.btn-outline{font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.12em;color:rgba(255,255,255,.3);text-decoration:none;transition:color .2s;}
+.btn-outline:hover{color:rgba(255,255,255,.8);}
+.hero-right{display:flex;flex-direction:column;align-items:flex-end;gap:16px;}
+.hero-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:360px;}
+.hero-stat{border:1px solid rgba(255,255,255,.06);padding:20px;text-align:right;}
+.hero-stat-n{font-family:var(--serif);font-size:32px;font-weight:900;color:#fff;line-height:1;}
+.hero-stat-n span{font-size:18px;color:var(--ouro-lt);}
+.hero-stat-l{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.22);margin-top:6px;}
+.hero-context{background:rgba(200,151,30,.06);border:1px solid rgba(200,151,30,.18);padding:20px;max-width:360px;width:100%;}
+.hero-context-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.3em;color:var(--ouro-lt);margin-bottom:10px;text-transform:uppercase;}
+.hero-context p{font-size:12px;line-height:1.75;color:rgba(255,255,255,.5);font-weight:300;}
+.hero-context strong{color:rgba(255,255,255,.8);}
+.hero-footer{position:relative;z-index:2;padding:0 64px 40px;display:flex;align-items:center;gap:40px;border-top:1px solid rgba(255,255,255,.05);padding-top:24px;}
+.hf-item{display:flex;align-items:center;gap:10px;}
+.hf-dot{width:6px;height:6px;border-radius:50%;}
+.hf-text{font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:rgba(255,255,255,.25);text-transform:uppercase;}
+
+/* SECTION SHELL */
+.section{padding:96px 64px;max-width:1280px;margin:0 auto;}
+.sec-full{padding:80px 0;}
+.sec-lbl{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:var(--b2);margin-bottom:16px;}
+.sec-lbl::before{content:'';width:24px;height:1.5px;background:var(--b2);}
+.sec-h{font-family:var(--serif);font-size:clamp(28px,3.5vw,50px);line-height:1.05;letter-spacing:-.02em;color:var(--ink);margin-bottom:14px;}
+.sec-sub{font-size:15px;line-height:1.8;color:var(--muted);max-width:640px;font-weight:300;}
+.divider{border:none;border-top:1px solid var(--line);}
+
+/* OPORTUNIDADE — dark section */
+.oportunidade{background:var(--ink);padding:80px 0;}
+.oportunidade .section{max-width:1280px;margin:0 auto;}
+.oportunidade .sec-lbl{color:var(--ouro-lt);}
+.oportunidade .sec-lbl::before{background:var(--ouro-lt);}
+.oportunidade .sec-h{color:#fff;}
+.oportunidade .sec-sub{color:rgba(255,255,255,.42);}
+.op-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,.05);margin-top:52px;}
+.op-card{background:var(--ink2);padding:36px 32px;position:relative;overflow:hidden;}
+.op-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;}
+.op-card:nth-child(1)::after{background:var(--ouro);}
+.op-card:nth-child(2)::after{background:var(--b2);}
+.op-card:nth-child(3)::after{background:var(--f2);}
+.op-num{font-family:var(--mono);font-size:9px;letter-spacing:.3em;color:rgba(255,255,255,.2);margin-bottom:20px;}
+.op-icon{font-size:28px;margin-bottom:16px;}
+.op-h{font-family:var(--serif);font-size:20px;color:#fff;margin-bottom:12px;line-height:1.2;}
+.op-p{font-size:13px;line-height:1.8;color:rgba(255,255,255,.38);font-weight:300;}
+.op-p strong{color:rgba(255,255,255,.75);}
+
+/* CONTEXTO SUL DE MINAS */
+.contexto-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:52px;align-items:start;}
+.contexto-text{}
+.contexto-actors{display:flex;flex-direction:column;gap:16px;}
+.actor-card{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start;padding:20px;background:var(--cream);border:1px solid var(--line);border-left:3px solid var(--f2);}
+.actor-card:nth-child(2){border-left-color:var(--b2);}
+.actor-card:nth-child(3){border-left-color:var(--ouro);}
+.actor-card:nth-child(4){border-left-color:var(--f5);}
+.actor-ico{width:40px;height:40px;border-radius:8px;background:var(--f4);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.actor-name{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.actor-desc{font-size:12px;line-height:1.65;color:var(--muted);font-weight:300;}
+.actor-role{display:inline-block;font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;color:var(--b2);background:var(--b4);padding:2px 8px;border-radius:2px;margin-top:6px;}
+
+/* POSITIONING */
+.pos-wrap{background:var(--f1);padding:80px 0;}
+.pos-wrap .section{max-width:1280px;margin:0 auto;}
+.pos-wrap .sec-lbl{color:var(--f3);}
+.pos-wrap .sec-lbl::before{background:var(--f3);}
+.pos-wrap .sec-h{color:#fff;}
+.pos-wrap .sec-sub{color:rgba(255,255,255,.45);}
+.pos-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.1);margin-top:52px;}
+.pos-item{background:rgba(255,255,255,.03);padding:36px 32px;}
+.pos-item-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.25em;color:rgba(255,255,255,.3);text-transform:uppercase;margin-bottom:16px;}
+.pos-item-h{font-family:var(--serif);font-size:22px;color:#fff;margin-bottom:12px;line-height:1.2;}
+.pos-item-p{font-size:13px;line-height:1.8;color:rgba(255,255,255,.42);font-weight:300;}
+.pos-item-p strong{color:rgba(255,255,255,.8);}
+.pos-highlight{background:rgba(200,151,30,.1);border:1px solid rgba(200,151,30,.25);padding:20px 24px;margin-top:32px;grid-column:1/-1;}
+.pos-highlight-text{font-size:15px;line-height:1.75;color:rgba(255,255,255,.7);font-weight:300;}
+.pos-highlight-text strong{color:var(--ouro-lt);}
+
+/* PLATAFORMA */
+.plat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:52px;}
+.plat-card{background:var(--cream);border:1px solid var(--line);padding:28px;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;}
+.plat-card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,0,0,.08);}
+.plat-tag{font-family:var(--mono);font-size:8px;letter-spacing:.2em;text-transform:uppercase;padding:4px 10px;border-radius:2px;display:inline-block;margin-bottom:16px;}
+.tag-core{background:var(--b4);color:var(--b1);}
+.tag-premium{background:rgba(200,151,30,.12);color:var(--ouro-dk);}
+.tag-agent{background:rgba(31,61,43,.1);color:var(--f1);}
+.plat-card-id{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--muted);margin-bottom:8px;}
+.plat-card-h{font-family:var(--serif);font-size:18px;color:var(--ink);margin-bottom:10px;}
+.plat-card-p{font-size:12.5px;line-height:1.75;color:var(--muted);font-weight:300;}
+
+/* MODELO DE NEGÓCIO */
+.modelo{background:var(--ink2);padding:80px 0;}
+.modelo .section{max-width:1280px;margin:0 auto;}
+.modelo .sec-lbl{color:var(--b3);}
+.modelo .sec-lbl::before{background:var(--b3);}
+.modelo .sec-h{color:#fff;}
+.modelo .sec-sub{color:rgba(255,255,255,.38);}
+.modelo-tiers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,.06);margin-top:52px;}
+.tier{padding:36px 32px;background:var(--ink);}
+.tier.featured{background:rgba(62,125,122,.1);border:1px solid rgba(62,125,122,.25);}
+.tier-badge{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;color:rgba(255,255,255,.25);text-transform:uppercase;margin-bottom:20px;}
+.tier-name{font-family:var(--serif);font-size:24px;color:#fff;margin-bottom:6px;}
+.tier.featured .tier-name{color:var(--b3);}
+.tier-price{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.35);margin-bottom:24px;letter-spacing:.05em;}
+.tier-price strong{font-family:var(--serif);font-size:22px;color:#fff;}
+.tier-features{display:flex;flex-direction:column;gap:10px;}
+.tf{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:rgba(255,255,255,.45);line-height:1.5;}
+.tf::before{content:'→';font-family:var(--mono);color:var(--b3);flex-shrink:0;font-size:11px;margin-top:1px;}
+
+/* FLUXO */
+.fluxo-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:52px;position:relative;}
+.fluxo-steps::before{content:'';position:absolute;top:28px;left:calc(100%/6);right:calc(100%/6);height:1px;background:linear-gradient(90deg,transparent,var(--b2),var(--b2),transparent);z-index:0;}
+.step{padding:32px 24px;text-align:center;position:relative;z-index:1;}
+.step-circle{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-family:var(--mono);font-size:13px;font-weight:500;border:2px solid;}
+.step:nth-child(1) .step-circle{background:rgba(31,61,43,.1);border-color:var(--f2);color:var(--f1);}
+.step:nth-child(2) .step-circle{background:rgba(200,151,30,.1);border-color:var(--ouro);color:var(--ouro-dk);}
+.step:nth-child(3) .step-circle{background:rgba(62,125,122,.1);border-color:var(--b2);color:var(--b1);}
+.step-num{font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--muted);margin-bottom:8px;}
+.step-h{font-family:var(--serif);font-size:16px;color:var(--ink);margin-bottom:8px;}
+.step-p{font-size:12px;line-height:1.7;color:var(--muted);font-weight:300;}
+
+/* PITCH ESTRATÉGICO */
+.pitch-wrap{background:var(--ink);padding:80px 0;}
+.pitch-wrap .section{max-width:1280px;margin:0 auto;}
+.pitch-wrap .sec-lbl{color:var(--ouro-lt);}
+.pitch-wrap .sec-lbl::before{background:var(--ouro-lt);}
+.pitch-wrap .sec-h{color:#fff;}
+.pitch-wrap .sec-sub{color:rgba(255,255,255,.38);}
+.pitch-cols{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.07);margin-top:52px;}
+.pitch-col{background:var(--ink2);padding:36px 32px;}
+.pitch-col-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.25em;color:rgba(255,255,255,.25);text-transform:uppercase;margin-bottom:20px;}
+.pitch-items{display:flex;flex-direction:column;gap:16px;}
+.pitch-item{padding:16px 20px;border-left:2px solid;}
+.pitch-item.green{border-color:var(--f2);background:rgba(31,61,43,.15);}
+.pitch-item.teal{border-color:var(--b2);background:rgba(62,125,122,.08);}
+.pitch-item.gold{border-color:var(--ouro);background:rgba(200,151,30,.08);}
+.pitch-item.red{border-color:#8B2020;background:rgba(139,32,32,.08);}
+.pitch-item h4{font-size:12px;font-weight:600;color:#fff;margin-bottom:6px;}
+.pitch-item p{font-size:11.5px;line-height:1.65;color:rgba(255,255,255,.38);font-weight:300;}
+
+/* PROJEÇÃO */
+.proj-grid{display:grid;grid-template-columns:1fr 2fr;gap:48px;margin-top:52px;align-items:start;}
+.proj-phases{display:flex;flex-direction:column;gap:12px;}
+.phase{padding:20px 24px;border:1px solid var(--line);background:var(--cream);position:relative;overflow:hidden;}
+.phase::before{content:attr(data-phase);position:absolute;right:16px;top:50%;transform:translateY(-50%);font-family:var(--serif);font-size:48px;color:rgba(0,0,0,.04);font-weight:900;line-height:1;}
+.phase-tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;}
+.phase-h{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+.phase-p{font-size:12px;line-height:1.65;color:var(--muted);font-weight:300;}
+.proj-timeline{background:var(--cream);border:1px solid var(--line);padding:32px;}
+.timeline-title{font-family:var(--serif);font-size:18px;color:var(--ink);margin-bottom:24px;}
+.tl-row{display:grid;grid-template-columns:100px 1fr;gap:0;border-bottom:1px solid var(--line);}
+.tl-row:last-child{border-bottom:none;}
+.tl-period{padding:14px 16px 14px 0;font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;border-right:1px solid var(--line);font-weight:300;}
+.tl-content{padding:14px 0 14px 20px;}
+.tl-actor{font-size:10px;font-weight:600;color:var(--ink);margin-bottom:3px;}
+.tl-action{font-size:11.5px;color:var(--muted);font-weight:300;line-height:1.5;}
+.tl-badge{display:inline-block;font-family:var(--mono);font-size:8px;letter-spacing:.1em;padding:2px 8px;border-radius:2px;margin-top:4px;}
+.tl-now{background:rgba(200,151,30,.12);color:var(--ouro-dk);}
+.tl-s1{background:var(--b4);color:var(--b1);}
+.tl-s2{background:rgba(31,61,43,.1);color:var(--f1);}
+.tl-s3{background:rgba(78,124,89,.12);color:var(--f1);}
+
+/* MANIFESTO */
+.manifesto{background:var(--f1);padding:96px 64px;text-align:center;position:relative;overflow:hidden;}
+.manifesto::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 80% at 20% 20%,rgba(78,124,89,.25) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 80%,rgba(35,77,77,.3) 0%,transparent 60%);}
+.manifesto-inner{position:relative;z-index:1;}
+.manifesto-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.4em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:24px;}
+.manifesto-h{font-family:var(--serif);font-size:clamp(28px,4.5vw,56px);color:#fff;line-height:1.15;letter-spacing:-.02em;margin-bottom:20px;}
+.manifesto-h em{color:var(--f3);font-weight:400;}
+.manifesto-p{font-size:16px;color:rgba(255,255,255,.42);max-width:620px;margin:0 auto;line-height:1.8;font-weight:300;}
+.manifesto-code{margin-top:40px;font-family:var(--mono);font-size:11px;color:rgba(167,196,154,.4);letter-spacing:.08em;}
+
+/* FOOTER */
+footer{background:var(--ink);padding:48px 64px;display:flex;align-items:center;justify-content:space-between;}
+.f-left{display:flex;flex-direction:column;gap:6px;}
+.f-brand{font-family:var(--serif);font-size:18px;color:#fff;font-weight:700;}
+.f-brand span{color:var(--ouro-lt);font-style:italic;}
+.f-sub{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.18);letter-spacing:.15em;}
+.f-right{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.15);letter-spacing:.1em;text-align:right;}
+
+/* ANIMATIONS */
+.fade-up{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s cubic-bezier(.16,1,.3,1);}
+.fade-up.vis{opacity:1;transform:translateY(0);}
+.fade-up:nth-child(2){transition-delay:.08s;}
+.fade-up:nth-child(3){transition-delay:.16s;}
+.fade-up:nth-child(4){transition-delay:.24s;}
+
+@media(max-width:960px){
+  nav{padding:0 20px;}.nav-links{display:none;}
+  .hero-content{grid-template-columns:1fr;padding:40px 24px 32px;}.hero-right{display:none;}
+  .section{padding:60px 24px;}
+  .op-grid,.plat-grid,.modelo-tiers,.pitch-cols,.fluxo-steps{grid-template-columns:1fr;}
+  .fluxo-steps::before{display:none;}
+  .contexto-grid,.proj-grid{grid-template-columns:1fr;}
+  .pos-grid{grid-template-columns:1fr;}
+  .manifesto{padding:60px 24px;}
+  footer{flex-direction:column;gap:16px;text-align:center;padding:40px 24px;}
+}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+
+<nav>
+  <div class="nav-brand">
+    <div class="nav-logo-mark">
+      <svg viewBox="0 0 70 70" fill="none"><path d="M8 8H34C52 8 62 19 62 35C62 51 52 62 34 62H8Z" fill="#A7C49A"/><path d="M35 20L35 50" stroke="#1F3D2B" stroke-width="3.5" stroke-linecap="round"/><path d="M35 35L25 25" stroke="#1F3D2B" stroke-width="3" stroke-linecap="round"/><path d="M35 28L45 20" stroke="#1F3D2B" stroke-width="3" stroke-linecap="round"/></svg>
+    </div>
+    <div class="nav-name">Di <span>Mata</span> × Primata</div>
+  </div>
+  <div class="nav-links">
+    <a class="nav-lnk" href="#oportunidade">Oportunidade</a>
+    <a class="nav-lnk" href="#posicionamento">Posicionamento</a>
+    <a class="nav-lnk" href="#plataforma">Plataforma</a>
+    <a class="nav-lnk" href="#modelo">Modelo</a>
+    <a class="nav-lnk" href="#pitch">Pitch</a>
+    <a class="nav-lnk" href="#projecao">Projeção</a>
+  </div>
+  <div class="nav-badge">Sul de Minas · 2026</div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-orb1"></div>
+  <div class="hero-orb2"></div>
+  <div class="hero-content">
+    <div class="hero-left">
+      <div class="hero-eyebrow">Plano de Negócio & Pitch · Confidencial</div>
+      <h1 class="hero-h1">
+        Rastreia&shy;bilidade<br><em>de origem</em><br><span class="ghost">Sul de Minas</span>
+      </h1>
+      <p class="hero-sub">
+        O movimento pelo <strong>Selo de Identidade de Produção</strong> do Sul de Minas cria a janela exata para viabilizar a Di Mata como infraestrutura oficial de rastreabilidade — com legitimidade pública, parceiros institucionais e demanda real.
+      </p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="#oportunidade">Ver o plano ↓</a>
+        <a class="btn-outline" href="#pitch">Direto ao pitch →</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-stat-grid">
+        <div class="hero-stat">
+          <div class="hero-stat-n">Sul<span>MG</span></div>
+          <div class="hero-stat-l">Maior polo cafeeiro</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-n">IF<span>+</span></div>
+          <div class="hero-stat-l">Parceiro técnico</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-n">Sico<span>p</span></div>
+          <div class="hero-stat-l">Cooperativa âncora</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-n">QR<span>∞</span></div>
+          <div class="hero-stat-l">Do campo ao consumidor</div>
+        </div>
+      </div>
+      <div class="hero-context">
+        <div class="hero-context-lbl">// Contexto estratégico</div>
+        <p>O <strong>Selo de Origem</strong> precisa de uma plataforma de rastreabilidade para existir. A Di Mata é essa plataforma. O IF, Sicop e as cafeiras não precisam construir — precisam adotar.</p>
+      </div>
+    </div>
+  </div>
+  <div class="hero-footer">
+    <div class="hf-item"><div class="hf-dot" style="background:var(--ouro)"></div><div class="hf-text">Oportunidade real e urgente</div></div>
+    <div class="hf-item"><div class="hf-dot" style="background:var(--b2)"></div><div class="hf-text">Parceiros institucionais ativados</div></div>
+    <div class="hf-item"><div class="hf-dot" style="background:var(--f2)"></div><div class="hf-text">Tecnologia pronta para MVP</div></div>
+    <div class="hf-item"><div class="hf-dot" style="background:var(--f3)"></div><div class="hf-text">Modelo de negócio validável agora</div></div>
+  </div>
+</div>
+
+<!-- OPORTUNIDADE -->
+<div class="oportunidade" id="oportunidade">
+  <div class="section">
+    <div class="sec-lbl">01 · A oportunidade</div>
+    <h2 class="sec-h">O movimento que cria a demanda</h2>
+    <p class="sec-sub">O Selo de Identidade de Produção do Sul de Minas não é uma hipótese — é um processo em andamento com atores institucionais reais. Esse movimento precisa de infraestrutura tecnológica. A Di Mata é essa infraestrutura.</p>
+    <div class="op-grid">
+      <div class="op-card fade-up">
+        <div class="op-num">01 · problema</div>
+        <div class="op-icon">🌱</div>
+        <h3 class="op-h">O campo produz. O mercado não reconhece.</h3>
+        <p class="op-p">Produtores do Sul de Minas entregam café de excelência, mas <strong>sem rastreabilidade documentada</strong>, a origem é invisível para o comprador. Sem dados, o selo não tem sustentação técnica.</p>
+      </div>
+      <div class="op-card fade-up">
+        <div class="op-num">02 · movimento</div>
+        <div class="op-icon">🏛️</div>
+        <h3 class="op-h">IF + Sicop + Cafeiras criam o Selo. Falta a plataforma.</h3>
+        <p class="op-p">O Instituto Federal, o Sicop e as cooperativas cafeiras estão estruturando o <strong>Selo de Identidade de Produção</strong>. Para o selo ter credibilidade técnica e auditabilidade, ele precisa de uma plataforma de rastreabilidade. <strong>Esse gap é a Di Mata.</strong></p>
+      </div>
+      <div class="op-card fade-up">
+        <div class="op-num">03 · timing</div>
+        <div class="op-icon">⏱️</div>
+        <h3 class="op-h">A janela de entrada é agora — antes de outra solução ser adotada.</h3>
+        <p class="op-p">Movimentos institucionais como esse frequentemente adotam <strong>a primeira solução disponível</strong> que atende os requisitos mínimos. A Di Mata precisa se posicionar como parceira tecnológica antes que o Selo escolha outra rota.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTEXTO -->
+<div class="section" id="contexto">
+  <div class="sec-lbl">02 · Atores e ecossistema</div>
+  <h2 class="sec-h">Quem está na mesa do Sul de Minas</h2>
+  <p class="sec-sub">Cada ator do movimento tem um papel distinto e uma dor específica que a Di Mata resolve. Entender o ecossistema é entender como apresentar a proposta para cada um.</p>
+  <div class="contexto-grid">
+    <div class="contexto-text">
+      <p style="font-size:15px;line-height:1.85;color:var(--muted);font-weight:300;margin-bottom:24px;">O Sul de Minas concentra a maior produção de café do Brasil. O movimento por um Selo de Identidade de Produção tem motivação econômica clara: <strong style="color:var(--ink);">café com origem certificada vale mais</strong> — no mercado interno e na exportação.</p>
+      <p style="font-size:15px;line-height:1.85;color:var(--muted);font-weight:300;margin-bottom:24px;">A Di Mata entra nesse ecossistema não como "mais um app agrícola", mas como a <strong style="color:var(--ink);">infraestrutura de dados que torna o Selo tecnicamente possível</strong> — com QR Code, rastreabilidade imutável e portal público do consumidor.</p>
+      <div style="background:var(--cream);border:1px solid var(--line);border-left:3px solid var(--ouro);padding:20px 24px;">
+        <p style="font-family:var(--mono);font-size:9px;letter-spacing:.2em;color:var(--muted);margin-bottom:8px;text-transform:uppercase;">// Proposta de valor central</p>
+        <p style="font-size:14px;line-height:1.75;color:var(--ink);font-weight:300;font-style:italic;">"O Selo diz que o café vem do Sul de Minas. A Di Mata prova, lote por lote, com dados auditáveis do campo ao consumidor."</p>
+      </div>
+    </div>
+    <div class="contexto-actors">
+      <div class="actor-card fade-up">
+        <div class="actor-ico">🎓</div>
+        <div>
+          <div class="actor-name">IF Sul de Minas (Instituto Federal)</div>
+          <div class="actor-desc">Ator técnico e de legitimidade. Valida protocolos, forma mão de obra, credencia o sistema. Tem interesse em <strong>pesquisa aplicada</strong> e extensão tecnológica.</div>
+          <div class="actor-role">Parceiro de validação & extensão</div>
+        </div>
+      </div>
+      <div class="actor-card fade-up">
+        <div class="actor-ico">🤝</div>
+        <div>
+          <div class="actor-name">Sicop (Cooperativa)</div>
+          <div class="actor-desc">Cooperativa que agrega e comercializa. Tem <strong>acesso direto aos produtores</strong> e interesse em diferenciar o café dos associados no mercado. Pode ser o canal de adoção em escala.</div>
+          <div class="actor-role">Canal de adoção & escala</div>
+        </div>
+      </div>
+      <div class="actor-card fade-up">
+        <div class="actor-ico">☕</div>
+        <div>
+          <div class="actor-name">Cafeiras e Produtores</div>
+          <div class="actor-desc">Usuários finais do campo. Precisam de uma ferramenta <strong>simples, offline e por voz</strong> — sem fricção. O Primata é construído para eles. A adoção via cooperativa reduz a barreira.</div>
+          <div class="actor-role">Usuários core · app Primata</div>
+        </div>
+      </div>
+      <div class="actor-card fade-up">
+        <div class="actor-ico">🧾</div>
+        <div>
+          <div class="actor-name">Compradores & Exportadores</div>
+          <div class="actor-desc">Quem paga mais pelo café certificado. O <strong>Portal Público via QR Code</strong> é o produto final para eles — rastreabilidade transparente, sem necessidade de login.</div>
+          <div class="actor-role">Mercado-alvo do Selo</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- POSICIONAMENTO -->
+<div class="pos-wrap" id="posicionamento">
+  <div class="section">
+    <div class="sec-lbl">03 · Posicionamento estratégico</div>
+    <h2 class="sec-h">Como a Di Mata se encaixa</h2>
+    <p class="sec-sub">Não somos concorrentes do Selo — somos a infraestrutura que o torna possível. Essa distinção é fundamental para a abordagem com os atores institucionais.</p>
+    <div class="pos-grid">
+      <div class="pos-item fade-up">
+        <div class="pos-item-lbl">// O que o Selo precisa</div>
+        <h3 class="pos-item-h">Rastreabilidade técnica e auditável</h3>
+        <p class="pos-item-p">Para o Selo ter credibilidade de mercado, ele precisa de <strong>dados verificáveis</strong>: quem produziu, em qual lote, com quais práticas, em qual período. Isso não é possível sem uma plataforma de dados.</p>
+      </div>
+      <div class="pos-item fade-up">
+        <div class="pos-item-lbl">// O que a Di Mata entrega</div>
+        <h3 class="pos-item-h">Infraestrutura de dados do campo ao QR</h3>
+        <p class="pos-item-p">Registro imutável de cada evento produtivo, geração de lote rastreável com QR único, e portal público que o consumidor acessa com o celular — <strong>sem login, sem fricção.</strong></p>
+      </div>
+      <div class="pos-item fade-up">
+        <div class="pos-item-lbl">// Por que agora</div>
+        <h3 class="pos-item-h">O movimento precisa de tecnologia antes de escalar</h3>
+        <p class="pos-item-p">O Selo ainda está em estruturação. Esse é o momento de <strong>entrar como parceiro fundacional</strong>, não como fornecedor. Parceiros fundacionais definem o padrão tecnológico adotado.</p>
+      </div>
+      <div class="pos-item fade-up">
+        <div class="pos-item-lbl">// Diferenciação competitiva</div>
+        <h3 class="pos-item-h">Primata: o único agente de IA para o campo brasileiro</h3>
+        <p class="pos-item-p">Captura por <strong>voz em campo</strong>, funciona offline, transcreve e categoriza automaticamente. Nenhuma plataforma de rastreabilidade agrícola do mercado tem esse diferencial de entrada de dados.</p>
+      </div>
+    </div>
+    <div class="pos-highlight">
+      <p class="pos-highlight-text">A Di Mata não compete com o IF, o Sicop ou as cooperativas. A Di Mata <strong>viabiliza tecnicamente o que eles querem construir</strong>. Essa é a posição de parceiro estratégico — não de fornecedor de software.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PLATAFORMA -->
+<div class="section" id="plataforma">
+  <div class="sec-lbl">04 · A plataforma</div>
+  <h2 class="sec-h">Di Mata × Primata — módulos core</h2>
+  <p class="sec-sub">Dois produtos, um ecossistema. Di Mata gerencia os dados. Primata captura em campo. Juntos, fecham o ciclo de rastreabilidade sem atrito para o produtor rural.</p>
+  <div class="plat-grid">
+    <div class="plat-card fade-up">
+      <span class="plat-tag tag-core">Core · Gratuito</span>
+      <div class="plat-card-id">M-01 → M-06</div>
+      <h3 class="plat-card-h">Rastreabilidade completa</h3>
+      <p class="plat-card-p">Cadastro do produtor, gestão de safra, registro de campo, geração de lote com QR único e portal público do consumidor. Tudo gratuito para garantir adoção em escala.</p>
+    </div>
+    <div class="plat-card fade-up">
+      <span class="plat-tag tag-premium">Premium · Assinatura</span>
+      <div class="plat-card-id">M-07 → M-09</div>
+      <h3 class="plat-card-h">Gestão financeira e operacional</h3>
+      <p class="plat-card-p">Controle de custos por safra e talhão, gestão de mão de obra, relatórios em PDF e exportação XLSX. A camada que monetiza para produtores que profissionalizam a gestão.</p>
+    </div>
+    <div class="plat-card fade-up">
+      <span class="plat-tag tag-agent">Primata · Agente IA</span>
+      <div class="plat-card-id">P-01 → P-04</div>
+      <h3 class="plat-card-h">Captura por voz e foto no campo</h3>
+      <p class="plat-card-p">O produtor fala, o Primata transcreve e categoriza. Opera offline e sincroniza ao reconectar. Sugestão contextual do próximo registro. Elimina a fricção da entrada de dados.</p>
+    </div>
+    <div class="plat-card fade-up">
+      <span class="plat-tag tag-core">Regras de Negócio</span>
+      <div class="plat-card-id">RN-01 → RN-12</div>
+      <h3 class="plat-card-h">Imutabilidade e integridade garantidas</h3>
+      <p class="plat-card-p">Registros não podem ser deletados, código de lote é único e imutável, dados financeiros são exclusivos do produtor. Arquitetura de confiança para suportar selos e certificações.</p>
+    </div>
+    <div class="plat-card fade-up">
+      <span class="plat-tag tag-core">Multi-setor</span>
+      <div class="plat-card-id">Agnóstico</div>
+      <h3 class="plat-card-h">Café hoje. Qualquer cadeia amanhã.</h3>
+      <p class="plat-card-p">A plataforma é agnóstica de setor. O Sul de Minas começa com café, mas o mesmo sistema serve para horticultura, pecuária, artesanato e indústria — escalabilidade sem reescrita.</p>
+    </div>
+    <div class="plat-card fade-up">
+      <span class="plat-tag tag-agent">Perfis de acesso</span>
+      <div class="plat-card-id">RBAC</div>
+      <h3 class="plat-card-h">Consultor, operador e consumidor separados</h3>
+      <p class="plat-card-p">Hierarquia clara: produtor vê tudo, consultor técnico vê dados agronômicos (sem financeiro), operador só registra, consumidor acessa via QR sem login. Privacidade por design.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- MODELO DE NEGÓCIO -->
+<div class="modelo" id="modelo">
+  <div class="section">
+    <div class="sec-lbl">05 · Modelo de negócio</div>
+    <h2 class="sec-h">Como a Di Mata gera receita</h2>
+    <p class="sec-sub">Freemium com upsell natural. O Core gratuito garante adoção em escala via cooperativas. O Premium converte produtores que querem gestão completa. O Enterprise monetiza a institucional.</p>
+    <div class="modelo-tiers">
+      <div class="tier">
+        <div class="tier-badge">tier · 01</div>
+        <div class="tier-name">Core</div>
+        <div class="tier-price"><strong>Gratuito</strong> · para todos os produtores</div>
+        <div class="tier-features">
+          <div class="tf">Cadastro completo e onboarding</div>
+          <div class="tf">Gestão de safra e talhões</div>
+          <div class="tf">Registro de campo manual ou via Primata</div>
+          <div class="tf">Geração de Lote com QR único</div>
+          <div class="tf">Portal público do consumidor</div>
+          <div class="tf">Painel do consultor técnico</div>
+        </div>
+      </div>
+      <div class="tier featured">
+        <div class="tier-badge">tier · 02 · recomendado</div>
+        <div class="tier-name">Premium</div>
+        <div class="tier-price">a partir de <strong>R$ 79</strong> /mês por propriedade</div>
+        <div class="tier-features">
+          <div class="tf">Tudo do Core incluso</div>
+          <div class="tf">Gestão de custos por safra e talhão</div>
+          <div class="tf">Controle de mão de obra e horas</div>
+          <div class="tf">Relatórios de produção e custo</div>
+          <div class="tf">Exportação PDF e XLSX</div>
+          <div class="tf">Suporte prioritário</div>
+        </div>
+      </div>
+      <div class="tier">
+        <div class="tier-badge">tier · 03</div>
+        <div class="tier-name">Enterprise</div>
+        <div class="tier-price"><strong>Sob consulta</strong> · cooperativas e selos</div>
+        <div class="tier-features">
+          <div class="tf">Multi-produtor sob uma conta</div>
+          <div class="tf">API para integração com Sicop e IF</div>
+          <div class="tf">White-label do portal do consumidor</div>
+          <div class="tf">Relatórios consolidados de origem</div>
+          <div class="tf">SLA garantido e suporte dedicado</div>
+          <div class="tf">Treinamento e onboarding presencial</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLUXO -->
+<div class="section">
+  <div class="sec-lbl">06 · Fluxo de valor</div>
+  <h2 class="sec-h">Do campo ao consumidor em 3 movimentos</h2>
+  <p class="sec-sub">O fluxo de valor da Di Mata segue a jornada real do produto — da captura no campo à leitura do QR pelo consumidor final.</p>
+  <div class="fluxo-steps">
+    <div class="step fade-up">
+      <div class="step-circle">🌱</div>
+      <div class="step-num">01 · campo</div>
+      <h3 class="step-h">Primata captura a realidade</h3>
+      <p class="step-p">O produtor fala ou fotografa. O Primata transcreve, categoriza e valida — offline, sem fricção. Cada evento é imutável e rastreável por safra e talhão.</p>
+    </div>
+    <div class="step fade-up">
+      <div class="step-circle">📦</div>
+      <div class="step-num">02 · consolidação</div>
+      <h3 class="step-h">Di Mata gera o Lote Rastreável</h3>
+      <p class="step-p">Ao encerrar a safra, o sistema consolida todos os registros em um Lote com código único e QR Code. O Selo de Origem é vinculado digitalmente a cada lote.</p>
+    </div>
+    <div class="step fade-up">
+      <div class="step-circle">📱</div>
+      <div class="step-num">03 · mercado</div>
+      <h3 class="step-h">Consumidor lê o QR — e confia</h3>
+      <p class="step-p">O comprador ou consumidor final escaneia o QR e vê a origem, o produtor, os processos e a safra. Transparência que justifica o premium price do Sul de Minas.</p>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- PITCH ESTRATÉGICO -->
+<div class="pitch-wrap" id="pitch">
+  <div class="section">
+    <div class="sec-lbl">07 · Pitch estratégico</div>
+    <h2 class="sec-h">Forças, riscos e a narrativa certa</h2>
+    <p class="sec-sub">Análise honesta do posicionamento para o pitch com IF, Sicop e parceiros do Selo. Saber onde estamos fortes e onde precisamos ser cuidadosos é o que diferencia um pitch crível.</p>
+    <div class="pitch-cols">
+      <div class="pitch-col">
+        <div class="pitch-col-lbl">// Forças do posicionamento</div>
+        <div class="pitch-items">
+          <div class="pitch-item green">
+            <h4>Timing perfeito — o Selo ainda está sendo estruturado</h4>
+            <p>Entrar agora como parceiro fundacional é diferente de entrar depois como fornecedor. A Di Mata pode ajudar a definir os padrões técnicos do Selo.</p>
+          </div>
+          <div class="pitch-item green">
+            <h4>Primata é único — captura por voz para o produtor rural</h4>
+            <p>Nenhuma solução concorrente tem um agente de IA que opera offline e captura dados por voz em português rural. Isso é diferenciação real.</p>
+          </div>
+          <div class="pitch-item green">
+            <h4>Core gratuito remove a barreira de adoção inicial</h4>
+            <p>Para a cooperativa e o IF apresentarem para os produtores, a conversa de "é gratuito para começar" elimina a resistência de entrada.</p>
+          </div>
+          <div class="pitch-item teal">
+            <h4>Arquitetura multi-setor — não somos só café</h4>
+            <p>O mesmo sistema serve horticultura, pecuária e artesanato. O Sul de Minas tem diversidade produtiva — a Di Mata cresce junto com o ecossistema.</p>
+          </div>
+        </div>
+      </div>
+      <div class="pitch-col">
+        <div class="pitch-col-lbl">// Riscos e como mitigar</div>
+        <div class="pitch-items">
+          <div class="pitch-item red">
+            <h4>Risco: "Ainda não temos o Primata funcionando"</h4>
+            <p>Mitigação: apresentar MVP com Di Mata funcional e Primata em protótipo validado. O pitch é sobre visão e parceria, não sobre produto acabado.</p>
+          </div>
+          <div class="pitch-item red">
+            <h4>Risco: Concorrente estabelecido pode ser adotado primeiro</h4>
+            <p>Mitigação: mover rápido. Agendar reunião com IF e Sicop antes que a decisão seja tomada. Propor piloto pago com 10 produtores para provar.</p>
+          </div>
+          <div class="pitch-item gold">
+            <h4>Oportunidade: IF pode viabilizar financiamento de pesquisa</h4>
+            <p>Institutos Federais têm acesso a editais de inovação (CNPq, FINEP, Fapemig). Uma parceria com o IF pode financiar o desenvolvimento do Primata.</p>
+          </div>
+          <div class="pitch-item gold">
+            <h4>Oportunidade: Sicop pode ser cliente Enterprise inaugural</h4>
+            <p>Uma cooperativa com centenas de associados como cliente Enterprise inaugural valida o modelo de escala e gera receita recorrente imediata.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROJEÇÃO -->
+<div class="section" id="projecao">
+  <div class="sec-lbl">08 · Projeção e próximos passos</div>
+  <h2 class="sec-h">Da conversa ao MVP rastreável</h2>
+  <p class="sec-sub">Roadmap realista para transformar o posicionamento estratégico em produto funcionando com o ecossistema do Sul de Minas.</p>
+  <div class="proj-grid">
+    <div class="proj-phases">
+      <div class="phase" data-phase="1">
+        <div class="phase-tag">Agora · Semanas 1–2</div>
+        <div class="phase-h">Posicionamento e reuniões</div>
+        <p class="phase-p">Reunião com IF Sul de Minas e Sicop. Apresentar a Di Mata como parceira tecnológica do Selo. Propor co-criação do protocolo técnico de rastreabilidade.</p>
+      </div>
+      <div class="phase" data-phase="2">
+        <div class="phase-tag">Sprint 1–2 · Mês 1</div>
+        <div class="phase-h">MVP Core funcional</div>
+        <p class="phase-p">Cadastro, safra, registro manual e geração de lote com QR. Portal público funcionando. 10 produtores piloto via Sicop com suporte presencial.</p>
+      </div>
+      <div class="phase" data-phase="3">
+        <div class="phase-tag">Sprint 3–4 · Mês 2</div>
+        <div class="phase-h">Primata MVP + integração Selo</div>
+        <p class="phase-p">Transcrição por voz funcional, categorização automática, sincronização offline. QR Code com identidade visual do Selo Sul de Minas integrada.</p>
+      </div>
+      <div class="phase" data-phase="4">
+        <div class="phase-tag">Sprint 5+ · Mês 3–4</div>
+        <div class="phase-h">Escala via cooperativa</div>
+        <p class="phase-p">Treinamento dos produtores associados, dashboard do consultor técnico, relatórios de origem consolidados para o Sicop. Início da cobrança Premium e Enterprise.</p>
+      </div>
+    </div>
+    <div class="proj-timeline">
+      <div class="timeline-title">Linha do tempo de ativação</div>
+      <div class="tl-row">
+        <div class="tl-period">Agora</div>
+        <div class="tl-content">
+          <div class="tl-actor">Di Mata + IF + Sicop</div>
+          <div class="tl-action">Reunião de alinhamento estratégico. Apresentação da plataforma e proposta de parceria fundacional no Selo de Origem.</div>
+          <span class="tl-badge tl-now">urgente · agora</span>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-period">Semana 3</div>
+        <div class="tl-content">
+          <div class="tl-actor">Di Mata (produto)</div>
+          <div class="tl-action">ERD finalizado, stack definida, repositório estruturado. Início do Sprint 1 com autenticação e cadastro.</div>
+          <span class="tl-badge tl-s1">sprint 1</span>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-period">Mês 1</div>
+        <div class="tl-content">
+          <div class="tl-actor">Produtores piloto</div>
+          <div class="tl-action">10 produtores do Sicop usando o Core gratuitamente. Feedback estruturado para iterar. IF acompanha como pesquisa aplicada.</div>
+          <span class="tl-badge tl-s1">piloto</span>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-period">Mês 2</div>
+        <div class="tl-content">
+          <div class="tl-actor">Primata lançado</div>
+          <div class="tl-action">Agente de voz funcionando em campo. Primeiro QR Code do Selo Sul de Minas gerado publicamente com histórico completo da safra.</div>
+          <span class="tl-badge tl-s2">marco</span>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-period">Mês 3</div>
+        <div class="tl-content">
+          <div class="tl-actor">Sicop Enterprise</div>
+          <div class="tl-action">Proposta Enterprise para o Sicop: dashboard consolidado, API, white-label do portal. Início da receita recorrente B2B.</div>
+          <span class="tl-badge tl-s3">receita</span>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-period">Mês 4+</div>
+        <div class="tl-content">
+          <div class="tl-actor">Expansão regional</div>
+          <div class="tl-action">Outros municípios do Sul de Minas. Outros setores (horticultura, laticínios). Editais IF/CNPq para financiar Primata 2.0.</div>
+          <span class="tl-badge tl-s3">escala</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MANIFESTO -->
+<div class="manifesto">
+  <div class="manifesto-inner">
+    <p class="manifesto-lbl">// manifesto · di mata × primata · sul de minas</p>
+    <h2 class="manifesto-h">
+      O Sul de Minas sempre soube de onde vem o café.<br>
+      <em>Agora o mundo vai saber também.</em>
+    </h2>
+    <p class="manifesto-p">O Selo de Identidade de Produção transforma conhecimento local em vantagem competitiva global. A Di Mata é a infraestrutura que transforma essa intenção em dados confiáveis — do primeiro registro de campo ao QR Code nas mãos do comprador internacional.</p>
+    <div class="manifesto-code">> dimata.run --region sul-de-minas --parceiros IF+SICOP+CAFEIRAS --modo Selo --output rastreabilidade_publica</div>
+  </div>
+</div>
+
+<footer>
+  <div class="f-left">
+    <div class="f-brand">Di <span>Mata</span> × Primata</div>
+    <div class="f-sub">Plano de Negócio · Posicionamento Selo Sul de Minas · Confidencial · 2026</div>
+  </div>
+  <div class="f-right">
+    v1.0 · pitch_document<br>
+    Di Mata × Primata · Documento Confidencial
+  </div>
+</footer>
+
+<script>
+// Progress bar
+window.addEventListener('scroll', () => {
+  const prog = document.getElementById('prog');
+  const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+  prog.style.width = pct + '%';
+});
+
+// Intersection observer for fade-up
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){ e.target.classList.add('vis'); io.unobserve(e.target); }
+  });
+}, {threshold:.12});
+document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
+
+// Nav active state
+const navLnks = document.querySelectorAll('.nav-lnk');
+navLnks.forEach(lnk => {
+  lnk.addEventListener('click', () => {
+    navLnks.forEach(l => l.classList.remove('on'));
+    lnk.classList.add('on');
+  });
+});
+</script>
+</body>
+</html>

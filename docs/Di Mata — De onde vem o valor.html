@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Di Mata — De onde vem o valor</title>
+<link href="Di%20Mata%20%E2%80%94%20De%20onde%20vem%20o%20valor_files/css2.css" rel="stylesheet">
+<style>
+:root {
+  --ink:#0C1109; --ink2:#161D12;
+  --f1:#1B3D24; --f2:#2E6B3A; --f3:#6EA87A; --f4:#C8DFC2;
+  --cream:#F5F0E8; --paper:#FAF8F3;
+  --b1:#1A3A36; --b2:#2D6B64; --b3:#7BBDB5; --b4:#D4EBE7;
+  --ouro:#B8860B; --ouro-lt:#D4A520; --ouro-cr:#F0DFA0;
+  --terra:#7A4E2D;
+  --muted:rgba(12,17,9,.48); --line:rgba(12,17,9,.08);
+  --mono:'DM Mono',monospace; --sans:'Epilogue',sans-serif; --serif:'Cormorant Garamond',serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);overflow-x:hidden;}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.028'/%3E%3C/svg%3E");opacity:.5;}
+#prog{position:fixed;top:0;left:0;height:1.5px;width:0;background:linear-gradient(90deg,var(--ouro),var(--b2),var(--f2));z-index:9998;transition:width .08s;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;justify-content:space-between;padding:0 52px;height:58px;background:rgba(12,17,9,.97);backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.04);}
+.nav-logo{display:flex;align-items:center;gap:12px;font-family:var(--serif);font-size:18px;font-weight:700;color:#fff;letter-spacing:-.01em;}
+.nav-logo-leaf{width:28px;height:28px;background:var(--f1);border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.nav-logo em{color:var(--ouro-lt);font-style:italic;font-weight:300;}
+.nav-center{display:flex;}
+.nav-lnk{font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.25);padding:0 18px;height:58px;display:flex;align-items:center;border-right:1px solid rgba(255,255,255,.04);text-decoration:none;transition:color .2s,background .2s;cursor:pointer;}
+.nav-lnk:first-child{border-left:1px solid rgba(255,255,255,.04);}
+.nav-lnk:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.02);}
+.nav-tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;color:var(--b3);padding:5px 14px;border:1px solid rgba(123,189,181,.18);border-radius:2px;}
+
+/* HERO */
+.hero{min-height:100vh;padding-top:58px;background:var(--ink);display:grid;grid-template-rows:1fr auto;position:relative;overflow:hidden;}
+.hero-lattice{position:absolute;inset:0;background-image:linear-gradient(rgba(184,134,11,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(184,134,11,.04) 1px,transparent 1px);background-size:56px 56px;}
+.hero-glow-a{position:absolute;width:900px;height:900px;border-radius:50%;top:-380px;right:-200px;background:radial-gradient(circle,rgba(27,61,36,.28) 0%,transparent 65%);filter:blur(80px);}
+.hero-glow-b{position:absolute;width:600px;height:600px;border-radius:50%;bottom:-100px;left:-80px;background:radial-gradient(circle,rgba(45,107,100,.18) 0%,transparent 65%);filter:blur(100px);}
+.hero-glow-c{position:absolute;width:400px;height:400px;border-radius:50%;top:30%;left:35%;background:radial-gradient(circle,rgba(184,134,11,.07) 0%,transparent 65%);filter:blur(60px);}
+.hero-body{position:relative;z-index:2;display:grid;grid-template-columns:1fr 400px;gap:0;align-items:end;padding:100px 64px 72px;}
+.hero-kicker{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:8.5px;letter-spacing:.38em;text-transform:uppercase;color:var(--ouro-lt);margin-bottom:36px;}
+.hero-kicker-dot{width:5px;height:5px;border-radius:50%;background:var(--ouro);animation:heartbeat 2s ease-in-out infinite;}
+@keyframes heartbeat{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:.5}}
+.hero-h1{font-family:var(--serif);font-size:clamp(58px,8.5vw,118px);line-height:.88;letter-spacing:-.03em;color:#fff;font-weight:300;margin-bottom:0;}
+.hero-h1 strong{font-weight:700;display:block;}
+.hero-h1 em{color:var(--f3);font-style:italic;font-weight:300;display:block;}
+.hero-h1 .outline{-webkit-text-stroke:1px rgba(255,255,255,.14);color:transparent;display:block;}
+.hero-divider{width:48px;height:1px;background:var(--ouro);margin:40px 0;}
+.hero-claim{font-size:clamp(13px,1.4vw,16px);font-weight:300;line-height:1.85;color:rgba(255,255,255,.42);max-width:520px;}
+.hero-claim strong{color:rgba(255,255,255,.82);font-weight:500;}
+.hero-cta-row{display:flex;align-items:center;gap:20px;margin-top:44px;}
+.cta-main{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;background:var(--ouro);color:var(--ink);padding:13px 28px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:10px;text-decoration:none;font-weight:500;transition:all .22s;}
+.cta-main:hover{background:var(--ouro-lt);transform:translateY(-2px);}
+.cta-ghost{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:rgba(255,255,255,.25);text-decoration:none;transition:color .2s;}
+.cta-ghost:hover{color:rgba(255,255,255,.7);}
+.hero-right{padding-left:52px;border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;gap:2px;}
+.hero-number-block{padding:24px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.hero-number-block:last-child{border-bottom:none;}
+.hnb-n{font-family:var(--serif);font-size:48px;font-weight:700;color:#fff;line-height:1;letter-spacing:-.02em;}
+.hnb-n sup{font-size:22px;color:var(--ouro-lt);}
+.hnb-l{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-top:6px;}
+.hero-footer-bar{position:relative;z-index:2;padding:20px 64px;border-top:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:48px;}
+.hfb-item{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.18);}
+.hfb-line{width:20px;height:1px;}
+
+/* CHAPTER SYSTEM */
+.chapter{display:grid;grid-template-columns:120px 1fr;max-width:1280px;margin:0 auto;padding:100px 64px;gap:0;}
+.ch-num{font-family:var(--mono);font-size:9px;letter-spacing:.3em;color:var(--muted);writing-mode:vertical-rl;transform:rotate(180deg);height:fit-content;}
+.sec-label{font-family:var(--mono);font-size:8.5px;letter-spacing:.38em;text-transform:uppercase;color:var(--b2);margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+.sec-label::before{content:'';width:20px;height:1px;background:var(--b2);}
+.ch-h{font-family:var(--serif);font-size:clamp(32px,4vw,56px);line-height:1.04;letter-spacing:-.025em;color:var(--ink);font-weight:300;margin-bottom:18px;}
+.ch-h strong{font-weight:700;}
+.ch-h em{color:var(--f2);font-style:italic;}
+.ch-lead{font-size:16px;font-weight:300;line-height:1.85;color:var(--muted);max-width:680px;margin-bottom:52px;}
+.ch-lead strong{color:var(--ink);font-weight:500;}
+
+/* DARK CHAPTER */
+.chapter-dark{background:var(--ink);}
+.chapter-dark .chapter{max-width:1280px;margin:0 auto;}
+.chapter-dark .ch-num{color:rgba(255,255,255,.18);}
+.chapter-dark .sec-label{color:var(--b3);}
+.chapter-dark .sec-label::before{background:var(--b3);}
+.chapter-dark .ch-h{color:#fff;}
+.chapter-dark .ch-h em{color:var(--f3);}
+.chapter-dark .ch-lead{color:rgba(255,255,255,.38);}
+.chapter-dark .ch-lead strong{color:rgba(255,255,255,.8);}
+
+/* FOREST CHAPTER */
+.chapter-forest{background:var(--f1);}
+.chapter-forest .chapter{max-width:1280px;margin:0 auto;}
+.chapter-forest .ch-num{color:rgba(255,255,255,.2);}
+.chapter-forest .sec-label{color:var(--f3);}
+.chapter-forest .sec-label::before{background:var(--f3);}
+.chapter-forest .ch-h{color:#fff;}
+.chapter-forest .ch-h em{color:var(--ouro-lt);}
+.chapter-forest .ch-lead{color:rgba(255,255,255,.42);}
+.chapter-forest .ch-lead strong{color:rgba(255,255,255,.82);}
+
+/* STORY CARDS */
+.story-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--line);}
+.story-card{background:var(--paper);padding:40px 36px;position:relative;overflow:hidden;transition:transform .28s cubic-bezier(.16,1,.3,1);}
+.story-card:hover{transform:translateY(-5px);}
+.story-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.story-card:nth-child(1)::before{background:var(--terra);}
+.story-card:nth-child(2)::before{background:var(--b2);}
+.story-card:nth-child(3)::before{background:var(--ouro);}
+.sc-persona{font-family:var(--mono);font-size:8.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+.sc-persona::before{content:'';display:block;width:8px;height:8px;border-radius:50%;}
+.story-card:nth-child(1) .sc-persona::before{background:var(--terra);}
+.story-card:nth-child(2) .sc-persona::before{background:var(--b2);}
+.story-card:nth-child(3) .sc-persona::before{background:var(--ouro);}
+.sc-h{font-family:var(--serif);font-size:22px;color:var(--ink);line-height:1.2;font-weight:600;margin-bottom:14px;}
+.sc-problem{font-size:13.5px;line-height:1.8;color:var(--muted);font-weight:300;margin-bottom:20px;}
+.sc-after{background:var(--cream);padding:16px 18px;border-left:2px solid var(--f2);}
+.sc-after-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--f2);margin-bottom:6px;}
+.sc-after-text{font-size:12.5px;line-height:1.7;color:var(--ink);font-weight:400;}
+
+/* CHAIN */
+.chain-wrap{background:var(--ink2);padding:72px 0;}
+.chain-inner{max-width:1280px;margin:0 auto;padding:0 64px;}
+.chain-title{font-family:var(--mono);font-size:9px;letter-spacing:.35em;text-transform:uppercase;color:rgba(255,255,255,.22);margin-bottom:48px;text-align:center;}
+.chain-nodes{display:grid;grid-template-columns:repeat(5,1fr);gap:0;position:relative;}
+.chain-nodes::after{content:'';position:absolute;top:40px;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--b2),var(--f2),var(--ouro),transparent);}
+.chain-node{display:flex;flex-direction:column;align-items:center;padding:20px 16px;z-index:1;text-align:center;}
+.cn-circle{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;border:1.5px solid;margin-bottom:16px;position:relative;background:var(--ink2);}
+.chain-node:nth-child(1) .cn-circle{border-color:var(--f2);}
+.chain-node:nth-child(2) .cn-circle{border-color:var(--f3);}
+.chain-node:nth-child(3) .cn-circle{border-color:var(--b2);}
+.chain-node:nth-child(4) .cn-circle{border-color:var(--ouro-lt);}
+.chain-node:nth-child(5) .cn-circle{border-color:var(--ouro);}
+.cn-label{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.22);margin-bottom:8px;}
+.cn-desc{font-size:12px;line-height:1.65;color:rgba(255,255,255,.38);font-weight:300;}
+.cn-tag{margin-top:10px;font-family:var(--mono);font-size:8px;letter-spacing:.12em;padding:3px 10px;border-radius:2px;display:inline-block;}
+.chain-node:nth-child(1) .cn-tag{background:rgba(46,107,58,.2);color:var(--f3);}
+.chain-node:nth-child(2) .cn-tag{background:rgba(110,168,122,.15);color:var(--f3);}
+.chain-node:nth-child(3) .cn-tag{background:rgba(45,107,100,.2);color:var(--b3);}
+.chain-node:nth-child(4) .cn-tag{background:rgba(184,134,11,.18);color:var(--ouro-lt);}
+.chain-node:nth-child(5) .cn-tag{background:rgba(184,134,11,.25);color:var(--ouro-lt);}
+
+/* SYSTEM GRID */
+.system-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,.07);margin-top:52px;}
+.sys-card{background:rgba(255,255,255,.025);padding:40px 36px;border-top:2px solid transparent;transition:background .25s;}
+.sys-card:hover{background:rgba(255,255,255,.05);}
+.sys-card:nth-child(1){border-color:var(--f2);}
+.sys-card:nth-child(2){border-color:var(--b2);}
+.sys-card:nth-child(3){border-color:var(--ouro);}
+.sys-card:nth-child(4){border-color:var(--terra);}
+.sys-num{font-family:var(--mono);font-size:9px;letter-spacing:.25em;color:rgba(255,255,255,.18);margin-bottom:20px;}
+.sys-icon{font-size:30px;margin-bottom:16px;display:block;}
+.sys-h{font-family:var(--serif);font-size:22px;color:#fff;font-weight:600;margin-bottom:12px;line-height:1.2;}
+.sys-p{font-size:13px;line-height:1.8;color:rgba(255,255,255,.38);font-weight:300;}
+.sys-p strong{color:rgba(255,255,255,.75);}
+
+/* VALUE TABLE */
+.value-stack{display:flex;flex-direction:column;gap:0;margin-top:52px;border:1px solid var(--line);}
+.value-row{display:grid;grid-template-columns:190px 1fr 1fr;border-bottom:1px solid var(--line);transition:background .2s;}
+.value-row:last-child{border-bottom:none;}
+.value-row:hover{background:rgba(46,107,58,.04);}
+.value-row.header{background:var(--ink);}
+.vr-who{padding:20px 24px;border-right:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+.value-row.header .vr-who{border-color:rgba(255,255,255,.06);}
+.vr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.vr-name{font-size:13px;font-weight:600;color:var(--ink);}
+.value-row.header .vr-name{font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.25);font-weight:400;}
+.vr-before{padding:20px 28px;border-right:1px solid var(--line);font-size:12.5px;line-height:1.7;color:var(--muted);font-weight:300;}
+.value-row.header .vr-before{border-color:rgba(255,255,255,.06);font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.25);}
+.vr-after{padding:20px 28px;font-size:12.5px;line-height:1.7;color:var(--ink);font-weight:400;}
+.value-row.header .vr-after{font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.25);}
+.vr-after strong{color:var(--f1);}
+
+/* PROCESS */
+.process-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line);}
+.ps-step{padding:36px 28px;border-right:1px solid var(--line);position:relative;overflow:hidden;transition:background .25s;}
+.ps-step:last-child{border-right:none;}
+.ps-step:hover{background:var(--cream);}
+.ps-step::after{content:attr(data-n);position:absolute;right:16px;bottom:12px;font-family:var(--serif);font-size:80px;font-weight:700;color:rgba(12,17,9,.04);line-height:1;}
+.ps-icon{font-size:24px;margin-bottom:18px;display:block;}
+.ps-tag{font-family:var(--mono);font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.ps-h{font-family:var(--serif);font-size:18px;color:var(--ink);font-weight:600;margin-bottom:10px;line-height:1.2;}
+.ps-p{font-size:12px;line-height:1.75;color:var(--muted);font-weight:300;}
+
+/* TIERS */
+.tiers-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:52px;}
+.tier{border:1px solid rgba(255,255,255,.07);padding:36px 32px;background:rgba(255,255,255,.02);transition:border-color .25s,background .25s;position:relative;overflow:hidden;}
+.tier:hover{border-color:rgba(123,189,181,.2);background:rgba(123,189,181,.04);}
+.tier.featured{background:rgba(45,107,100,.1);border-color:rgba(45,107,100,.35);}
+.tier-mark{font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-bottom:24px;}
+.tier.featured .tier-mark{color:var(--b3);}
+.tier-name{font-family:var(--serif);font-size:26px;color:#fff;font-weight:600;margin-bottom:8px;}
+.tier-price{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.28);margin-bottom:28px;letter-spacing:.04em;}
+.tier-price b{font-family:var(--serif);font-size:20px;color:#fff;}
+.tier-list{display:flex;flex-direction:column;gap:11px;}
+.tl{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:rgba(255,255,255,.42);line-height:1.5;font-weight:300;}
+.tl::before{content:'→';font-family:var(--mono);font-size:10px;color:var(--b3);flex-shrink:0;margin-top:1px;}
+.tier.featured .tl{color:rgba(255,255,255,.6);}
+
+/* MANIFESTO */
+.manifesto{background:var(--ink);padding:120px 64px;position:relative;overflow:hidden;text-align:center;}
+.manifesto::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 15% 20%,rgba(27,61,36,.32) 0%,transparent 55%),radial-gradient(ellipse 50% 60% at 85% 80%,rgba(26,58,54,.28) 0%,transparent 55%),radial-gradient(ellipse 30% 40% at 50% 50%,rgba(184,134,11,.06) 0%,transparent 60%);}
+.manifesto-inner{position:relative;z-index:1;max-width:780px;margin:0 auto;}
+.manifesto-eyebrow{font-family:var(--mono);font-size:8.5px;letter-spacing:.4em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-bottom:32px;}
+.manifesto-h{font-family:var(--serif);font-size:clamp(32px,5vw,64px);color:#fff;line-height:1.1;letter-spacing:-.025em;font-weight:300;margin-bottom:24px;}
+.manifesto-h strong{font-weight:700;}
+.manifesto-h em{color:var(--f3);font-style:italic;}
+.manifesto-body{font-size:16px;line-height:1.85;color:rgba(255,255,255,.38);font-weight:300;margin-bottom:48px;}
+.manifesto-body strong{color:rgba(255,255,255,.72);font-weight:400;}
+.manifesto-rules{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:rgba(255,255,255,.06);margin-bottom:52px;text-align:left;}
+.mr{padding:24px 28px;background:rgba(255,255,255,.02);display:flex;flex-direction:column;gap:10px;}
+.mr-icon{font-size:20px;}
+.mr-h{font-size:13px;font-weight:600;color:#fff;}
+.mr-p{font-size:11.5px;line-height:1.65;color:rgba(255,255,255,.32);font-weight:300;}
+.manifesto-cmd{font-family:var(--mono);font-size:11px;color:rgba(110,168,122,.4);letter-spacing:.06em;}
+
+footer{background:var(--ink2);padding:44px 64px;border-top:1px solid rgba(255,255,255,.04);display:flex;align-items:center;justify-content:space-between;}
+.f-brand{font-family:var(--serif);font-size:20px;color:#fff;font-weight:600;}
+.f-brand em{color:var(--ouro-lt);font-style:italic;font-weight:300;}
+.f-meta{font-family:var(--mono);font-size:8.5px;color:rgba(255,255,255,.15);letter-spacing:.12em;text-align:right;line-height:1.8;}
+.hr{border:none;border-top:1px solid var(--line);}
+
+/* ANIMATIONS */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s cubic-bezier(.16,1,.3,1);}
+.reveal.vis{opacity:1;transform:translateY(0);}
+.reveal:nth-child(2){transition-delay:.07s}
+.reveal:nth-child(3){transition-delay:.14s}
+.reveal:nth-child(4){transition-delay:.21s}
+.reveal:nth-child(5){transition-delay:.28s}
+.reveal:nth-child(6){transition-delay:.35s}
+
+@media(max-width:960px){
+  nav{padding:0 20px;}.nav-center{display:none;}
+  .hero-body{grid-template-columns:1fr;padding:60px 24px 48px;}.hero-right{display:none;}
+  .chapter{grid-template-columns:1fr;padding:60px 24px;}.chapter-index{display:none;}
+  .story-grid,.system-grid,.tiers-grid,.manifesto-rules{grid-template-columns:1fr;}
+  .value-row{grid-template-columns:1fr;}.vr-before,.vr-who{border-right:none;border-bottom:1px solid var(--line);}
+  .process-steps{grid-template-columns:1fr 1fr;}
+  .chain-nodes{grid-template-columns:1fr 1fr 1fr;}.chain-nodes::after{display:none;}
+  .manifesto{padding:72px 24px;}
+  footer{flex-direction:column;gap:16px;text-align:center;padding:36px 24px;}
+}
+</style>
+</head>
+<body>
+<div id="prog" style="width: 100.008%;"></div>
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-leaf">
+      <svg width="18" height="18" viewBox="0 0 70 70" fill="none"><path d="M8 8H34C52 8 62 19 62 35C62 51 52 62 34 62H8Z" fill="#6EA87A"></path><path d="M35 20L35 50" stroke="#1B3D24" stroke-width="4" stroke-linecap="round"></path><path d="M35 35L25 25" stroke="#1B3D24" stroke-width="3.5" stroke-linecap="round"></path><path d="M35 28L45 20" stroke="#1B3D24" stroke-width="3.5" stroke-linecap="round"></path></svg>
+    </div>
+    Di <em>&nbsp;Mata</em>
+  </div>
+  <div class="nav-center">
+    <a class="nav-lnk" href="#problema" style="color: rgba(255, 255, 255, 0.25);">O Problema</a>
+    <a class="nav-lnk" href="#sistema" style="color: rgba(255, 255, 255, 0.25);">O Sistema</a>
+    <a class="nav-lnk" href="#valor" style="color: rgba(255, 255, 255, 0.25);">Valor por Elo</a>
+    <a class="nav-lnk" href="#como" style="color: rgba(255, 255, 255, 0.25);">Como Funciona</a>
+    <a class="nav-lnk" href="#modelo" style="color: rgba(255, 255, 255, 0.9);">Modelo</a>
+  </div>
+  <div class="nav-tag">rastreabilidade · origem · IA</div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-lattice"></div>
+  <div class="hero-glow-a"></div>
+  <div class="hero-glow-b"></div>
+  <div class="hero-glow-c"></div>
+  <div class="hero-body">
+    <div class="hero-left">
+      <div class="hero-kicker"><span class="hero-kicker-dot"></span>Plataforma de Rastreabilidade &amp; IA · 2026</div>
+      <h1 class="hero-h1">
+        <strong>De onde</strong>
+        <em>vem o valor</em>
+        <span class="outline">da origem</span>
+      </h1>
+      <div class="hero-divider"></div>
+      <p class="hero-claim">Todo produto carrega uma história. <strong>A maioria dessas histórias se perde antes de chegar a quem importa.</strong> A Di Mata é a infraestrutura que conecta a origem ao destino — transformando dados do campo em confiança para o mercado.</p>
+      <div class="hero-cta-row">
+        <a class="cta-main" href="#problema">Ver a narrativa completa ↓</a>
+        <a class="cta-ghost" href="#modelo">Modelo de negócio →</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-number-block"><div class="hnb-n">100<sup>%</sup></div><div class="hnb-l">rastreabilidade imutável</div></div>
+      <div class="hero-number-block"><div class="hnb-n">0<sup>x</sup></div><div class="hnb-l">registros podem ser apagados</div></div>
+      <div class="hero-number-block"><div class="hnb-n">QR</div><div class="hnb-l">público · sem login · sempre</div></div>
+      <div class="hero-number-block"><div class="hnb-n">IA</div><div class="hnb-l">voz · foto · campo · offline</div></div>
+    </div>
+  </div>
+  <div class="hero-footer-bar">
+    <div class="hfb-item"><div class="hfb-line" style="background:var(--terra)"></div>Produtor</div>
+    <div class="hfb-item"><div class="hfb-line" style="background:var(--f2)"></div>Processo</div>
+    <div class="hfb-item"><div class="hfb-line" style="background:var(--b2)"></div>Certificação</div>
+    <div class="hfb-item"><div class="hfb-line" style="background:var(--ouro)"></div>Mercado</div>
+    <div class="hfb-item"><div class="hfb-line" style="background:var(--ouro-lt)"></div>Consumidor</div>
+  </div>
+</div>
+
+<!-- CAP 1: O PROBLEMA -->
+<div id="problema">
+  <div class="chapter">
+    <div class="chapter-index"><div class="ch-num">01 — Problema</div></div>
+    <div class="chapter-body">
+      <div class="sec-label">A história que se perde no caminho</div>
+      <h2 class="ch-h">O produto <strong>existe.</strong><br>A origem <em>desaparece.</em></h2>
+      <p class="ch-lead">Cada produto que chega ao mercado vem de 
+alguém, de algum lugar, de um processo. Mas essa história — o trabalho, o
+ cuidado, as práticas — <strong>se dissolve entre o campo e a prateleira.</strong> O produtor perde poder de precificação. O mercado perde argumento de diferenciação. O consumidor perde confiança.</p>
+    </div>
+  </div>
+  <div class="story-grid">
+    <div class="story-card reveal vis">
+      <div class="sc-persona">Quem produz</div>
+      <h3 class="sc-h">A nota existe.<br>A história que a explica, não.</h3>
+      <p class="sc-problem">O café tem pontuação Q. O comprador sabe que
+ é especial. Mas sem rastreabilidade do processo — o manejo, a safra, as
+ práticas que geraram aquela nota — <strong>a origem vira narrativa, não evidência.</strong> E narrativa não escala nem negocia.</p>
+      <div class="sc-after"><div class="sc-after-lbl">Com Di Mata →</div><div class="sc-after-text">A pontuação Q ganha contexto rastreável. O manejo que gerou o 87 vira registro público, auditável e vinculado ao lote.</div></div>
+    </div>
+    <div class="story-card reveal vis">
+      <div class="sc-persona">Quem certifica e valida</div>
+      <h3 class="sc-h">A avaliação sensorial existe.<br>O processo que a gerou, não.</h3>
+      <p class="sc-problem">O cupping diz o que está na xícara. Mas para
+ orientar o produtor a repetir — ou melhorar — o resultado, o técnico 
+precisa do histórico de manejo. <strong>Sem registro contínuo, o conhecimento acumulado some com a memória de cada visita.</strong></p>
+      <div class="sc-after"><div class="sc-after-lbl">Com Di Mata →</div><div class="sc-after-text">A
+ análise sensorial encontra o registro de processo. O técnico 
+correlaciona decisões de campo com resultados de xícara — safra a safra.</div></div>
+    </div>
+    <div class="story-card reveal vis">
+      <div class="sc-persona">Quem compra e consome</div>
+      <h3 class="sc-h">A vontade de confiar existe.<br>O instrumento para isso, não.</h3>
+      <p class="sc-problem">O consumidor quer saber de onde vem o que 
+consome — e está disposto a pagar por isso. Mas rótulos de origem, por 
+melhores que sejam, são declaratórios. <strong>Sem verificação independente, a confiança depende inteiramente da boa vontade de quem declara.</strong></p>
+      <div class="sc-after"><div class="sc-after-lbl">Com Di Mata →</div><div class="sc-after-text">QR Code no produto. Portal público. Histórico auditável. Zero login. A origem prova a si mesma — sem intermediários.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CHAIN -->
+<div class="chain-wrap">
+  <div class="chain-inner">
+    <div class="chain-title">// A cadeia que a Di Mata conecta — do primeiro registro ao consumidor final</div>
+    <div class="chain-nodes">
+      <div class="chain-node reveal vis"><div class="cn-circle">🌱</div><div class="cn-label">origem</div><div class="cn-desc">Campo, talhão, produtor. A realidade começa aqui.</div><div class="cn-tag">captura · Primata</div></div>
+      <div class="chain-node reveal vis"><div class="cn-circle">📋</div><div class="cn-label">processo</div><div class="cn-desc">Cada operação registrada. Plantio, manejo, colheita.</div><div class="cn-tag">registro · imutável</div></div>
+      <div class="chain-node reveal vis"><div class="cn-circle">📦</div><div class="cn-label">lote</div><div class="cn-desc">Consolidação rastreável com código único e QR.</div><div class="cn-tag">Di Mata · automático</div></div>
+      <div class="chain-node reveal vis"><div class="cn-circle">🏷️</div><div class="cn-label">mercado</div><div class="cn-desc">O produto carrega sua história. O comprador vê tudo.</div><div class="cn-tag">argumento · verificável</div></div>
+      <div class="chain-node reveal vis"><div class="cn-circle">📱</div><div class="cn-label">consumidor</div><div class="cn-desc">Escaneia. Confia. Paga o que vale a origem.</div><div class="cn-tag">portal público · QR</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CAP 2: O SISTEMA -->
+<div class="chapter-dark" id="sistema">
+  <div class="chapter">
+    <div class="chapter-index"><div class="ch-num">02 — Sistema</div></div>
+    <div class="chapter-body">
+      <div class="sec-label">O que a plataforma resolve</div>
+      <h2 class="ch-h"><strong>Dois produtos.</strong><br>Um <em>ecossistema fechado.</em></h2>
+      <p class="ch-lead">Di Mata gerencia os dados — da safra ao lote ao QR. Primata captura em campo — por voz, por foto, offline. <strong>Juntos eliminam a lacuna entre o que acontece na produção e o que o mercado consegue ver.</strong></p>
+      <div class="system-grid">
+        <div class="sys-card reveal vis"><div class="sys-num">sistema · 01</div><span class="sys-icon">🗂️</span><h3 class="sys-h">Registro imutável de cada evento</h3><p class="sys-p">Nada é apagado. Cada ação gera um registro com timestamp, autor e mídia associada. <strong>Correções são aditamentos, nunca sobrescritas.</strong> O histórico é sagrado e auditável.</p></div>
+        <div class="sys-card reveal vis"><div class="sys-num">sistema · 02</div><span class="sys-icon">🤖</span><h3 class="sys-h">Primata: IA que entende o campo</h3><p class="sys-p">O produtor fala no campo. O Primata transcreve, categoriza e valida antes de salvar. Opera <strong>100% offline</strong>, sincroniza ao reconectar. Sugestão contextual do próximo registro esperado.</p></div>
+        <div class="sys-card reveal vis"><div class="sys-num">sistema · 03</div><span class="sys-icon">📦</span><h3 class="sys-h">Lote rastreável com QR único</h3><p class="sys-p">Ao encerrar o ciclo produtivo, o sistema consolida automaticamente em um <strong>lote com código imutável</strong> e QR Code público — vinculado à origem específica, não ao produto genérico.</p></div>
+        <div class="sys-card reveal vis"><div class="sys-num">sistema · 04</div><span class="sys-icon">🌐</span><h3 class="sys-h">Portal público sem barreiras</h3><p class="sys-p">O consumidor escaneia o QR e acessa <strong>origem, processos, safra e história</strong> sem criar conta, sem instalar app. Transparência como produto entregável ao mercado.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CAP 3: VALOR POR ELO -->
+<div id="valor">
+  <div class="chapter">
+    <div class="chapter-index"><div class="ch-num">03 — Valor</div></div>
+    <div class="chapter-body">
+      <div class="sec-label">Geração de valor para toda a cadeia</div>
+      <h2 class="ch-h">Cada elo <strong>ganha</strong><br>algo <em>diferente.</em></h2>
+      <p class="ch-lead">Rastreabilidade não serve só ao consumidor. <strong>Cada participante da cadeia produtiva tem um ganho específico e mensurável</strong> quando os dados fluem de forma confiável do campo ao mercado.</p>
+      <div class="value-stack">
+        <div class="value-row header">
+          <div class="vr-who"><div class="vr-name">Elo da cadeia</div></div>
+          <div class="vr-before">Antes — o que falta hoje</div>
+          <div class="vr-after">Com Di Mata — o que passa a existir</div>
+        </div>
+        <div class="value-row reveal vis">
+          <div class="vr-who"><div class="vr-dot" style="background:var(--terra)"></div><div class="vr-name">Produtor</div></div>
+          <div class="vr-before">A pontuação Q já diferencia o café na 
+xícara. Mas sem rastreabilidade do processo, o comprador internacional 
+não consegue verificar a origem e as práticas que geraram essa 
+qualidade.</div>
+          <div class="vr-after"><strong>A nota Q ganha contexto rastreável.</strong> Manejo, safra e origem documentados lote a lote — o argumento que faltava para mercados que exigem verificação além da xícara.</div>
+        </div>
+        <div class="value-row reveal vis">
+          <div class="vr-who"><div class="vr-dot" style="background:var(--f2)"></div><div class="vr-name">Técnico / Consultor</div></div>
+          <div class="vr-before">Sem histórico estruturado, a orientação é baseada em memória e anotações dispersas. Cada visita recomeça.</div>
+          <div class="vr-after"><strong>Histórico completo e contínuo</strong> por safra. Laudos vinculados a eventos reais. Decisão técnica mais rápida e embasada.</div>
+        </div>
+        <div class="value-row reveal vis">
+          <div class="vr-who"><div class="vr-dot" style="background:var(--b2)"></div><div class="vr-name">Certificadora / Selo</div></div>
+          <div class="vr-before">Auditoria manual e dependência de documentação em papel que pode ser manipulada.</div>
+          <div class="vr-after"><strong>Dados auditáveis e imutáveis.</strong> Selo com sustentação técnica real, não apenas declaratória.</div>
+        </div>
+        <div class="value-row reveal vis">
+          <div class="vr-who"><div class="vr-dot" style="background:var(--ouro)"></div><div class="vr-name">Comprador / Exportador</div></div>
+          <div class="vr-before">Paga por origem sem poder verificar. Risco de reputação com produto sem documentação para mercados exigentes.</div>
+          <div class="vr-after"><strong>Due diligence em segundos.</strong> QR Code verifica lote, origem e processo. Redução de risco e argumento de venda.</div>
+        </div>
+        <div class="value-row reveal vis">
+          <div class="vr-who"><div class="vr-dot" style="background:var(--ouro-lt)"></div><div class="vr-name">Consumidor Final</div></div>
+          <div class="vr-before">Confia no rótulo sem evidência. Marketing de origem sem verificação gera desconfiança crescente.</div>
+          <div class="vr-after"><strong>Transparência real, não narrativa.</strong> Vê o produtor, o processo, a safra. Escolha informada e conexão com a origem.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="hr">
+
+<!-- CAP 4: COMO FUNCIONA -->
+<div id="como">
+  <div class="chapter">
+    <div class="chapter-index"><div class="ch-num">04 — Processo</div></div>
+    <div class="chapter-body">
+      <div class="sec-label">Do campo ao consumidor</div>
+      <h2 class="ch-h"><strong>8 passos.</strong><br>Uma cadeia <em>sem lacunas.</em></h2>
+      <p class="ch-lead">O fluxo da Di Mata foi desenhado para ser <strong>invisível para quem produz e transparente para quem compra.</strong> O produtor registra com a voz. O mercado recebe dados auditáveis.</p>
+      <div class="process-steps">
+        <div class="ps-step" data-n="01"><span class="ps-icon">🌾</span><div class="ps-tag">passo 01</div><div class="ps-h">Cadastro e talhões</div><p class="ps-p">Produtor registra propriedade, talhões e configura o setor. Mapa de produção ativo em minutos.</p></div>
+        <div class="ps-step" data-n="02"><span class="ps-icon">📅</span><div class="ps-tag">passo 02</div><div class="ps-h">Abertura de safra</div><p class="ps-p">Define ciclo, cultura e período. A safra é a unidade de rastreabilidade — tudo o que acontece fica vinculado a ela.</p></div>
+        <div class="ps-step" data-n="03"><span class="ps-icon">🎙️</span><div class="ps-tag">passo 03</div><div class="ps-h">Primata captura em campo</div><p class="ps-p">O produtor fala ou fotografa. O Primata transcreve, categoriza e aguarda confirmação. Offline e sem fricção.</p></div>
+        <div class="ps-step" data-n="04"><span class="ps-icon">✅</span><div class="ps-tag">passo 04</div><div class="ps-h">Confirmação e registro</div><p class="ps-p">Produtor aprova ou corrige. Registro salvo com timestamp imutável, autor e mídia associada.</p></div>
+      </div>
+      <div class="process-steps" style="margin-top:1px">
+        <div class="ps-step" data-n="05"><span class="ps-icon">🔬</span><div class="ps-tag">passo 05</div><div class="ps-h">Validação técnica</div><p class="ps-p">Técnico acessa o painel, analisa a safra completa, emite laudos vinculados aos eventos reais de campo.</p></div>
+        <div class="ps-step" data-n="06"><span class="ps-icon">🏁</span><div class="ps-tag">passo 06</div><div class="ps-h">Encerramento da safra</div><p class="ps-p">Colheita registrada. Safra encerrada. Sistema verifica que todos os requisitos para geração do lote foram cumpridos.</p></div>
+        <div class="ps-step" data-n="07"><span class="ps-icon">📦</span><div class="ps-tag">passo 07</div><div class="ps-h">Geração do lote e QR</div><p class="ps-p">Sistema consolida automaticamente. Lote com código único imutável. QR Code gerado e pronto para aplicação na embalagem.</p></div>
+        <div class="ps-step" data-n="08"><span class="ps-icon">📱</span><div class="ps-tag">passo 08</div><div class="ps-h">Consumidor escaneia</div><p class="ps-p">QR na embalagem. Portal público. Origem, processo, safra, história. Sem login. Transparência como produto final.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CAP 5: MODELO -->
+<div class="chapter-forest" id="modelo">
+  <div class="chapter">
+    <div class="chapter-index"><div class="ch-num">05 — Modelo</div></div>
+    <div class="chapter-body">
+      <div class="sec-label">Como a Di Mata gera receita</div>
+      <h2 class="ch-h"><strong>Gratuito para adotar.</strong><br>Valioso para <em>crescer.</em></h2>
+      <p class="ch-lead">O Core gratuito garante adoção em escala — sem 
+barreira de entrada. O Premium converte quem quer gestão completa. O 
+Enterprise escala para cadeias e selos inteiros.</p>
+      <div class="tiers-grid">
+        <div class="tier reveal vis">
+          <div class="tier-mark">· Core · Gratuito</div>
+          <div class="tier-name">Rastreabilidade</div>
+          <div class="tier-price">Sempre <b>gratuito</b> · para todo produtor</div>
+          <div class="tier-list">
+            <div class="tl">Cadastro completo e onboarding guiado</div>
+            <div class="tl">Gestão de safra e talhões com mapa</div>
+            <div class="tl">Registro de campo via Primata ou manual</div>
+            <div class="tl">Lote rastreável com QR Code único</div>
+            <div class="tl">Portal público do consumidor</div>
+            <div class="tl">Painel do técnico e consultor</div>
+          </div>
+        </div>
+        <div class="tier featured reveal vis">
+          <div class="tier-mark">· Premium · Assinatura</div>
+          <div class="tier-name">Gestão Completa</div>
+          <div class="tier-price">a partir de <b>R$ 79</b> /mês por propriedade</div>
+          <div class="tier-list">
+            <div class="tl">Tudo do Core incluso</div>
+            <div class="tl">Gestão de custos por safra e talhão</div>
+            <div class="tl">Controle de mão de obra e horas</div>
+            <div class="tl">Custo por hectare e por lote</div>
+            <div class="tl">Relatórios de produção exportáveis</div>
+            <div class="tl">Suporte prioritário e onboarding</div>
+          </div>
+        </div>
+        <div class="tier reveal vis">
+          <div class="tier-mark">· Enterprise · Cadeia</div>
+          <div class="tier-name">Escala</div>
+          <div class="tier-price"><b>Sob consulta</b> · cadeias e selos</div>
+          <div class="tier-list">
+            <div class="tl">Gestão de múltiplos produtores em uma conta</div>
+            <div class="tl">API para integração de cadeias e selos</div>
+            <div class="tl">Portal white-label com identidade do selo</div>
+            <div class="tl">Relatórios consolidados de origem</div>
+            <div class="tl">SLA garantido e suporte dedicado</div>
+            <div class="tl">Treinamento e onboarding presencial</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MANIFESTO -->
+<div class="manifesto">
+  <div class="manifesto-inner">
+    <div class="manifesto-eyebrow">// di mata × primata · manifesto de produto</div>
+    <h2 class="manifesto-h">O campo sempre <strong>soube</strong><br>o que produzia.<br>Agora o mercado <em>também sabe.</em></h2>
+    <p class="manifesto-body">Rastreabilidade não é compliance. É <strong>vantagem competitiva</strong> para quem produz bem. É <strong>argumento de negociação</strong> para quem vende. É <strong>confiança verificável</strong>
+ para quem compra. A Di Mata transforma dados do campo em decisões de 
+negócio — para cada elo da cadeia, de formas diferentes, com valor real.</p>
+    <div class="manifesto-rules">
+      <div class="mr"><div class="mr-icon">🔒</div><div class="mr-h">Imutabilidade por design</div><p class="mr-p">Nenhum registro pode ser apagado. Correções geram novos eventos. O histórico é permanente e auditável.</p></div>
+      <div class="mr"><div class="mr-icon">🌐</div><div class="mr-h">Transparência pública, privacidade protegida</div><p class="mr-p">O consumidor vê origem e processo. Nunca vê custos ou dados financeiros. Cada perfil acessa exatamente o que precisa.</p></div>
+      <div class="mr"><div class="mr-icon">♾️</div><div class="mr-h">Agnóstico de setor e cadeia</div><p class="mr-p">Café, horticultura, têxtil, artesanato. O mesmo sistema rastreia qualquer cadeia produtiva sem reescrita.</p></div>
+    </div>
+    <div class="manifesto-cmd">&gt; dimata.run --mode full-chain --ai primata --output confiança_verificável</div>
+  </div>
+</div>
+
+<footer>
+  <div class="f-brand">Di <em>Mata</em> × Primata</div>
+  <div class="f-meta">Plataforma de Rastreabilidade &amp; IA · Documento Confidencial · 2026<br>pitch_v2.0 · design_story · chain_value</div>
+</footer>
+
+<script>
+window.addEventListener('scroll',()=>{
+  const pct=(window.scrollY/(document.body.scrollHeight-window.innerHeight))*100;
+  document.getElementById('prog').style.width=pct+'%';
+  const sections=document.querySelectorAll('[id]');
+  const navLnks=document.querySelectorAll('.nav-lnk');
+  let curr='';
+  sections.forEach(s=>{if(window.scrollY>=s.offsetTop-120)curr=s.id;});
+  navLnks.forEach(l=>{l.style.color=l.getAttribute('href')==='#'+curr?'rgba(255,255,255,.9)':'rgba(255,255,255,.25)';});
+});
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');io.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+
+
+</body></html>
