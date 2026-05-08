@@ -1,10 +1,9 @@
 import logging
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.core.auth import TokenData, decode_token
-from app.repositories.store import Store, get_store
 
 bearer = HTTPBearer()
 logger = logging.getLogger(__name__)
@@ -18,7 +17,7 @@ def get_token(creds: HTTPAuthorizationCredentials = Depends(bearer)) -> TokenDat
         return token_data
     except ValueError as exc:
         logger.info("Token rejeitado: %s", exc)
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc))
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)) from exc
 
 
 def require_roles(*roles: str):
@@ -34,3 +33,8 @@ def require_roles(*roles: str):
         logger.debug("Role autorizada: user_id=%s role=%s", token.user_id, token.role)
         return token
     return _check
+
+
+def get_twilio_client(request: Request):
+    """Retorna o Twilio Client singleton inicializado no lifespan, ou None se não configurado."""
+    return getattr(request.app.state, "twilio_client", None)

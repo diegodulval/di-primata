@@ -12,6 +12,7 @@ dependencies = [
     "qrcode[pil]>=7.4.2",
     "pillow>=10.0.0",
     "python-multipart>=0.0.9",
+    "twilio>=9.0.0",
 ]
 
 [project.optional-dependencies]

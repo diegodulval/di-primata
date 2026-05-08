@@ -9,6 +9,7 @@ from app.models.primata import PrimataSessao
 from app.models.protocol import Protocol
 from app.models.unit import Unit
 from app.models.user import Profile, User
+from app.models.whatsapp import WhatsappMensagem, WhatsappSessao
 from app.repositories.base import InMemoryRepository
 
 
@@ -30,6 +31,8 @@ class Store:
         self.kb_items: InMemoryRepository[KbItem] = InMemoryRepository()
         self.primata_sessoes: InMemoryRepository[PrimataSessao] = InMemoryRepository()
         self.audit_logs: InMemoryRepository[AuditLog] = InMemoryRepository()
+        self.whatsapp_sessoes: InMemoryRepository[WhatsappSessao] = InMemoryRepository()
+        self.whatsapp_mensagens: InMemoryRepository[WhatsappMensagem] = InMemoryRepository()
         self._lot_seq: dict[str, int] = {}
 
     def next_lot_seq(self, key: str) -> int:

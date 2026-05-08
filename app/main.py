@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import auth, accounts, units, cycles, events, lots, public
+from app.routers import accounts, auth, cycles, events, lots, public, units, whatsapp
 
 # Habilita DEBUG para todos os loggers app.* em desenvolvimento.
 # Em produção mantém INFO para não expor dados sensíveis nos logs.
@@ -65,10 +65,25 @@ def _bootstrap_admin() -> None:
     )
 
 
+def _init_twilio(app: FastAPI) -> None:
+    from app.core.config import settings as cfg
+
+    if cfg.twilio_account_sid and cfg.twilio_auth_token:
+        from twilio.rest import Client
+
+        app.state.twilio_client = Client(cfg.twilio_account_sid, cfg.twilio_auth_token)
+        logger.info("Twilio client inicializado | from=%s", cfg.twilio_whatsapp_from)
+    else:
+        app.state.twilio_client = None
+        logger.warning("Twilio não configurado — envios serão simulados")
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     _bootstrap_admin()
+    _init_twilio(_app)
     yield
+    _app.state.twilio_client = None
 
 
 app = FastAPI(
@@ -99,7 +114,8 @@ app.include_router(units.router,    prefix="/units",   tags=["units"])
 app.include_router(cycles.router,   prefix="/cycles",  tags=["cycles"])
 app.include_router(events.router,   prefix="/cycles",  tags=["events"])
 app.include_router(lots.router,     prefix="/cycles",  tags=["lots"])
-app.include_router(public.router,   prefix="/p",       tags=["public"])
+app.include_router(public.router,     prefix="/p",         tags=["public"])
+app.include_router(whatsapp.router,   prefix="/whatsapp",  tags=["whatsapp"])
 
 
 @app.get("/health", tags=["infra"])
