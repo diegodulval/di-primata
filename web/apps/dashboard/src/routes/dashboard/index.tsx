@@ -1,13 +1,8 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle, Skeleton } from "@di-mata/ui";
 import { useTenant } from "@di-mata/theme";
 
 export const Route = createFileRoute("/dashboard/")({
-  beforeLoad: () => {
-    if (!sessionStorage.getItem("access_token")) {
-      throw redirect({ to: "/login" });
-    }
-  },
   component: DashboardHome,
 });
 

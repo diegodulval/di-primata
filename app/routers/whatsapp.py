@@ -1,5 +1,6 @@
 import logging
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import PlainTextResponse
@@ -86,9 +87,36 @@ async def status_callback(request: Request):
     return PlainTextResponse("", status_code=200)
 
 
-# ── Consulta de sessões (uso interno / debug) ──────────────────────────────────
+# ── Consulta de sessões e mensagens ───────────────────────────────────────────
 
 @router.get("/sessions")
 def list_sessions(store: Store = Depends(get_store)):
-    """Lista sessões WhatsApp ativas — apenas para uso interno."""
-    return store.whatsapp_sessoes.list_all()
+    """Lista todas as sessões WhatsApp com contagem de mensagens."""
+    sessoes = store.whatsapp_sessoes.list_all()
+    result = []
+    for s in sessoes:
+        msgs = store.whatsapp_mensagens.list_by(sessao_id=s.id)
+        result.append({
+            **s.model_dump(),
+            "total_mensagens": len(msgs),
+        })
+    return result
+
+
+@router.get("/sessions/{session_id}")
+def get_session(session_id: UUID, store: Store = Depends(get_store)):
+    """Retorna uma sessão pelo ID."""
+    sessao = store.whatsapp_sessoes.get(session_id)
+    if not sessao:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+    return sessao
+
+
+@router.get("/sessions/{session_id}/messages")
+def list_session_messages(session_id: UUID, store: Store = Depends(get_store)):
+    """Lista todas as mensagens de uma sessão em ordem cronológica."""
+    sessao = store.whatsapp_sessoes.get(session_id)
+    if not sessao:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+    msgs = store.whatsapp_mensagens.list_by(sessao_id=session_id)
+    return sorted(msgs, key=lambda m: m.criado_em)
