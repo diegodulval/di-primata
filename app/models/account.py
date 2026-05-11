@@ -14,6 +14,7 @@ class Account(BaseModel):
     email: str
     plano: PlanoAssinatura = PlanoAssinatura.FREE
     setor_primario: str
+    whatsapp_phone: str | None = None
     ativo: bool = True
     criado_em: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     meta_json: dict[str, Any] = Field(default_factory=dict)
@@ -25,4 +26,10 @@ class AccountCreate(BaseModel):
     email: str
     plano: PlanoAssinatura = PlanoAssinatura.FREE
     setor_primario: str
+    whatsapp_phone: str | None = None
     meta_json: dict[str, Any] = Field(default_factory=dict)
+
+
+class AccountUpdate(BaseModel):
+    nome: str | None = None
+    whatsapp_phone: str | None = None

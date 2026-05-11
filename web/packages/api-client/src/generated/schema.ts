@@ -47,7 +47,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** Update Me */
+        patch: operations["update_me_accounts_me_patch"];
         trace?: never;
     };
     "/accounts/users": {
@@ -356,7 +357,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Update Session
+         * @description Atualiza campos editáveis da sessão (ex: vincular talhão).
+         */
+        patch: operations["update_session_whatsapp_sessions__session_id__patch"];
         trace?: never;
     };
     "/whatsapp/sessions/{session_id}/messages": {
@@ -434,6 +439,8 @@ export interface components {
             plano: components["schemas"]["PlanoAssinatura"];
             /** Setor Primario */
             setor_primario: string;
+            /** Whatsapp Phone */
+            whatsapp_phone?: string | null;
             /**
              * Ativo
              * @default true
@@ -461,10 +468,19 @@ export interface components {
             plano: components["schemas"]["PlanoAssinatura"];
             /** Setor Primario */
             setor_primario: string;
+            /** Whatsapp Phone */
+            whatsapp_phone?: string | null;
             /** Meta Json */
             meta_json?: {
                 [key: string]: unknown;
             };
+        };
+        /** AccountUpdate */
+        AccountUpdate: {
+            /** Nome */
+            nome?: string | null;
+            /** Whatsapp Phone */
+            whatsapp_phone?: string | null;
         };
         /** Certification */
         Certification: {
@@ -510,11 +526,8 @@ export interface components {
              * Format: uuid
              */
             unit_id: string;
-            /**
-             * Protocol Id
-             * Format: uuid
-             */
-            protocol_id: string;
+            /** Protocol Id */
+            protocol_id?: string | null;
             /** Codigo */
             codigo: string;
             /** Produto */
@@ -572,16 +585,10 @@ export interface components {
              * Format: uuid
              */
             ciclo_id: string;
-            /**
-             * Etapa Protocolo Id
-             * Format: uuid
-             */
-            etapa_protocolo_id: string;
-            /**
-             * Autor User Id
-             * Format: uuid
-             */
-            autor_user_id: string;
+            /** Etapa Protocolo Id */
+            etapa_protocolo_id?: string | null;
+            /** Autor User Id */
+            autor_user_id?: string | null;
             tipo_evento: components["schemas"]["TipoEvento"];
             /** Descricao */
             descricao: string;
@@ -990,6 +997,11 @@ export interface components {
             /** Context */
             ctx?: Record<string, never>;
         };
+        /** WhatsappSessaoUpdate */
+        WhatsappSessaoUpdate: {
+            /** Unit Id */
+            unit_id?: string | null;
+        };
     };
     responses: never;
     parameters: never;
@@ -1081,6 +1093,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Account"];
+                };
+            };
+        };
+    };
+    update_me_accounts_me_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AccountUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Account"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1687,6 +1732,41 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_session_whatsapp_sessions__session_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WhatsappSessaoUpdate"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {

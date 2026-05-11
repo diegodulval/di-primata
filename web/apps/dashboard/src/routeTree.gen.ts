@@ -14,6 +14,8 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardWhatsappIndexRouteImport } from './routes/dashboard/whatsapp/index'
+import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
+import { Route as DashboardRegistrosIndexRouteImport } from './routes/dashboard/registros/index'
 import { Route as DashboardWhatsappSessionIdRouteImport } from './routes/dashboard/whatsapp/$sessionId'
 
 const LoginRoute = LoginRouteImport.update({
@@ -41,6 +43,16 @@ const DashboardWhatsappIndexRoute = DashboardWhatsappIndexRouteImport.update({
   path: '/whatsapp/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardRegistrosIndexRoute = DashboardRegistrosIndexRouteImport.update({
+  id: '/registros/',
+  path: '/registros/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardWhatsappSessionIdRoute =
   DashboardWhatsappSessionIdRouteImport.update({
     id: '/whatsapp/$sessionId',
@@ -54,6 +66,8 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/whatsapp/$sessionId': typeof DashboardWhatsappSessionIdRoute
+  '/dashboard/registros/': typeof DashboardRegistrosIndexRoute
+  '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/dashboard/whatsapp/': typeof DashboardWhatsappIndexRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +75,8 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/whatsapp/$sessionId': typeof DashboardWhatsappSessionIdRoute
+  '/dashboard/registros': typeof DashboardRegistrosIndexRoute
+  '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/dashboard/whatsapp': typeof DashboardWhatsappIndexRoute
 }
 export interface FileRoutesById {
@@ -70,6 +86,8 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/whatsapp/$sessionId': typeof DashboardWhatsappSessionIdRoute
+  '/dashboard/registros/': typeof DashboardRegistrosIndexRoute
+  '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/dashboard/whatsapp/': typeof DashboardWhatsappIndexRoute
 }
 export interface FileRouteTypes {
@@ -80,6 +98,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard/'
     | '/dashboard/whatsapp/$sessionId'
+    | '/dashboard/registros/'
+    | '/dashboard/settings/'
     | '/dashboard/whatsapp/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -87,6 +107,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard'
     | '/dashboard/whatsapp/$sessionId'
+    | '/dashboard/registros'
+    | '/dashboard/settings'
     | '/dashboard/whatsapp'
   id:
     | '__root__'
@@ -95,6 +117,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/dashboard/'
     | '/dashboard/whatsapp/$sessionId'
+    | '/dashboard/registros/'
+    | '/dashboard/settings/'
     | '/dashboard/whatsapp/'
   fileRoutesById: FileRoutesById
 }
@@ -141,6 +165,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardWhatsappIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/settings/': {
+      id: '/dashboard/settings/'
+      path: '/settings'
+      fullPath: '/dashboard/settings/'
+      preLoaderRoute: typeof DashboardSettingsIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/registros/': {
+      id: '/dashboard/registros/'
+      path: '/registros'
+      fullPath: '/dashboard/registros/'
+      preLoaderRoute: typeof DashboardRegistrosIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/whatsapp/$sessionId': {
       id: '/dashboard/whatsapp/$sessionId'
       path: '/whatsapp/$sessionId'
@@ -154,12 +192,16 @@ declare module '@tanstack/react-router' {
 interface DashboardRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardWhatsappSessionIdRoute: typeof DashboardWhatsappSessionIdRoute
+  DashboardRegistrosIndexRoute: typeof DashboardRegistrosIndexRoute
+  DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute
   DashboardWhatsappIndexRoute: typeof DashboardWhatsappIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardWhatsappSessionIdRoute: DashboardWhatsappSessionIdRoute,
+  DashboardRegistrosIndexRoute: DashboardRegistrosIndexRoute,
+  DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,
   DashboardWhatsappIndexRoute: DashboardWhatsappIndexRoute,
 }
 

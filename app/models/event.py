@@ -28,8 +28,8 @@ class EventAttachment(BaseModel):
 class Event(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     ciclo_id: UUID
-    etapa_protocolo_id: UUID
-    autor_user_id: UUID
+    etapa_protocolo_id: UUID | None = None
+    autor_user_id: UUID | None = None
     tipo_evento: TipoEvento
     descricao: str
     payload_json: dict[str, Any] = Field(default_factory=dict)

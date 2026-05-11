@@ -11,7 +11,7 @@ class Cycle(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     account_id: UUID
     unit_id: UUID
-    protocol_id: UUID
+    protocol_id: UUID | None = None
     codigo: str
     produto: str
     status: StatusCiclo = StatusCiclo.ABERTO

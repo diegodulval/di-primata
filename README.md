@@ -278,6 +278,68 @@ GET  /p/{qr_hash}            # portal público — sem autenticação
 
 ---
 
+## Integração WhatsApp (Twilio Sandbox)
+
+Esta seção explica como conectar o webhook do WhatsApp ao Twilio durante o desenvolvimento local.
+
+### 1. Pré-requisito: API rodando
+
+```bash
+make run   # API em http://localhost:8000
+```
+
+### 2. Expor a API com Cloudflare Tunnel
+
+O Twilio precisa de uma URL pública para entregar mensagens. Use o `cloudflared` para criar um tunnel temporário sem precisar de conta:
+
+```bash
+# baixar o binário (apenas uma vez)
+wget -O /tmp/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
+chmod +x /tmp/cloudflared
+
+# iniciar o tunnel
+/tmp/cloudflared tunnel --url http://localhost:8000 --no-autoupdate
+```
+
+O terminal exibirá uma linha como:
+
+```
+INF  +--------------------------------------------------------------------------------------------+
+INF  |  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable): |
+INF  |  https://lending-practitioner-navigation-bird.trycloudflare.com                           |
+INF  +--------------------------------------------------------------------------------------------+
+```
+
+Copie essa URL — ela muda a cada reinicialização.
+
+### 3. Configurar no Twilio Console
+
+Acesse [console.twilio.com](https://console.twilio.com) → **Messaging → Try it out → Send a WhatsApp message → Sandbox Settings** e preencha:
+
+| Campo | Valor |
+|---|---|
+| **When a message comes in** | `https://<sua-url>/whatsapp/webhook` |
+| **Status callback URL** | `https://<sua-url>/whatsapp/status` |
+
+Ambos usam método **HTTP POST**.
+
+### 4. Variáveis de ambiente (.env)
+
+```env
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_WHATSAPP_FROM=+14155238886
+TWILIO_VALIDATE_SIGNATURE=False   # True somente em produção
+```
+
+### 5. Testar
+
+Envie qualquer mensagem para o número do sandbox no WhatsApp. O terminal da API mostrará os logs de entrada. O bot responde com o menu inicial.
+
+> **Atenção:** A URL do tunnel é descartável — muda toda vez que você reinicia o `cloudflared`. Atualize o Twilio Console sempre que isso acontecer.
+
+---
+
 ## Arquivos de referência
 
 | Arquivo | Conteúdo |

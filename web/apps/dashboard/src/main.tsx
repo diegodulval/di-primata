@@ -3,8 +3,13 @@ import { createRoot } from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@di-mata/theme";
+import { setAuthToken } from "@di-mata/api-client";
 import { routeTree } from "./routeTree.gen";
 import "./styles.css";
+
+// Restaura token da sessão anterior ao recarregar a página
+const stored = sessionStorage.getItem("access_token");
+if (stored) setAuthToken(stored);
 
 const queryClient = new QueryClient({
   defaultOptions: {

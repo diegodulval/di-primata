@@ -2,7 +2,7 @@ import { api } from "@di-mata/api-client";
 import { formatDateTime } from "@di-mata/shared";
 import type { EstadoAgente } from "@di-mata/shared";
 import { Badge, Skeleton } from "@di-mata/ui";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/whatsapp/$sessionId")({
@@ -13,6 +13,7 @@ type Session = {
   id: string;
   phone: string;
   profile_name: string | null;
+  unit_id: string | null;
   estado: EstadoAgente;
   ultima_atividade_em: string;
   criado_em: string;
@@ -27,6 +28,12 @@ type Message = {
   num_midia: number;
   midia_urls: string[];
   criado_em: string;
+};
+
+type Unit = {
+  id: string;
+  nome: string;
+  tipo: string;
 };
 
 const ESTADO_BADGE: Record<
@@ -66,6 +73,69 @@ function useMessages(sessionId: string) {
     },
     refetchInterval: 5_000,
   });
+}
+
+function useUnits() {
+  return useQuery<Unit[]>({
+    queryKey: ["units"],
+    queryFn: async () => {
+      const { data, error } = await api.GET("/units");
+      if (error) throw error;
+      return data as Unit[];
+    },
+  });
+}
+
+function useLinkUnit(sessionId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (unit_id: string | null) => {
+      const { data, error } = await api.PATCH("/whatsapp/sessions/{session_id}", {
+        params: { path: { session_id: sessionId } },
+        body: { unit_id },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["whatsapp", "sessions", sessionId] });
+    },
+  });
+}
+
+function UnitSelector({ session }: { session: Session }) {
+  const { data: units, isLoading } = useUnits();
+  const link = useLinkUnit(session.id);
+
+  if (isLoading) return <Skeleton className="h-8 w-48" />;
+  if (!units?.length) return null;
+
+  const linked = units.find((u) => u.id === session.unit_id);
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs text-[--color-text-muted]">Talhão:</span>
+      <select
+        value={session.unit_id ?? ""}
+        disabled={link.isPending}
+        onChange={(e) => link.mutate(e.target.value || null)}
+        className="rounded border border-[--color-border] bg-[--color-surface] px-2 py-1 text-xs text-[--color-text-primary] focus:outline-none focus:ring-1 focus:ring-[--color-primary] disabled:opacity-50"
+      >
+        <option value="">— sem vínculo —</option>
+        {units.map((u) => (
+          <option key={u.id} value={u.id}>
+            {u.nome}
+          </option>
+        ))}
+      </select>
+      {linked && (
+        <span className="text-xs text-[--color-success]">✓ {linked.nome}</span>
+      )}
+      {link.isError && (
+        <span className="text-xs text-[--color-error]">Erro ao salvar</span>
+      )}
+    </div>
+  );
 }
 
 function Bubble({ msg }: { msg: Message }) {
@@ -141,10 +211,13 @@ function SessionDetail() {
       </div>
 
       {session && (
-        <p className="text-xs text-[--color-text-muted]">
-          Sessão iniciada em {formatDateTime(session.criado_em)} · última atividade{" "}
-          {formatDateTime(session.ultima_atividade_em)}
-        </p>
+        <div className="flex flex-wrap items-center gap-4">
+          <p className="text-xs text-[--color-text-muted]">
+            Sessão iniciada em {formatDateTime(session.criado_em)} · última atividade{" "}
+            {formatDateTime(session.ultima_atividade_em)}
+          </p>
+          <UnitSelector session={session} />
+        </div>
       )}
 
       {/* Thread de mensagens */}

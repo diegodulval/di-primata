@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     bootstrap_admin_email: str = "admin@dimata.dev"
     bootstrap_admin_senha: str = "dev1234"
     bootstrap_admin_nome: str = "Admin Di Mata"
+    bootstrap_admin_whatsapp_phone: str = ""  # ex: +5511999990000
 
     # Twilio / WhatsApp
     twilio_account_sid: str = ""

@@ -49,6 +49,7 @@ def _bootstrap_admin() -> None:
             documento="00.000.000/0001-00",
             email=settings.bootstrap_admin_email,
             setor_primario="Plataforma",
+            whatsapp_phone=settings.bootstrap_admin_whatsapp_phone or None,
         ),
         UserCreate(
             nome=settings.bootstrap_admin_nome,

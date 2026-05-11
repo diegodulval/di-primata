@@ -1,5 +1,7 @@
-import { Link, Outlet, createFileRoute, redirect } from "@tanstack/react-router";
+import { setAuthToken } from "@di-mata/api-client";
 import { useTenant } from "@di-mata/theme";
+import { Link, Outlet, createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: () => {
@@ -12,11 +14,26 @@ export const Route = createFileRoute("/dashboard")({
 
 const NAV_ITEMS = [
   { to: "/dashboard" as const, label: "Início" },
+  { to: "/dashboard/registros" as const, label: "Registros" },
   { to: "/dashboard/whatsapp" as const, label: "WhatsApp" },
+  { to: "/dashboard/settings" as const, label: "Configurações" },
 ];
 
 function DashboardLayout() {
   const tenant = useTenant();
+  const navigate = useNavigate();
+
+  function logout() {
+    sessionStorage.removeItem("access_token");
+    setAuthToken(null);
+    void navigate({ to: "/login" });
+  }
+
+  useEffect(() => {
+    const handler = () => logout();
+    window.addEventListener("auth:unauthorized", handler);
+    return () => window.removeEventListener("auth:unauthorized", handler);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="flex min-h-screen bg-[--color-background]">
@@ -39,6 +56,15 @@ function DashboardLayout() {
             </Link>
           ))}
         </nav>
+        <div className="px-3 py-4 border-t border-[--color-border]">
+          <button
+            type="button"
+            onClick={logout}
+            className="w-full px-3 py-2 rounded-md text-sm text-left text-[--color-text-muted] hover:bg-[--color-background] hover:text-[--color-error] transition-colors"
+          >
+            Sair
+          </button>
+        </div>
       </aside>
 
       <main className="flex-1 min-w-0 overflow-auto">

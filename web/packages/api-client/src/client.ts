@@ -18,12 +18,18 @@ export const api = createClient<paths>({
   },
 });
 
-// Injeta o Bearer token em todas as requisições autenticadas
 api.use({
   onRequest({ request }) {
     if (_authToken) {
       request.headers.set("Authorization", `Bearer ${_authToken}`);
     }
     return request;
+  },
+  onResponse({ response }) {
+    if (response.status === 401) {
+      _authToken = null;
+      window.dispatchEvent(new CustomEvent("auth:unauthorized"));
+    }
+    return response;
   },
 });

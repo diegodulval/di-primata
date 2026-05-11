@@ -17,10 +17,16 @@ class WhatsappSessao(BaseModel):
     id: UUID = Field(default_factory=uuid4)
     phone: str  # E.164 sem prefixo whatsapp: ex. +5511999990000
     profile_name: str | None = None
+    account_id: UUID | None = None  # resolvido via Account.whatsapp_phone
+    unit_id: UUID | None = None     # talhão padrão vinculado manualmente pelo admin
     estado: EstadoAgente = EstadoAgente.OCIOSO
     contexto_json: dict[str, Any] = Field(default_factory=dict)
     criado_em: datetime = Field(default_factory=lambda: datetime.now(UTC))
     ultima_atividade_em: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class WhatsappSessaoUpdate(BaseModel):
+    unit_id: UUID | None = None
 
 
 class WhatsappMensagem(BaseModel):
