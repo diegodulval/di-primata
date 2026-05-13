@@ -38,3 +38,13 @@ def require_roles(*roles: str):
 def get_twilio_client(request: Request):
     """Retorna o Twilio Client singleton inicializado no lifespan, ou None se não configurado."""
     return getattr(request.app.state, "twilio_client", None)
+
+
+def get_debounce_buffer(request: Request):
+    """Retorna o DebounceBuffer singleton, ou None se DATABASE_URL não configurada."""
+    return getattr(request.app.state, "debounce_buffer", None)
+
+
+def get_rate_limiter(request: Request):
+    """Retorna o FixedWindowRateLimiter singleton."""
+    return getattr(request.app.state, "rate_limiter", None)

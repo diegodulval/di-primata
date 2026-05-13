@@ -79,11 +79,43 @@ def _init_twilio(app: FastAPI) -> None:
         logger.warning("Twilio não configurado — envios serão simulados")
 
 
+async def _init_db(_app: FastAPI) -> None:
+    from app.db import pool as db_pool_module
+    from app.ingestion.debounce import DebounceBuffer
+    from app.ingestion.rate_limiter import FixedWindowRateLimiter
+
+    _app.state.rate_limiter = FixedWindowRateLimiter(
+        max_requests=settings.rate_limit_max,
+        window_seconds=settings.rate_limit_window,
+    )
+
+    if settings.database_url:
+        pool = await db_pool_module.create_pool(settings.database_url)
+        _app.state.db_pool = pool
+        _app.state.debounce_buffer = DebounceBuffer(pool, window_seconds=settings.debounce_window_seconds)
+        logger.info("DB pool inicializado | url=%s", settings.database_url.split("@")[-1])
+    else:
+        _app.state.db_pool = None
+        _app.state.debounce_buffer = DebounceBuffer(None, window_seconds=settings.debounce_window_seconds)
+        logger.warning("DATABASE_URL não configurada — mensagens não serão persistidas na fila")
+
+
+async def _close_db(_app: FastAPI) -> None:
+    from app.db import pool as db_pool_module
+
+    pool = getattr(_app.state, "db_pool", None)
+    if pool:
+        await db_pool_module.close_pool(pool)
+        logger.info("DB pool encerrado")
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     _bootstrap_admin()
     _init_twilio(_app)
+    await _init_db(_app)
     yield
+    await _close_db(_app)
     _app.state.twilio_client = None
 
 

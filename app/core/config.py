@@ -19,6 +19,17 @@ class Settings(BaseSettings):
     # Em produção deve ser True; False permite testar sem enviar credenciais reais
     twilio_validate_signature: bool = False
 
+    # PostgreSQL — usado apenas para a fila de mensagens (Camada 1)
+    # ex: postgresql://user:pass@localhost/dimata
+    database_url: str = ""
+
+    # Debounce: janela de acumulação de mensagens do mesmo phone (segundos)
+    debounce_window_seconds: float = 2.0
+
+    # Rate limit por phone: máximo de mensagens dentro da janela
+    rate_limit_max: int = 10
+    rate_limit_window: int = 60  # segundos
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 

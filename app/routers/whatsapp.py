@@ -7,10 +7,10 @@ from fastapi.responses import PlainTextResponse
 
 from app.core.config import Settings
 from app.core.config import settings as _default_settings
-from app.core.deps import get_twilio_client
+from app.core.deps import get_debounce_buffer, get_rate_limiter, get_twilio_client
+from app.ingestion.normalizer import normalize
 from app.models.whatsapp import WhatsappSessaoUpdate
 from app.repositories.store import Store, get_store
-from app.services.whatsapp_service import WhatsappService
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -41,29 +41,36 @@ async def _validate_twilio_signature(request: Request, cfg: Settings) -> None:
 @router.post("/webhook", response_class=PlainTextResponse)
 async def webhook(
     request: Request,
-    store: Store = Depends(get_store),
     cfg: Settings = Depends(get_settings),
-    twilio_client: Annotated[object, Depends(get_twilio_client)] = None,
+    debounce=Depends(get_debounce_buffer),
+    rate_limiter=Depends(get_rate_limiter),
 ):
     """
     Configurar em: Sandbox Settings → "When a message comes in"
     URL: POST /whatsapp/webhook
+
+    Camada 1 — Entrada/Recebimento:
+    valida → normaliza → rate limit → debounce buffer → fila PostgreSQL
     """
     await _validate_twilio_signature(request, cfg)
 
     form = await request.form()
-    payload = dict(form)
+    msg = normalize(dict(form))
 
-    from_number = payload.get("From", "")
-    sid = payload.get("MessageSid", "")
-    logger.info("Mensagem inbound | from=%s sid=%s body=%r", from_number, sid, payload.get("Body"))
+    logger.info("Mensagem inbound | from=%s sid=%s body=%r", msg.phone, msg.message_sid, msg.body)
 
-    svc = WhatsappService(store, twilio_client, cfg.twilio_whatsapp_from)
-    try:
-        svc.processar_webhook(payload)
-    except Exception:
-        # Sempre retorna 200: resposta não-200 faz o Twilio retentar o webhook.
-        logger.exception("Erro ao processar mensagem | sid=%s", sid)
+    if msg.num_media > 0:
+        logger.debug("Mídia ignorada (Camada 1) | phone=%s num_media=%d", msg.phone, msg.num_media)
+        return PlainTextResponse("", status_code=200)
+
+    if rate_limiter and not rate_limiter.is_allowed(msg.phone):
+        logger.warning("Rate limit excedido | phone=%s", msg.phone)
+        return PlainTextResponse("", status_code=200)
+
+    if debounce:
+        await debounce.push(msg)
+    else:
+        logger.warning("debounce_buffer indisponível, mensagem descartada | phone=%s sid=%s", msg.phone, msg.message_sid)
 
     return PlainTextResponse("", status_code=200)
 
