@@ -1,5 +1,5 @@
 import { setAuthToken } from "@di-mata/api-client";
-import { clearToken, formatDate, getToken, type Account, type Unit } from "@di-mata/shared";
+import { type Account, type Unit, clearToken, formatDate, getToken } from "@di-mata/shared";
 import { Field, Input, Select, Skeleton } from "@di-mata/ui";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -29,6 +29,19 @@ type Atividade = {
   capturado_em: string;
   unit_id: string | null;
   unit_nome: string;
+};
+
+type LoteGerado = {
+  lot_id: string;
+  codigo_lote: string;
+  qr_hash: string;
+  qr_image: string | null;
+  gerado_em: string;
+  unit_id: string | null;
+  unit_nome: string;
+  autodeclarado: boolean;
+  total_atividades: number;
+  total_custo: number;
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -66,8 +79,7 @@ async function portalPost<T>(path: string, body: unknown): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-const brl = (v: number) =>
-  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 const TIPO_LABEL: Record<string, string> = {
   TALHAO: "Talhão",
@@ -100,18 +112,22 @@ function MinhaAreaPage() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [resumo, setResumo] = useState<Resumo | null>(null);
   const [atividades, setAtividades] = useState<Atividade[]>([]);
+  const [lotes, setLotes] = useState<LoteGerado[]>([]);
   const [loading, setLoading] = useState(true);
 
   function loadAtividades() {
     return Promise.all([
       portalFetch<Resumo>("/api/bff/portal/resumo"),
       portalFetch<Atividade[]>("/api/bff/portal/atividades"),
-    ]).then(([r, a]) => {
+      portalFetch<LoteGerado[]>("/api/bff/portal/lotes"),
+    ]).then(([r, a, l]) => {
       setResumo(r);
       setAtividades(a);
+      setLotes(l);
     });
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: loadAtividades only depends on stable setters
   useEffect(() => {
     Promise.all([
       portalFetch<Account>("/api/accounts/me"),
@@ -151,7 +167,6 @@ function MinhaAreaPage() {
       </header>
 
       <div className="max-w-md mx-auto px-4 py-6 space-y-4">
-
         {/* Conta */}
         <section className="rounded-2xl border border-[--color-border] bg-[--color-surface] p-5">
           {loading ? (
@@ -174,7 +189,9 @@ function MinhaAreaPage() {
 
         {/* Resumo financeiro */}
         <section className="rounded-2xl border border-[--color-border] bg-[--color-surface] p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-[--color-text-primary]">Custos das atividades</h2>
+          <h2 className="text-sm font-semibold text-[--color-text-primary]">
+            Custos das atividades
+          </h2>
           {loading ? (
             <div className="space-y-2">
               <Skeleton className="h-8 w-32" />
@@ -194,9 +211,14 @@ function MinhaAreaPage() {
               {(resumo?.por_unidade.length ?? 0) > 0 && (
                 <ul className="space-y-1">
                   {resumo?.por_unidade.map((u) => (
-                    <li key={u.unit_id} className="flex justify-between text-xs text-[--color-text-muted]">
+                    <li
+                      key={u.unit_id}
+                      className="flex justify-between text-xs text-[--color-text-muted]"
+                    >
                       <span>{u.unit_nome}</span>
-                      <span>{brl(u.custo)} · {u.atividades} ativ.</span>
+                      <span>
+                        {brl(u.custo)} · {u.atividades} ativ.
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -213,6 +235,15 @@ function MinhaAreaPage() {
           onCreated={loadAtividades}
         />
 
+        {/* QR / fechar safra */}
+        <QrSection
+          units={units}
+          lotes={lotes}
+          resumo={resumo}
+          loading={loading}
+          onGenerated={loadAtividades}
+        />
+
         {/* Rastrear produto */}
         <section className="rounded-2xl border border-[--color-border] bg-[--color-surface] p-5 space-y-3">
           <h2 className="text-sm font-semibold text-[--color-text-primary]">Rastrear produto</h2>
@@ -224,7 +255,9 @@ function MinhaAreaPage() {
           <h2 className="text-sm font-semibold text-[--color-text-primary]">Unidades produtivas</h2>
           {loading ? (
             <div className="space-y-2">
-              {[1, 2].map((i) => <Skeleton key={i} className="h-10 w-full rounded-lg" />)}
+              {[1, 2].map((i) => (
+                <Skeleton key={i} className="h-10 w-full rounded-lg" />
+              ))}
             </div>
           ) : units.length === 0 ? (
             <p className="text-sm text-[--color-text-muted]">Nenhuma unidade cadastrada.</p>
@@ -247,7 +280,6 @@ function MinhaAreaPage() {
             </ul>
           )}
         </section>
-
       </div>
     </main>
   );
@@ -293,7 +325,9 @@ function AtividadesSection({ units, atividades, loading, onCreated }: Atividades
 
       {loading ? (
         <div className="space-y-2">
-          {[1, 2].map((i) => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
+          {[1, 2].map((i) => (
+            <Skeleton key={i} className="h-12 w-full rounded-lg" />
+          ))}
         </div>
       ) : atividades.length === 0 && !showForm ? (
         <p className="text-sm text-[--color-text-muted]">Nenhuma atividade registrada.</p>
@@ -363,8 +397,8 @@ function NovaAtividadeForm({ units, onCancel, onCreated }: NovaAtividadeFormProp
         unit_id: unitId,
         tipo_evento: tipo,
         descricao: descricao.trim(),
-        custo: custo ? parseFloat(custo.replace(",", ".")) : null,
-        capturado_em: new Date(data + "T12:00:00").toISOString(),
+        custo: custo ? Number.parseFloat(custo.replace(",", ".")) : null,
+        capturado_em: new Date(`${data}T12:00:00`).toISOString(),
       });
       await onCreated();
     } catch {
@@ -376,12 +410,11 @@ function NovaAtividadeForm({ units, onCancel, onCreated }: NovaAtividadeFormProp
   return (
     <form onSubmit={handleSubmit} className="space-y-3 border-t border-[--color-border] pt-4">
       <Field label="Unidade">
-        <Select
-          value={unitId}
-          onChange={(e) => setUnitId(e.target.value)}
-        >
+        <Select value={unitId} onChange={(e) => setUnitId(e.target.value)}>
           {units.map((u) => (
-            <option key={u.id} value={u.id}>{u.nome}</option>
+            <option key={u.id} value={u.id}>
+              {u.nome}
+            </option>
           ))}
         </Select>
       </Field>
@@ -389,7 +422,9 @@ function NovaAtividadeForm({ units, onCancel, onCreated }: NovaAtividadeFormProp
       <Field label="Tipo">
         <Select value={tipo} onChange={(e) => setTipo(e.target.value)}>
           {Object.entries(EVENTO_LABEL).map(([v, l]) => (
-            <option key={v} value={v}>{l}</option>
+            <option key={v} value={v}>
+              {l}
+            </option>
           ))}
         </Select>
       </Field>
@@ -397,7 +432,10 @@ function NovaAtividadeForm({ units, onCancel, onCreated }: NovaAtividadeFormProp
       <Field label="Descrição" error={error && !descricao.trim() ? error : undefined}>
         <Input
           value={descricao}
-          onChange={(e) => { setDescricao(e.target.value); setError(""); }}
+          onChange={(e) => {
+            setDescricao(e.target.value);
+            setError("");
+          }}
           placeholder="Ex: Aplicação de fertilizante"
         />
       </Field>
@@ -415,11 +453,7 @@ function NovaAtividadeForm({ units, onCancel, onCreated }: NovaAtividadeFormProp
       </Field>
 
       <Field label="Data">
-        <Input
-          type="date"
-          value={data}
-          onChange={(e) => setData(e.target.value)}
-        />
+        <Input type="date" value={data} onChange={(e) => setData(e.target.value)} />
       </Field>
 
       {error && <p className="text-xs text-[--color-error]">{error}</p>}
@@ -441,6 +475,171 @@ function NovaAtividadeForm({ units, onCancel, onCreated }: NovaAtividadeFormProp
         </button>
       </div>
     </form>
+  );
+}
+
+// ── Seção de QR / fechar safra ────────────────────────────────────────────────
+
+type QrSectionProps = {
+  units: Unit[];
+  lotes: LoteGerado[];
+  resumo: Resumo | null;
+  loading: boolean;
+  onGenerated: () => Promise<void>;
+};
+
+function QrSection({ units, lotes, resumo, loading, onGenerated }: QrSectionProps) {
+  const activeUnitIds = new Set<string>([
+    ...(resumo?.por_unidade.map((u) => u.unit_id) ?? []),
+    ...lotes.map((l) => l.unit_id).filter((id): id is string => id !== null),
+  ]);
+  const activeUnits = units.filter((u) => activeUnitIds.has(u.id));
+
+  if (loading) {
+    return (
+      <section className="rounded-2xl border border-[--color-border] bg-[--color-surface] p-5 space-y-3">
+        <h2 className="text-sm font-semibold text-[--color-text-primary]">
+          Fechar safra e gerar QR
+        </h2>
+        <Skeleton className="h-28 w-full rounded-xl" />
+      </section>
+    );
+  }
+
+  if (activeUnits.length === 0) return null;
+
+  return (
+    <section className="rounded-2xl border border-[--color-border] bg-[--color-surface] p-5 space-y-4">
+      <h2 className="text-sm font-semibold text-[--color-text-primary]">Fechar safra e gerar QR</h2>
+      <div className="space-y-4">
+        {activeUnits.map((unit) => (
+          <UnitQrCard
+            key={unit.id}
+            unit={unit}
+            unitLotes={lotes.filter((l) => l.unit_id === unit.id)}
+            unitResumo={resumo?.por_unidade.find((u) => u.unit_id === unit.id) ?? null}
+            onGenerated={onGenerated}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+type UnitQrCardProps = {
+  unit: Unit;
+  unitLotes: LoteGerado[];
+  unitResumo: { unit_id: string; unit_nome: string; custo: number; atividades: number } | null;
+  onGenerated: () => Promise<void>;
+};
+
+function UnitQrCard({ unit, unitLotes, unitResumo, onGenerated }: UnitQrCardProps) {
+  const [autodeclarado, setAutodeclarado] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState("");
+  const [newLote, setNewLote] = useState<LoteGerado | null>(null);
+
+  const allLotes = newLote ? [newLote, ...unitLotes] : unitLotes;
+
+  async function handleGenerate() {
+    setGenError("");
+    setGenerating(true);
+    try {
+      const lot = await portalPost<LoteGerado>("/api/bff/portal/lotes", {
+        unit_id: unit.id,
+        autodeclarado: true,
+      });
+      setNewLote(lot);
+      setAutodeclarado(false);
+      await onGenerated();
+    } catch {
+      setGenError("Erro ao gerar QR. Verifique se há atividades registradas.");
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-[--color-border] p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-[--color-text-primary]">{unit.nome}</h3>
+        {unitResumo && (
+          <span className="text-xs text-[--color-text-muted]">
+            {unitResumo.atividades} ativ. · {brl(unitResumo.custo)}
+          </span>
+        )}
+      </div>
+
+      {allLotes.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-[--color-text-muted] uppercase tracking-wide">
+            QR codes gerados
+          </p>
+          {allLotes.map((lot) => (
+            <div
+              key={lot.lot_id}
+              className="flex items-start gap-3 rounded-lg bg-[--color-background] p-3"
+            >
+              {lot.qr_image && (
+                <img
+                  src={lot.qr_image}
+                  alt={`QR ${lot.codigo_lote}`}
+                  className="w-16 h-16 rounded flex-shrink-0"
+                />
+              )}
+              <div className="min-w-0 flex-1 space-y-0.5">
+                <p className="text-xs font-mono text-[--color-text-primary] truncate">
+                  {lot.codigo_lote}
+                </p>
+                <p className="text-xs text-[--color-text-muted]">
+                  {formatDate(lot.gerado_em)} · {lot.total_atividades} ativ. ·{" "}
+                  {brl(lot.total_custo)}
+                </p>
+                {lot.autodeclarado && (
+                  <p className="text-xs text-[--color-primary] font-medium">
+                    ✓ Verificado pelo engenheiro
+                  </p>
+                )}
+                <a
+                  href={`/p/${lot.qr_hash}`}
+                  className="text-xs text-[--color-primary] hover:underline"
+                >
+                  Ver relatório →
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="space-y-2 border-t border-[--color-border] pt-3">
+        <label className="flex items-start gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={autodeclarado}
+            onChange={(e) => {
+              setAutodeclarado(e.target.checked);
+              setGenError("");
+            }}
+            className="mt-0.5 flex-shrink-0 accent-[--color-primary]"
+          />
+          <span className="text-xs text-[--color-text-muted] leading-relaxed">
+            Declaro que os registros foram verificados pelo engenheiro responsável
+          </span>
+        </label>
+
+        {genError && <p className="text-xs text-[--color-error]">{genError}</p>}
+
+        <button
+          type="button"
+          onClick={handleGenerate}
+          disabled={generating || !autodeclarado}
+          className="w-full rounded-lg bg-[--color-primary] px-4 py-2.5 text-sm font-medium text-[--color-primary-fg] hover:opacity-90 transition-opacity disabled:opacity-40"
+        >
+          {generating ? "Gerando…" : "Fechar safra e gerar QR code"}
+        </button>
+      </div>
+    </div>
   );
 }
 

@@ -2,11 +2,11 @@ import base64
 import hashlib
 import io
 import secrets
+from datetime import UTC, datetime
 from uuid import UUID
 
-from fastapi import HTTPException
-
 import qrcode
+from fastapi import HTTPException
 
 from app.models.audit import AuditLog
 from app.models.enums import StatusCiclo, StatusLote, StatusValidacao, TipoAsset
@@ -18,21 +18,31 @@ class LotService:
     def __init__(self, store: Store) -> None:
         self.store = store
 
-    def generate(self, cycle_id: UUID, actor_id: UUID) -> Lot:
+    def generate(
+        self,
+        cycle_id: UUID,
+        actor_id: UUID,
+        autodeclarado: bool = False,
+    ) -> Lot:
         cycle = self.store.cycles.get(cycle_id)
         if not cycle:
             raise HTTPException(status_code=404, detail="Ciclo não encontrado")
         if cycle.status != StatusCiclo.VALIDANDO:
-            raise HTTPException(status_code=422, detail="Ciclo precisa estar em VALIDANDO para gerar lote")
+            raise HTTPException(
+                status_code=422, detail="Ciclo precisa estar em VALIDANDO para gerar lote"
+            )
         if self.store.lots.find_one(ciclo_id=cycle_id):
             raise HTTPException(status_code=409, detail="Lote já gerado para este ciclo")
 
-        protocol = self.store.protocols.get(cycle.protocol_id)
+        protocol = self.store.protocols.get(cycle.protocol_id) if cycle.protocol_id else None
         events = self.store.events.list_by(ciclo_id=cycle_id)
 
-        # RN-01: todas as etapas obrigatórias precisam estar cobertas
+        # RN-01: etapas obrigatórias — só aplica a ciclos com protocolo formal
         if protocol and protocol.etapas_obrig_ids:
-            covered = {e.etapa_protocolo_id for e in events if e.status_validacao != StatusValidacao.INVALIDO}
+            covered = {
+                e.etapa_protocolo_id for e in events
+                if e.status_validacao != StatusValidacao.INVALIDO
+            }
             missing = [sid for sid in protocol.etapas_obrig_ids if sid not in covered]
             if missing:
                 raise HTTPException(
@@ -42,7 +52,7 @@ class LotService:
         unit = self.store.units.get(cycle.unit_id)
 
         qr_hash = self._make_qr_hash(cycle.codigo)
-        snapshot = self._build_snapshot(cycle, events, unit, protocol)
+        snapshot = self._build_snapshot(cycle, events, unit, protocol, autodeclarado)
 
         lot = Lot(
             ciclo_id=cycle_id,
@@ -86,21 +96,29 @@ class LotService:
         raw = f"{codigo_lote}{secrets.token_hex(8)}"
         return hashlib.sha256(raw.encode()).hexdigest()[:32]
 
-    def _build_snapshot(self, cycle, events, unit, protocol) -> dict:
+    def _build_snapshot(self, cycle, events, unit, protocol, autodeclarado: bool = False) -> dict:
+        _SKIP = {"attachments", "location", "payload_json", "aditamento_de_id", "sincronizado_em"}
         public_events = [
-            {k: v for k, v in e.model_dump().items() if k not in ("attachments",)}
-            for e in events
+            {k: v for k, v in e.model_dump().items() if k not in _SKIP}
+            for e in sorted(events, key=lambda e: e.capturado_em)
             if e.visivel_publico
         ]
+        total_custo = sum((e.custo or 0) for e in events if e.visivel_publico)
         return {
             "codigo_lote": cycle.codigo,
             "produto": cycle.produto,
             "iniciado_em": cycle.iniciado_em.isoformat(),
             "encerrado_em": cycle.encerrado_em.isoformat() if cycle.encerrado_em else None,
-            "unidade": unit.model_dump() if unit else None,
-            "protocolo": {"nome": protocol.nome, "versao": protocol.versao, "ref_normativa": protocol.ref_normativa} if protocol else None,
+            "unidade": {"nome": unit.nome, "tipo": unit.tipo} if unit else None,
+            "protocolo": (
+                {"nome": protocol.nome, "versao": protocol.versao}
+                if protocol else None
+            ),
+            "total_custo": total_custo,
+            "total_atividades": len(public_events),
+            "autodeclarado": autodeclarado,
+            "autodeclarado_em": datetime.now(UTC).isoformat() if autodeclarado else None,
             "eventos": public_events,
-            "meta": cycle.meta_json,
         }
 
     def _generate_qr_asset(self, lot: Lot) -> LotAsset:

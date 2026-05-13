@@ -21,6 +21,7 @@ from app.models.event import Event
 from app.models.unit import Unit
 from app.models.user import Profile, User
 from app.repositories.store import Store, get_store
+from app.services.lot_service import LotService
 
 router = APIRouter()
 
@@ -356,3 +357,107 @@ def resumo_produtor(
         "total_atividades": total_atividades,
         "por_unidade": list(por_unidade.values()),
     }
+
+
+class LotePortalCreate(BaseModel):
+    unit_id: UUID
+    autodeclarado: bool = False
+
+
+@router.post("/portal/lotes", status_code=201)
+def gerar_lote_portal(
+    body: LotePortalCreate,
+    token: TokenData = Depends(get_token),
+    store: Store = Depends(get_store),
+):
+    """
+    Fecha todos os ciclos abertos de uma unidade e gera o lote com QR code.
+    Fluxo: ABERTO/EM_PRODUCAO → ENCERRADO → VALIDANDO → gerar → publicar.
+    """
+    unit = store.units.get(body.unit_id)
+    if not unit or unit.account_id != token.account_id:
+        raise HTTPException(status_code=404, detail="Unidade não encontrada")
+
+    open_cycles = [
+        c for c in store.cycles.list_by(unit_id=body.unit_id)
+        if c.status in (StatusCiclo.ABERTO, StatusCiclo.EM_PRODUCAO)
+    ]
+    if not open_cycles:
+        raise HTTPException(status_code=422, detail="Nenhum ciclo aberto para esta unidade")
+
+    svc = LotService(store)
+    lotes = []
+
+    for cycle in open_cycles:
+        events = store.events.list_by(ciclo_id=cycle.id)
+        if not events:
+            continue
+
+        # Transições de estado até VALIDANDO
+        _TRANSITIONS = [StatusCiclo.EM_PRODUCAO, StatusCiclo.ENCERRADO, StatusCiclo.VALIDANDO]
+        for status in _TRANSITIONS:
+            if cycle.status != status:
+                cycle.status = status
+                if status == StatusCiclo.ENCERRADO:
+                    cycle.encerrado_em = datetime.now(UTC)
+                store.cycles.save(cycle)
+
+        lot = svc.generate(cycle.id, token.user_id, autodeclarado=body.autodeclarado)
+        svc.publish(lot.id, token.user_id)
+
+        qr_asset = next((a for a in lot.assets if a.tipo.value == "QR_PNG"), None)
+        lotes.append({
+            "lot_id": str(lot.id),
+            "codigo_lote": lot.codigo_lote,
+            "qr_hash": lot.qr_hash,
+            "qr_image": qr_asset.url if qr_asset else None,
+            "gerado_em": lot.gerado_em.isoformat(),
+            "unit_id": str(unit.id),
+            "unit_nome": unit.nome,
+            "autodeclarado": body.autodeclarado,
+            "total_atividades": lot.snapshot_json.get("total_atividades", 0),
+            "total_custo": lot.snapshot_json.get("total_custo", 0.0),
+        })
+
+    if not lotes:
+        raise HTTPException(
+            status_code=422,
+            detail="Nenhum ciclo com atividades registradas para gerar lote",
+        )
+
+    return lotes[0] if len(lotes) == 1 else lotes
+
+
+@router.get("/portal/lotes")
+def listar_lotes_portal(
+    token: TokenData = Depends(get_token),
+    store: Store = Depends(get_store),
+):
+    """Lista todos os lotes gerados pelo produtor autenticado."""
+    cycles = store.cycles.list_by(account_id=token.account_id)
+    cycle_ids = {c.id for c in cycles}
+    unit_map = {u.id: u for u in store.units.list_by(account_id=token.account_id)}
+    cycle_unit_map = {c.id: c.unit_id for c in cycles}
+
+    result = []
+    for lot in store.lots.list_all():
+        if lot.ciclo_id not in cycle_ids:
+            continue
+        unit_id = cycle_unit_map.get(lot.ciclo_id)
+        unit = unit_map.get(unit_id) if unit_id else None
+        qr_asset = next((a for a in lot.assets if a.tipo.value == "QR_PNG"), None)
+        result.append({
+            "lot_id": str(lot.id),
+            "codigo_lote": lot.codigo_lote,
+            "qr_hash": lot.qr_hash,
+            "qr_image": qr_asset.url if qr_asset else None,
+            "status": lot.status,
+            "unit_id": str(unit_id) if unit_id else None,
+            "unit_nome": unit.nome if unit else "—",
+            "gerado_em": lot.gerado_em.isoformat(),
+            "autodeclarado": lot.snapshot_json.get("autodeclarado", False),
+            "total_atividades": lot.snapshot_json.get("total_atividades", 0),
+            "total_custo": lot.snapshot_json.get("total_custo", 0.0),
+        })
+
+    return sorted(result, key=lambda r: r["gerado_em"], reverse=True)
