@@ -77,11 +77,44 @@ make web-generate
 
 | Interface | URL | Descrição |
 |---|---|---|
-| Dashboard | `http://localhost:5173` | SPA autenticado (admin / manager / operador) |
-| Portal QR | `http://localhost:5174/p/{hash}` | Portal público do consumidor |
+| Dashboard | `http://localhost:5173` | SPA operacional — gestão de usuários, acessos e auditoria |
+| Portal | `http://localhost:5174` | Portal do produtor — rastreabilidade, financeiro e QR codes |
 | Swagger UI | `http://localhost:8000/docs` | Documentação interativa da API |
 | ReDoc | `http://localhost:8000/redoc` | Documentação da API em formato ReDoc |
 | Health check | `http://localhost:8000/health` | Status da API |
+
+### Credenciais padrão
+
+**Dashboard (admin):**
+
+| Campo | Valor |
+|---|---|
+| URL | `http://localhost:5173` |
+| E-mail | `admin@dimata.dev` |
+| Senha | `dev1234` |
+
+**Portal (produtor de teste):**
+
+| Campo | Valor |
+|---|---|
+| URL | `http://localhost:5174` |
+| E-mail | `produtor@teste.dev` |
+| Senha | `teste123` |
+| Organização | Fazenda Teste (setor: café) |
+
+> O usuário de teste é criado em memória — se a API reiniciar, recrie com:
+> ```bash
+> # 1. obter token admin
+> TOKEN=$(curl -s -X POST http://localhost:8000/auth/login \
+>   -H "Content-Type: application/json" \
+>   -d '{"email":"admin@dimata.dev","senha":"dev1234"}' | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+>
+> # 2. criar produtor de teste
+> curl -s -X POST http://localhost:8000/bff/users \
+>   -H "Content-Type: application/json" \
+>   -H "Authorization: Bearer $TOKEN" \
+>   -d '{"nome":"Produtor Teste","email":"produtor@teste.dev","senha":"teste123","role":"PRODUTOR","nome_conta":"Fazenda Teste","documento":"000.000.000-00","setor_primario":"cafe","unidades":[{"nome":"Talhão A","tipo":"TALHAO","area_capacidade":5.0}]}'
+> ```
 
 ---
 

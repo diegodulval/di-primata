@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import accounts, auth, cycles, events, lots, public, units, whatsapp
+from app.routers import accounts, auth, bff, cycles, events, lots, public, units, whatsapp
 
 # Habilita DEBUG para todos os loggers app.* em desenvolvimento.
 # Em produção mantém INFO para não expor dados sensíveis nos logs.
@@ -117,6 +117,7 @@ app.include_router(events.router,   prefix="/cycles",  tags=["events"])
 app.include_router(lots.router,     prefix="/cycles",  tags=["lots"])
 app.include_router(public.router,     prefix="/p",         tags=["public"])
 app.include_router(whatsapp.router,   prefix="/whatsapp",  tags=["whatsapp"])
+app.include_router(bff.router,        prefix="/bff",        tags=["bff"])
 
 
 @app.get("/health", tags=["infra"])

@@ -27,8 +27,8 @@ function PortalPage() {
   useEffect(() => {
     async function fetchLote() {
       try {
-        // @ts-expect-error — remover após pnpm generate:api
-        const { data, error: apiError } = await api.GET("/p/{qr_hash}", {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data, error: apiError } = await (api.GET as any)("/p/{qr_hash}", {
           params: { path: { qr_hash: hash } },
         });
         if (apiError) throw new Error("Lote não encontrado");

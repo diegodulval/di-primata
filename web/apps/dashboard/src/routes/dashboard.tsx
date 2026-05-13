@@ -1,30 +1,26 @@
 import { setAuthToken } from "@di-mata/api-client";
+import { clearToken, getToken } from "@di-mata/shared";
 import { useTenant } from "@di-mata/theme";
 import { Link, Outlet, createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { DomainProvider, useDomain } from "../providers/DomainProvider";
 
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: () => {
-    if (!sessionStorage.getItem("access_token")) {
+    if (!getToken()) {
       throw redirect({ to: "/login" });
     }
   },
-  component: DashboardLayout,
+  component: DashboardLayoutWithDomain,
 });
-
-const NAV_ITEMS = [
-  { to: "/dashboard" as const, label: "Início" },
-  { to: "/dashboard/registros" as const, label: "Registros" },
-  { to: "/dashboard/whatsapp" as const, label: "WhatsApp" },
-  { to: "/dashboard/settings" as const, label: "Configurações" },
-];
 
 function DashboardLayout() {
   const tenant = useTenant();
+  const domain = useDomain();
   const navigate = useNavigate();
 
   function logout() {
-    sessionStorage.removeItem("access_token");
+    clearToken();
     setAuthToken(null);
     void navigate({ to: "/login" });
   }
@@ -34,6 +30,14 @@ function DashboardLayout() {
     window.addEventListener("auth:unauthorized", handler);
     return () => window.removeEventListener("auth:unauthorized", handler);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const NAV_ITEMS = [
+    { to: "/dashboard" as const, label: "Início" },
+    { to: "/dashboard/usuarios" as const, label: "Usuários" },
+    { to: "/dashboard/registros" as const, label: domain.labels.event.plural },
+    { to: "/dashboard/whatsapp" as const, label: "WhatsApp" },
+    { to: "/dashboard/settings" as const, label: "Configurações" },
+  ];
 
   return (
     <div className="flex min-h-screen bg-[--color-background]">
@@ -71,5 +75,13 @@ function DashboardLayout() {
         <Outlet />
       </main>
     </div>
+  );
+}
+
+function DashboardLayoutWithDomain() {
+  return (
+    <DomainProvider>
+      <DashboardLayout />
+    </DomainProvider>
   );
 }

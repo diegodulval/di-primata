@@ -14,9 +14,11 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardWhatsappIndexRouteImport } from './routes/dashboard/whatsapp/index'
+import { Route as DashboardUsuariosIndexRouteImport } from './routes/dashboard/usuarios/index'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
 import { Route as DashboardRegistrosIndexRouteImport } from './routes/dashboard/registros/index'
 import { Route as DashboardWhatsappSessionIdRouteImport } from './routes/dashboard/whatsapp/$sessionId'
+import { Route as DashboardUsuariosNovoRouteImport } from './routes/dashboard/usuarios/novo'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -43,6 +45,11 @@ const DashboardWhatsappIndexRoute = DashboardWhatsappIndexRouteImport.update({
   path: '/whatsapp/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardUsuariosIndexRoute = DashboardUsuariosIndexRouteImport.update({
+  id: '/usuarios/',
+  path: '/usuarios/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
   id: '/settings/',
   path: '/settings/',
@@ -59,24 +66,33 @@ const DashboardWhatsappSessionIdRoute =
     path: '/whatsapp/$sessionId',
     getParentRoute: () => DashboardRoute,
   } as any)
+const DashboardUsuariosNovoRoute = DashboardUsuariosNovoRouteImport.update({
+  id: '/usuarios/novo',
+  path: '/usuarios/novo',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/usuarios/novo': typeof DashboardUsuariosNovoRoute
   '/dashboard/whatsapp/$sessionId': typeof DashboardWhatsappSessionIdRoute
   '/dashboard/registros/': typeof DashboardRegistrosIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
+  '/dashboard/usuarios/': typeof DashboardUsuariosIndexRoute
   '/dashboard/whatsapp/': typeof DashboardWhatsappIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/usuarios/novo': typeof DashboardUsuariosNovoRoute
   '/dashboard/whatsapp/$sessionId': typeof DashboardWhatsappSessionIdRoute
   '/dashboard/registros': typeof DashboardRegistrosIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
+  '/dashboard/usuarios': typeof DashboardUsuariosIndexRoute
   '/dashboard/whatsapp': typeof DashboardWhatsappIndexRoute
 }
 export interface FileRoutesById {
@@ -85,9 +101,11 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/usuarios/novo': typeof DashboardUsuariosNovoRoute
   '/dashboard/whatsapp/$sessionId': typeof DashboardWhatsappSessionIdRoute
   '/dashboard/registros/': typeof DashboardRegistrosIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
+  '/dashboard/usuarios/': typeof DashboardUsuariosIndexRoute
   '/dashboard/whatsapp/': typeof DashboardWhatsappIndexRoute
 }
 export interface FileRouteTypes {
@@ -97,18 +115,22 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/dashboard/'
+    | '/dashboard/usuarios/novo'
     | '/dashboard/whatsapp/$sessionId'
     | '/dashboard/registros/'
     | '/dashboard/settings/'
+    | '/dashboard/usuarios/'
     | '/dashboard/whatsapp/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/dashboard'
+    | '/dashboard/usuarios/novo'
     | '/dashboard/whatsapp/$sessionId'
     | '/dashboard/registros'
     | '/dashboard/settings'
+    | '/dashboard/usuarios'
     | '/dashboard/whatsapp'
   id:
     | '__root__'
@@ -116,9 +138,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/dashboard/'
+    | '/dashboard/usuarios/novo'
     | '/dashboard/whatsapp/$sessionId'
     | '/dashboard/registros/'
     | '/dashboard/settings/'
+    | '/dashboard/usuarios/'
     | '/dashboard/whatsapp/'
   fileRoutesById: FileRoutesById
 }
@@ -165,6 +189,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardWhatsappIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/usuarios/': {
+      id: '/dashboard/usuarios/'
+      path: '/usuarios'
+      fullPath: '/dashboard/usuarios/'
+      preLoaderRoute: typeof DashboardUsuariosIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/settings/': {
       id: '/dashboard/settings/'
       path: '/settings'
@@ -186,22 +217,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardWhatsappSessionIdRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/usuarios/novo': {
+      id: '/dashboard/usuarios/novo'
+      path: '/usuarios/novo'
+      fullPath: '/dashboard/usuarios/novo'
+      preLoaderRoute: typeof DashboardUsuariosNovoRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
 interface DashboardRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardUsuariosNovoRoute: typeof DashboardUsuariosNovoRoute
   DashboardWhatsappSessionIdRoute: typeof DashboardWhatsappSessionIdRoute
   DashboardRegistrosIndexRoute: typeof DashboardRegistrosIndexRoute
   DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute
+  DashboardUsuariosIndexRoute: typeof DashboardUsuariosIndexRoute
   DashboardWhatsappIndexRoute: typeof DashboardWhatsappIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardUsuariosNovoRoute: DashboardUsuariosNovoRoute,
   DashboardWhatsappSessionIdRoute: DashboardWhatsappSessionIdRoute,
   DashboardRegistrosIndexRoute: DashboardRegistrosIndexRoute,
   DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,
+  DashboardUsuariosIndexRoute: DashboardUsuariosIndexRoute,
   DashboardWhatsappIndexRoute: DashboardWhatsappIndexRoute,
 }
 

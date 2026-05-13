@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@di-mata/ui";
 import { setAuthToken } from "@di-mata/api-client";
+import { setToken } from "@di-mata/shared";
 import { useTenant } from "@di-mata/theme";
 
 export const Route = createFileRoute("/login")({
@@ -42,7 +43,7 @@ function LoginPage() {
 
       const { access_token } = (await res.json()) as { access_token: string };
       if (isDev) console.debug("[login] ok, navegando para /dashboard");
-      sessionStorage.setItem("access_token", access_token);
+      setToken(access_token);
       setAuthToken(access_token);
       void navigate({ to: "/dashboard" });
     } catch (err) {

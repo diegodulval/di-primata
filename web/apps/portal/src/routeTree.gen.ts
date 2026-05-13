@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MinhaAreaIndexRouteImport } from './routes/minha-area/index'
 import { Route as PHashRouteImport } from './routes/p.$hash'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MinhaAreaIndexRoute = MinhaAreaIndexRouteImport.update({
+  id: '/minha-area/',
+  path: '/minha-area/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PHashRoute = PHashRouteImport.update({
@@ -26,27 +32,31 @@ const PHashRoute = PHashRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/p/$hash': typeof PHashRoute
+  '/minha-area/': typeof MinhaAreaIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/p/$hash': typeof PHashRoute
+  '/minha-area': typeof MinhaAreaIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/p/$hash': typeof PHashRoute
+  '/minha-area/': typeof MinhaAreaIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/p/$hash'
+  fullPaths: '/' | '/p/$hash' | '/minha-area/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/p/$hash'
-  id: '__root__' | '/' | '/p/$hash'
+  to: '/' | '/p/$hash' | '/minha-area'
+  id: '__root__' | '/' | '/p/$hash' | '/minha-area/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PHashRoute: typeof PHashRoute
+  MinhaAreaIndexRoute: typeof MinhaAreaIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/minha-area/': {
+      id: '/minha-area/'
+      path: '/minha-area'
+      fullPath: '/minha-area/'
+      preLoaderRoute: typeof MinhaAreaIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/p/$hash': {
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PHashRoute: PHashRoute,
+  MinhaAreaIndexRoute: MinhaAreaIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
