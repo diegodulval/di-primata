@@ -1,4 +1,4 @@
-import { formatDateTime } from "@di-mata/shared";
+import { formatDateTime, type PlatformUser } from "@di-mata/shared";
 import { Badge, Card, CardContent, Skeleton } from "@di-mata/ui";
 import { useQuery } from "@tanstack/react-query";
 import { Link, createFileRoute } from "@tanstack/react-router";
@@ -6,20 +6,6 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/dashboard/usuarios/")({
   component: UsuariosPage,
 });
-
-type PlatformUser = {
-  id: string;
-  nome: string;
-  email: string;
-  ativo: boolean;
-  role: string | null;
-  portal_access: boolean;
-  account_id: string;
-  account_nome: string;
-  setor_primario: string;
-  whatsapp_phone: string | null;
-  criado_em: string;
-};
 
 function useUsers() {
   return useQuery<PlatformUser[]>({

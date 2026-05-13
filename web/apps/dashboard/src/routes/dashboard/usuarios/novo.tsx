@@ -1,5 +1,5 @@
 import type { SelectOption } from "@di-mata/shared";
-import { Card, CardContent } from "@di-mata/ui";
+import { Card, CardContent, Field, Input, Select, StepIndicator } from "@di-mata/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -108,82 +108,6 @@ function useSetorOptions() {
 
 // ── Componentes de apoio ──────────────────────────────────────────────────────
 
-function StepIndicator({ current, total }: { current: number; total: number }) {
-  return (
-    <div className="flex items-center gap-2">
-      {Array.from({ length: total }, (_, i) => (
-        <div key={i} className="flex items-center gap-2">
-          <div
-            className={[
-              "w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors",
-              i < current
-                ? "bg-[--color-primary] text-[--color-primary-fg]"
-                : i === current
-                  ? "bg-[--color-primary] text-[--color-primary-fg] ring-2 ring-[--color-primary] ring-offset-2 ring-offset-[--color-background]"
-                  : "bg-[--color-border] text-[--color-text-muted]",
-            ].join(" ")}
-          >
-            {i < current ? "✓" : i + 1}
-          </div>
-          {i < total - 1 && (
-            <div
-              className={[
-                "h-px w-8",
-                i < current ? "bg-[--color-primary]" : "bg-[--color-border]",
-              ].join(" ")}
-            />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string | undefined;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1">
-      <label className="block text-sm font-medium text-[--color-text-secondary]">{label}</label>
-      {children}
-      {error && <p className="text-xs text-[--color-error]">{error}</p>}
-    </div>
-  );
-}
-
-function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <input
-      {...props}
-      className={[
-        "w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm text-[--color-text-primary]",
-        "placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary]",
-        "disabled:opacity-50",
-        props.className ?? "",
-      ].join(" ")}
-    />
-  );
-}
-
-function SelectEl(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
-  return (
-    <select
-      {...props}
-      className={[
-        "w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm text-[--color-text-primary]",
-        "focus:outline-none focus:ring-2 focus:ring-[--color-primary] disabled:opacity-50",
-        props.className ?? "",
-      ].join(" ")}
-    />
-  );
-}
-
 // ── Steps ─────────────────────────────────────────────────────────────────────
 
 function Step1({
@@ -290,7 +214,7 @@ function Step2({
       {form.role === "PRODUTOR" && (
         <>
           <Field label="Setor de atuação" error={errors.setor_primario}>
-            <SelectEl
+            <Select
               value={form.setor_primario}
               onChange={(e) => onChange({ setor_primario: e.target.value })}
             >
@@ -300,7 +224,7 @@ function Step2({
                   {o.label}
                 </option>
               ))}
-            </SelectEl>
+            </Select>
             {form.setor_primario && (
               <p className="text-xs text-[--color-text-muted] mt-1">
                 Domínio:{" "}
@@ -412,13 +336,13 @@ function Step3({
               </div>
               <div className="w-44 space-y-1">
                 <label className="text-xs font-medium text-[--color-text-muted]">Tipo</label>
-                <SelectEl value={u.tipo} onChange={(e) => updateUnit(i, { tipo: e.target.value })}>
+                <Select value={u.tipo} onChange={(e) => updateUnit(i, { tipo: e.target.value })}>
                   {unitTypes.map((t) => (
                     <option key={t.value} value={t.value}>
                       {t.label}
                     </option>
                   ))}
-                </SelectEl>
+                </Select>
               </div>
               <div className="w-28 space-y-1">
                 <label className="text-xs font-medium text-[--color-text-muted]">Área (ha)</label>

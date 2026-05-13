@@ -87,22 +87,35 @@ Monorepo pnpm em `web/` com dois apps e quatro packages:
 ```
 apps/
   dashboard/   ← SPA admin (port 5173) — TanStack Router + Query + Tailwind v4
-  portal/      ← Portal público QR (port 5174) — mobile-first, sem auth
+  portal/      ← Portal público QR (port 5174) — mobile-first, acesso produtor + rastreio público
 
 packages/
-  ui/          ← Componentes base (Card, Badge, Button, Skeleton…)
-  theme/       ← ThemeProvider + 4 tokens CSS (floresta, oliva, terra, brisa)
+  ui/          ← Componentes base: Card, Badge, Button, Input, Field, Select, StepIndicator, Skeleton…
+  theme/       ← ThemeProvider + tokens CSS por paleta (floresta, oliva, terra, brisa)
   api-client/  ← Cliente tipado gerado do OpenAPI (openapi-fetch + openapi-typescript)
-  shared/      ← Tipos de domínio, constantes, hooks utilitários (ex: useApiHealth)
+  shared/      ← Auth, QueryClient compartilhado, tipos de domínio, enums, hooks utilitários
 ```
 
 **Dependência entre packages:** `shared` não importa nenhum outro package interno. `api-client` importa `shared`. `ui` e `theme` são independentes. Apps importam tudo.
 
-**Theming:** `ThemeProvider` aplica a classe `theme-<paleta>` no `<html>`. Os tokens CSS em `packages/theme/src/tokens/` definem `--color-*`, `--font-*`, `--shadow-*`. Tailwind v4 consome essas variáveis via `@theme`. A paleta padrão do dashboard é `oliva`.
+**Auth compartilhado (`packages/shared/src/auth.ts`):** `getToken()`, `setToken()`, `clearToken()`, `restoreToken(cb)`. O token vive em `sessionStorage` sob a chave `"access_token"`. Nunca acessar `sessionStorage` diretamente nas rotas — usar sempre essas funções. `restoreToken(setAuthToken)` é chamado no `main.tsx` de cada app para reidratar o cliente API no reload de página.
 
-**Cliente API:** `web/packages/api-client/src/client.ts` exporta a instância `api` configurada com `openapi-fetch`. O `schema.ts` em `src/generated/` é **gerado — nunca editar manualmente**. Rodar `pnpm generate:api` após qualquer mudança na API Python. O dashboard proxia `/api` → `http://localhost:8000` via Vite (ver `vite.config.ts`).
+**QueryClient compartilhado (`packages/shared/src/query-client.ts`):** instância única exportada como `queryClient`. Ambos os apps importam e passam para `QueryClientProvider` — não instanciar um novo.
 
-**Roteamento:** TanStack Router com file-based routing. Rotas do dashboard protegidas via `beforeLoad` que verifica `sessionStorage.access_token`. O token é guardado apenas em memória (`sessionStorage`) — nunca `localStorage`.
+**Tipos de domínio (`packages/shared/src/types/domain.ts`):** `Account`, `Unit`, `PlatformUser`, `DomainSchema`, `SelectOption` etc. Adicionar novos tipos de API aqui, nunca declarar localmente nas rotas.
+
+**Componentes de formulário (`packages/ui`):**
+- `Input`: CVA com variante `inputSize` (sm/md) — **não `size`**, pois `size` é atributo nativo do `<input>` com tipo `number` e causa conflito de tipos.
+- `Select`: mesma razão — variante nomeada `selectSize`.
+- `Field`: wrapper com `label`, `hint` e `error`. O prop `error` é tipado como `string | undefined` (necessário com `exactOptionalPropertyTypes: true`).
+
+**Theming:** `ThemeProvider` aplica `theme-<paleta>` no `<html>`. Cada app importa em `styles.css` apenas o token CSS da sua paleta: dashboard usa `oliva.css`, portal usa `floresta.css`. Não importar todas as paletas nos dois apps.
+
+**Cliente API:** `web/packages/api-client/src/client.ts` exporta a instância `api`. O `schema.ts` em `src/generated/` é **gerado — nunca editar manualmente**. Rodar `pnpm generate:api` após qualquer mudança na API Python. O dashboard proxia `/api` → `http://localhost:8000` via Vite.
+
+**Roteamento:** TanStack Router com file-based routing. Rotas do dashboard protegidas via `beforeLoad` usando `getToken()` de `@di-mata/shared`. Portal usa o mesmo padrão — `getToken()` em `beforeLoad` das rotas autenticadas.
+
+**BFF (`app/routers/bff.py`):** router montado em `/bff` com endpoints `GET /bff/users`, `POST /bff/users` e `GET /bff/stats`. O `POST /bff/users` diferencia criação por role: PRODUTOR cria Account própria + Units; outros roles (OPERADOR, CONSULTOR) são sub-usuários vinculados à conta do admin autenticado.
 
 ---
 

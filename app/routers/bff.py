@@ -1,13 +1,23 @@
 from datetime import UTC, datetime
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.core.auth import TokenData, hash_password
 from app.core.deps import get_token
 from app.domains.registry import ALL_SETOR_OPTIONS, resolve_domain
 from app.models.account import Account
-from app.models.enums import RolePerfil, TipoAgente, TipoUnidade
+from app.models.cycle import Cycle
+from app.models.enums import (
+    OrigemCaptura,
+    RolePerfil,
+    StatusCiclo,
+    TipoAgente,
+    TipoEvento,
+    TipoUnidade,
+)
+from app.models.event import Event
 from app.models.unit import Unit
 from app.models.user import Profile, User
 from app.repositories.store import Store, get_store
@@ -202,4 +212,147 @@ def create_user(
         "role": body.role,
         "portal_access": False,
         "account_id": str(token.account_id),
+    }
+
+
+# ── Portal do Produtor ────────────────────────────────────────────────────────
+
+class AtividadeCreate(BaseModel):
+    unit_id: UUID
+    tipo_evento: TipoEvento
+    descricao: str
+    custo: float | None = None
+    capturado_em: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+def _open_or_create_cycle(account_id: UUID, unit: Unit, store: Store) -> Cycle:
+    """Retorna o ciclo aberto da unidade ou cria um novo ciclo livre (sem protocolo)."""
+    open_cycles = [
+        c for c in store.cycles.list_by(unit_id=unit.id)
+        if c.status in (StatusCiclo.ABERTO, StatusCiclo.EM_PRODUCAO)
+    ]
+    if open_cycles:
+        return open_cycles[0]
+
+    year = datetime.now(UTC).year
+    unit_code = unit.nome[:3].upper()
+    setor_code = unit.setor_template[:3].upper()
+    seq_key = f"{setor_code}-{unit_code}-{year}"
+    seq = store.next_lot_seq(seq_key)
+    cycle = Cycle(
+        account_id=account_id,
+        unit_id=unit.id,
+        protocol_id=None,
+        codigo=f"{setor_code}-{unit_code}-{year}-{seq:04d}",
+        produto="Registro Manual",
+    )
+    store.cycles.save(cycle)
+    return cycle
+
+
+@router.post("/portal/atividades", status_code=201)
+def criar_atividade(
+    body: AtividadeCreate,
+    token: TokenData = Depends(get_token),
+    store: Store = Depends(get_store),
+):
+    """Registra uma atividade com custo no portal do produtor."""
+    unit = store.units.get(body.unit_id)
+    if not unit or unit.account_id != token.account_id:
+        raise HTTPException(status_code=404, detail="Unidade não encontrada")
+
+    cycle = _open_or_create_cycle(token.account_id, unit, store)
+
+    event = Event(
+        ciclo_id=cycle.id,
+        autor_user_id=token.user_id,
+        tipo_evento=body.tipo_evento,
+        descricao=body.descricao,
+        custo=body.custo,
+        origem=OrigemCaptura.MANUAL,
+        capturado_em=body.capturado_em,
+    )
+    store.events.save(event)
+
+    return {
+        "id": str(event.id),
+        "tipo_evento": event.tipo_evento,
+        "descricao": event.descricao,
+        "custo": event.custo,
+        "capturado_em": event.capturado_em.isoformat(),
+        "unit_id": str(unit.id),
+        "unit_nome": unit.nome,
+    }
+
+
+@router.get("/portal/atividades")
+def listar_atividades(
+    token: TokenData = Depends(get_token),
+    store: Store = Depends(get_store),
+):
+    """Lista todas as atividades do produtor autenticado, mais recentes primeiro."""
+    cycles = store.cycles.list_by(account_id=token.account_id)
+    cycle_ids = {c.id for c in cycles}
+    unit_map = {u.id: u for u in store.units.list_by(account_id=token.account_id)}
+    cycle_unit_map = {c.id: c.unit_id for c in cycles}
+
+    result = []
+    for event in store.events.list_all():
+        if event.ciclo_id not in cycle_ids:
+            continue
+        unit_id = cycle_unit_map.get(event.ciclo_id)
+        unit = unit_map.get(unit_id) if unit_id else None
+        result.append({
+            "id": str(event.id),
+            "tipo_evento": event.tipo_evento,
+            "descricao": event.descricao,
+            "custo": event.custo,
+            "capturado_em": event.capturado_em.isoformat(),
+            "unit_id": str(unit_id) if unit_id else None,
+            "unit_nome": unit.nome if unit else "—",
+        })
+
+    return sorted(result, key=lambda e: e["capturado_em"], reverse=True)
+
+
+@router.get("/portal/resumo")
+def resumo_produtor(
+    token: TokenData = Depends(get_token),
+    store: Store = Depends(get_store),
+):
+    """Totais financeiros e contagem de atividades por unidade."""
+    cycles = store.cycles.list_by(account_id=token.account_id)
+    cycle_ids = {c.id for c in cycles}
+    unit_map = {u.id: u for u in store.units.list_by(account_id=token.account_id)}
+    cycle_unit_map = {c.id: c.unit_id for c in cycles}
+
+    total_custo = 0.0
+    total_atividades = 0
+    por_unidade: dict[str, dict] = {}
+
+    for event in store.events.list_all():
+        if event.ciclo_id not in cycle_ids:
+            continue
+        total_atividades += 1
+        custo = event.custo or 0.0
+        total_custo += custo
+
+        unit_id = cycle_unit_map.get(event.ciclo_id)
+        if unit_id:
+            key = str(unit_id)
+            unit = unit_map.get(unit_id)
+            if key not in por_unidade:
+                por_unidade[key] = {
+                    "unit_id": key,
+                    "unit_nome": unit.nome if unit else "—",
+                    "custo": 0.0,
+                    "atividades": 0,
+                }
+            por_unidade[key]["custo"] += custo
+            por_unidade[key]["atividades"] += 1
+
+    return {
+        "total_custo": total_custo,
+        "total_atividades": total_atividades,
+        "por_unidade": list(por_unidade.values()),
     }

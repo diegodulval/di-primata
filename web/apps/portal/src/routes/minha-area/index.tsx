@@ -1,6 +1,6 @@
-import { Skeleton } from "@di-mata/ui";
 import { setAuthToken } from "@di-mata/api-client";
-import { clearToken, getToken } from "@di-mata/shared";
+import { clearToken, formatDate, getToken, type Account, type Unit } from "@di-mata/shared";
+import { Field, Input, Select, Skeleton } from "@di-mata/ui";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
@@ -13,23 +13,25 @@ export const Route = createFileRoute("/minha-area/")({
   component: MinhaAreaPage,
 });
 
-// ── Tipos ─────────────────────────────────────────────────────────────────────
+// ── Tipos locais ──────────────────────────────────────────────────────────────
 
-type Account = {
-  id: string;
-  nome: string;
-  setor_primario: string;
-  whatsapp_phone: string | null;
+type Resumo = {
+  total_custo: number;
+  total_atividades: number;
+  por_unidade: { unit_id: string; unit_nome: string; custo: number; atividades: number }[];
 };
 
-type Unit = {
+type Atividade = {
   id: string;
-  nome: string;
-  tipo: string;
-  area_capacidade: number | null;
+  tipo_evento: string;
+  descricao: string;
+  custo: number | null;
+  capturado_em: string;
+  unit_id: string | null;
+  unit_nome: string;
 };
 
-// ── Helper ────────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 async function portalFetch<T>(path: string): Promise<T> {
   const token = getToken();
@@ -45,6 +47,28 @@ async function portalFetch<T>(path: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+async function portalPost<T>(path: string, body: unknown): Promise<T> {
+  const token = getToken();
+  const res = await fetch(path, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(body),
+  });
+  if (res.status === 401) {
+    clearToken();
+    setAuthToken(null);
+    window.location.href = "/";
+  }
+  if (!res.ok) throw new Error(`Erro ${res.status}`);
+  return res.json() as Promise<T>;
+}
+
+const brl = (v: number) =>
+  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
 const TIPO_LABEL: Record<string, string> = {
   TALHAO: "Talhão",
   VIVEIRO: "Viveiro",
@@ -55,6 +79,18 @@ const TIPO_LABEL: Record<string, string> = {
   OUTRO: "Outro",
 };
 
+const EVENTO_LABEL: Record<string, string> = {
+  ENTRADA_INSUMO: "Entrada de insumo",
+  OPERACAO: "Operação",
+  CTRL_QUALIDADE: "Controle de qualidade",
+  ANOMALIA: "Anomalia",
+  MOVIMENTACAO: "Movimentação",
+  COLHEITA: "Colheita",
+  EXPEDICAO: "Expedição",
+};
+
+const today = () => new Date().toISOString().slice(0, 10);
+
 // ── Componente principal ──────────────────────────────────────────────────────
 
 function MinhaAreaPage() {
@@ -62,12 +98,25 @@ function MinhaAreaPage() {
 
   const [account, setAccount] = useState<Account | null>(null);
   const [units, setUnits] = useState<Unit[]>([]);
+  const [resumo, setResumo] = useState<Resumo | null>(null);
+  const [atividades, setAtividades] = useState<Atividade[]>([]);
   const [loading, setLoading] = useState(true);
+
+  function loadAtividades() {
+    return Promise.all([
+      portalFetch<Resumo>("/api/bff/portal/resumo"),
+      portalFetch<Atividade[]>("/api/bff/portal/atividades"),
+    ]).then(([r, a]) => {
+      setResumo(r);
+      setAtividades(a);
+    });
+  }
 
   useEffect(() => {
     Promise.all([
       portalFetch<Account>("/api/accounts/me"),
       portalFetch<Unit[]>("/api/units"),
+      loadAtividades(),
     ])
       .then(([acc, uns]) => {
         setAccount(acc);
@@ -101,7 +150,9 @@ function MinhaAreaPage() {
         </button>
       </header>
 
-      <div className="max-w-md mx-auto px-4 py-6 space-y-5">
+      <div className="max-w-md mx-auto px-4 py-6 space-y-4">
+
+        {/* Conta */}
         <section className="rounded-2xl border border-[--color-border] bg-[--color-surface] p-5">
           {loading ? (
             <div className="space-y-2">
@@ -121,15 +172,56 @@ function MinhaAreaPage() {
           ) : null}
         </section>
 
+        {/* Resumo financeiro */}
+        <section className="rounded-2xl border border-[--color-border] bg-[--color-surface] p-5 space-y-3">
+          <h2 className="text-sm font-semibold text-[--color-text-primary]">Custos das atividades</h2>
+          {loading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-32" />
+              <Skeleton className="h-4 w-full" />
+            </div>
+          ) : (
+            <>
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-[--color-text-primary]">
+                  {brl(resumo?.total_custo ?? 0)}
+                </span>
+                <span className="text-sm text-[--color-text-muted]">
+                  {resumo?.total_atividades ?? 0} atividade
+                  {(resumo?.total_atividades ?? 0) !== 1 ? "s" : ""}
+                </span>
+              </div>
+              {(resumo?.por_unidade.length ?? 0) > 0 && (
+                <ul className="space-y-1">
+                  {resumo?.por_unidade.map((u) => (
+                    <li key={u.unit_id} className="flex justify-between text-xs text-[--color-text-muted]">
+                      <span>{u.unit_nome}</span>
+                      <span>{brl(u.custo)} · {u.atividades} ativ.</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
+        </section>
+
+        {/* Atividades */}
+        <AtividadesSection
+          units={units}
+          atividades={atividades}
+          loading={loading}
+          onCreated={loadAtividades}
+        />
+
+        {/* Rastrear produto */}
         <section className="rounded-2xl border border-[--color-border] bg-[--color-surface] p-5 space-y-3">
           <h2 className="text-sm font-semibold text-[--color-text-primary]">Rastrear produto</h2>
           <TrackInline />
         </section>
 
+        {/* Unidades */}
         <section className="rounded-2xl border border-[--color-border] bg-[--color-surface] p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-[--color-text-primary]">
-            Unidades produtivas
-          </h2>
+          <h2 className="text-sm font-semibold text-[--color-text-primary]">Unidades produtivas</h2>
           {loading ? (
             <div className="space-y-2">
               {[1, 2].map((i) => <Skeleton key={i} className="h-10 w-full rounded-lg" />)}
@@ -155,10 +247,204 @@ function MinhaAreaPage() {
             </ul>
           )}
         </section>
+
       </div>
     </main>
   );
 }
+
+// ── Seção de atividades ───────────────────────────────────────────────────────
+
+type AtividadesSectionProps = {
+  units: Unit[];
+  atividades: Atividade[];
+  loading: boolean;
+  onCreated: () => Promise<void>;
+};
+
+function AtividadesSection({ units, atividades, loading, onCreated }: AtividadesSectionProps) {
+  const [showForm, setShowForm] = useState(false);
+
+  return (
+    <section className="rounded-2xl border border-[--color-border] bg-[--color-surface] p-5 space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-[--color-text-primary]">Atividades</h2>
+        {!showForm && (
+          <button
+            type="button"
+            onClick={() => setShowForm(true)}
+            className="text-xs font-medium text-[--color-primary] hover:underline"
+          >
+            + Nova atividade
+          </button>
+        )}
+      </div>
+
+      {showForm && (
+        <NovaAtividadeForm
+          units={units}
+          onCancel={() => setShowForm(false)}
+          onCreated={async () => {
+            setShowForm(false);
+            await onCreated();
+          }}
+        />
+      )}
+
+      {loading ? (
+        <div className="space-y-2">
+          {[1, 2].map((i) => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
+        </div>
+      ) : atividades.length === 0 && !showForm ? (
+        <p className="text-sm text-[--color-text-muted]">Nenhuma atividade registrada.</p>
+      ) : (
+        <ul className="space-y-2">
+          {atividades.map((a) => (
+            <li
+              key={a.id}
+              className="rounded-lg bg-[--color-background] px-4 py-3 flex items-start justify-between gap-3"
+            >
+              <div className="min-w-0">
+                <div className="text-sm font-medium text-[--color-text-primary] truncate">
+                  {a.descricao}
+                </div>
+                <div className="text-xs text-[--color-text-muted] mt-0.5">
+                  {EVENTO_LABEL[a.tipo_evento] ?? a.tipo_evento}
+                  {" · "}
+                  {a.unit_nome}
+                  {" · "}
+                  {formatDate(a.capturado_em)}
+                </div>
+              </div>
+              {a.custo != null && (
+                <span className="text-sm font-semibold text-[--color-text-primary] whitespace-nowrap">
+                  {brl(a.custo)}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+// ── Formulário de nova atividade ──────────────────────────────────────────────
+
+type NovaAtividadeFormProps = {
+  units: Unit[];
+  onCancel: () => void;
+  onCreated: () => Promise<void>;
+};
+
+function NovaAtividadeForm({ units, onCancel, onCreated }: NovaAtividadeFormProps) {
+  const [unitId, setUnitId] = useState(units[0]?.id ?? "");
+  const [tipo, setTipo] = useState("OPERACAO");
+  const [descricao, setDescricao] = useState("");
+  const [custo, setCusto] = useState("");
+  const [data, setData] = useState(today());
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!descricao.trim()) {
+      setError("Descrição obrigatória.");
+      return;
+    }
+    if (!unitId) {
+      setError("Selecione uma unidade.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      await portalPost("/api/bff/portal/atividades", {
+        unit_id: unitId,
+        tipo_evento: tipo,
+        descricao: descricao.trim(),
+        custo: custo ? parseFloat(custo.replace(",", ".")) : null,
+        capturado_em: new Date(data + "T12:00:00").toISOString(),
+      });
+      await onCreated();
+    } catch {
+      setError("Erro ao registrar atividade.");
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3 border-t border-[--color-border] pt-4">
+      <Field label="Unidade">
+        <Select
+          value={unitId}
+          onChange={(e) => setUnitId(e.target.value)}
+        >
+          {units.map((u) => (
+            <option key={u.id} value={u.id}>{u.nome}</option>
+          ))}
+        </Select>
+      </Field>
+
+      <Field label="Tipo">
+        <Select value={tipo} onChange={(e) => setTipo(e.target.value)}>
+          {Object.entries(EVENTO_LABEL).map(([v, l]) => (
+            <option key={v} value={v}>{l}</option>
+          ))}
+        </Select>
+      </Field>
+
+      <Field label="Descrição" error={error && !descricao.trim() ? error : undefined}>
+        <Input
+          value={descricao}
+          onChange={(e) => { setDescricao(e.target.value); setError(""); }}
+          placeholder="Ex: Aplicação de fertilizante"
+        />
+      </Field>
+
+      <Field label="Custo (R$)" hint="Opcional">
+        <Input
+          type="number"
+          inputMode="decimal"
+          min="0"
+          step="0.01"
+          value={custo}
+          onChange={(e) => setCusto(e.target.value)}
+          placeholder="0,00"
+        />
+      </Field>
+
+      <Field label="Data">
+        <Input
+          type="date"
+          value={data}
+          onChange={(e) => setData(e.target.value)}
+        />
+      </Field>
+
+      {error && <p className="text-xs text-[--color-error]">{error}</p>}
+
+      <div className="flex gap-2 pt-1">
+        <button
+          type="submit"
+          disabled={saving}
+          className="flex-1 rounded-lg bg-[--color-primary] px-4 py-2.5 text-sm font-medium text-[--color-primary-fg] hover:opacity-90 transition-opacity disabled:opacity-60"
+        >
+          {saving ? "Registrando…" : "Registrar"}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-lg border border-[--color-border] px-4 py-2.5 text-sm text-[--color-text-muted] hover:bg-[--color-background] transition-colors"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// ── Rastrear inline ───────────────────────────────────────────────────────────
 
 function TrackInline() {
   const navigate = useNavigate();
@@ -172,11 +458,10 @@ function TrackInline() {
 
   return (
     <form onSubmit={handleTrack} className="flex gap-2">
-      <input
+      <Input
         value={code}
         onChange={(e) => setCode(e.target.value)}
         placeholder="Código do produto"
-        className="flex-1 rounded-lg border border-[--color-border] px-3 py-2 text-sm bg-[--color-background] text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
         autoCapitalize="none"
         spellCheck={false}
       />

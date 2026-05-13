@@ -1,3 +1,31 @@
+export interface Account {
+  id: string;
+  nome: string;
+  setor_primario: string;
+  whatsapp_phone: string | null;
+}
+
+export interface Unit {
+  id: string;
+  nome: string;
+  tipo: string;
+  area_capacidade?: number | null;
+}
+
+export interface PlatformUser {
+  id: string;
+  nome: string;
+  email: string;
+  ativo: boolean;
+  role: string | null;
+  portal_access: boolean;
+  account_id: string;
+  account_nome: string;
+  setor_primario: string;
+  whatsapp_phone: string | null;
+  criado_em: string;
+}
+
 export interface EntityLabel {
   singular: string;
   plural: string;

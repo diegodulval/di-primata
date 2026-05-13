@@ -311,12 +311,12 @@ def test_reset_keywords_variantes(client, store, account, unit, kw):
 # ── Testes: fluxo adubação ────────────────────────────────────────────────────
 
 def test_adubacao_fluxo_completo_um_talhao(client, store, account, unit):
-    _webhook(client, "oi",       sid="SM001")  # → talhão question
-    _webhook(client, "1",        sid="SM002")  # → seleciona talhão → menu
-    _webhook(client, "1",        sid="SM003")  # → registrar atividade
-    _webhook(client, "adubação", sid="SM004")
-    _webhook(client, "350",      sid="SM005")
-    _webhook(client, "sim",      sid="SM006")
+    _webhook(client, "oi",  sid="SM001")  # → talhão question
+    _webhook(client, "1",   sid="SM002")  # → seleciona talhão → menu
+    _webhook(client, "1",   sid="SM003")  # → registrar atividade → menu atividades
+    _webhook(client, "1",   sid="SM004")  # → opção 1 = adubação
+    _webhook(client, "350", sid="SM005")
+    _webhook(client, "sim", sid="SM006")
 
     sessao = store.whatsapp_sessoes.list_all()[0]
     assert sessao.estado == EstadoAgente.OCIOSO
@@ -328,31 +328,31 @@ def test_adubacao_fluxo_completo_um_talhao(client, store, account, unit):
     from app.models.enums import TipoEvento
     eventos = store.events.list_by(ciclo_id=ciclos[0].id)
     assert len(eventos) == 1
-    assert eventos[0].tipo_evento == TipoEvento.OPERACAO
-    assert eventos[0].payload_json["tipo_atividade"] == "adubacao"
-    assert eventos[0].payload_json["valor_gasto"] == 350.0
+    assert eventos[0].tipo_evento == TipoEvento.ENTRADA_INSUMO
+    assert eventos[0].custo == 350.0
+    assert eventos[0].payload_json.get("origem_wpp") is True
 
 
 def test_adubacao_valor_com_virgula(client, store, account, unit):
     _webhook(client, "oi",       sid="SM001")
     _webhook(client, "1",        sid="SM002")
     _webhook(client, "1",        sid="SM003")
-    _webhook(client, "adubacao", sid="SM004")
+    _webhook(client, "1",        sid="SM004")  # opção 1 = adubação
     _webhook(client, "1.250,50", sid="SM005")
     _webhook(client, "sim",      sid="SM006")
 
     ciclos = store.cycles.list_by(account_id=account.id, unit_id=unit.id)
     eventos = store.events.list_by(ciclo_id=ciclos[0].id)
-    assert eventos[0].payload_json["valor_gasto"] == 1250.50
+    assert eventos[0].custo == 1250.50
 
 
 def test_adubacao_cancelar_nao_persiste_evento(client, store, account, unit):
-    _webhook(client, "oi",       sid="SM001")
-    _webhook(client, "1",        sid="SM002")
-    _webhook(client, "1",        sid="SM003")
-    _webhook(client, "adubação", sid="SM004")
-    _webhook(client, "200",      sid="SM005")
-    _webhook(client, "não",      sid="SM006")
+    _webhook(client, "oi",  sid="SM001")
+    _webhook(client, "1",   sid="SM002")
+    _webhook(client, "1",   sid="SM003")
+    _webhook(client, "1",   sid="SM004")  # opção 1 = adubação
+    _webhook(client, "200", sid="SM005")
+    _webhook(client, "não", sid="SM006")
 
     assert store.cycles.list_all() == []
     assert store.events.list_all() == []
@@ -362,10 +362,10 @@ def test_adubacao_cancelar_nao_persiste_evento(client, store, account, unit):
 
 
 def test_adubacao_atividade_nao_reconhecida(client, store, account, unit):
-    _webhook(client, "oi",             sid="SM001")
-    _webhook(client, "1",              sid="SM002")
-    _webhook(client, "1",              sid="SM003")
-    resp = _webhook(client, "voar de drone", sid="SM004")
+    _webhook(client, "oi",  sid="SM001")
+    _webhook(client, "1",   sid="SM002")
+    _webhook(client, "1",   sid="SM003")
+    resp = _webhook(client, "9", sid="SM004")  # opção fora do intervalo
     assert resp.status_code == 200
 
     sessao = store.whatsapp_sessoes.list_all()[0]
@@ -373,14 +373,14 @@ def test_adubacao_atividade_nao_reconhecida(client, store, account, unit):
 
     msgs = store.whatsapp_mensagens.list_by(sessao_id=sessao.id)
     outbound = [m for m in msgs if m.direcao == DirecaoMensagem.OUTBOUND]
-    assert "não reconhecida" in outbound[-1].corpo
+    assert "Opção inválida" in outbound[-1].corpo
 
 
 def test_adubacao_valor_invalido_pede_novamente(client, store, account, unit):
-    _webhook(client, "oi",       sid="SM001")
-    _webhook(client, "1",        sid="SM002")
-    _webhook(client, "1",        sid="SM003")
-    _webhook(client, "adubação", sid="SM004")
+    _webhook(client, "oi",  sid="SM001")
+    _webhook(client, "1",   sid="SM002")
+    _webhook(client, "1",   sid="SM003")
+    _webhook(client, "1",   sid="SM004")  # opção 1 = adubação
     resp = _webhook(client, "abc", sid="SM005")
     assert resp.status_code == 200
 
@@ -392,12 +392,12 @@ def test_adubacao_valor_invalido_pede_novamente(client, store, account, unit):
 def test_adubacao_com_dois_talhoes_usa_selecionado(client, store, account, two_units):
     """Após selecionar talhão na identificação, atividade usa esse talhão sem perguntar."""
     u1, u2 = two_units
-    _webhook(client, "oi",       sid="SM001")  # → selecionar talhão
-    _webhook(client, "1",        sid="SM002")  # → talhão Norte → menu
-    _webhook(client, "1",        sid="SM003")  # → registrar atividade
-    _webhook(client, "adubação", sid="SM004")  # → pede valor (sem perguntar talhão)
-    _webhook(client, "200",      sid="SM005")
-    _webhook(client, "sim",      sid="SM006")
+    _webhook(client, "oi",  sid="SM001")  # → selecionar talhão
+    _webhook(client, "1",   sid="SM002")  # → talhão Norte → menu
+    _webhook(client, "1",   sid="SM003")  # → registrar atividade → menu atividades
+    _webhook(client, "1",   sid="SM004")  # → opção 1 = adubação → pede valor
+    _webhook(client, "200", sid="SM005")
+    _webhook(client, "sim", sid="SM006")
 
     ciclos = store.cycles.list_by(account_id=account.id, unit_id=u1.id)
     assert len(ciclos) == 1
@@ -409,19 +409,19 @@ def test_adubacao_com_dois_talhoes_usa_selecionado(client, store, account, two_u
 
 def test_segundo_registro_reutiliza_ciclo(client, store, account, unit):
     # Primeira iteração: inclui seleção de talhão
-    _webhook(client, "oi",        sid="SM001")
-    _webhook(client, "1",         sid="SM002")  # → seleciona talhão
-    _webhook(client, "1",         sid="SM003")  # → registrar atividade
-    _webhook(client, "adubação",  sid="SM004")
-    _webhook(client, "150",       sid="SM005")
-    _webhook(client, "sim",       sid="SM006")
+    _webhook(client, "oi",  sid="SM001")
+    _webhook(client, "1",   sid="SM002")  # → seleciona talhão
+    _webhook(client, "1",   sid="SM003")  # → registrar atividade → menu atividades
+    _webhook(client, "1",   sid="SM004")  # → opção 1 = adubação
+    _webhook(client, "150", sid="SM005")
+    _webhook(client, "sim", sid="SM006")
 
     # Segunda iteração: unit_id já persistido → vai direto ao menu
-    _webhook(client, "oi",        sid="SM007")
-    _webhook(client, "1",         sid="SM008")  # → registrar atividade
-    _webhook(client, "irrigação", sid="SM009")
-    _webhook(client, "80",        sid="SM010")
-    _webhook(client, "sim",       sid="SM011")
+    _webhook(client, "oi",  sid="SM007")
+    _webhook(client, "1",   sid="SM008")  # → registrar atividade → menu atividades
+    _webhook(client, "2",   sid="SM009")  # → opção 2 = irrigação
+    _webhook(client, "80",  sid="SM010")
+    _webhook(client, "sim", sid="SM011")
 
     assert len(store.cycles.list_all()) == 1, "Deve reutilizar o ciclo existente"
     assert len(store.events.list_all()) == 2

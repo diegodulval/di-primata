@@ -1,7 +1,5 @@
 import { api } from "@di-mata/api-client";
-import { Button } from "@di-mata/ui";
-import { Card, CardContent, CardHeader, CardTitle } from "@di-mata/ui";
-import { Skeleton } from "@di-mata/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Field, Input, Skeleton } from "@di-mata/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -83,11 +81,10 @@ function Settings() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <Field label="Nome da propriedade">
-                <input
+                <Input
                   type="text"
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
-                  className={inputCls}
                   placeholder="Ex: Fazenda Boa Vista"
                 />
               </Field>
@@ -96,11 +93,10 @@ function Settings() {
                 label="Telefone WhatsApp"
                 hint="Formato internacional, ex: +5511999990000"
               >
-                <input
+                <Input
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className={inputCls}
                   placeholder="+5511999990000"
                 />
               </Field>
@@ -138,26 +134,6 @@ function Settings() {
   );
 }
 
-const inputCls =
-  "w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary] focus:border-transparent";
-
-function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1">
-      <label className="block text-sm font-medium text-[--color-text-primary]">{label}</label>
-      {hint && <p className="text-xs text-[--color-text-muted]">{hint}</p>}
-      {children}
-    </div>
-  );
-}
 
 function Row({ label, value }: { label: string; value: string | undefined }) {
   return (

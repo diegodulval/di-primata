@@ -1,5 +1,6 @@
 import { setAuthToken } from "@di-mata/api-client";
 import { setToken } from "@di-mata/shared";
+import { Input } from "@di-mata/ui";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -56,18 +57,15 @@ function TrackCard() {
       </div>
 
       <form onSubmit={handleTrack} className="space-y-3">
-        <input
+        <Input
+          inputSize="md"
+          state={error ? "error" : "default"}
           value={code}
           onChange={(e) => {
             setCode(e.target.value);
             setError("");
           }}
           placeholder="Ex: abc123xyz"
-          className={[
-            "w-full rounded-lg border px-4 py-3 text-sm bg-[--color-background] text-[--color-text-primary]",
-            "placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary]",
-            error ? "border-[--color-error]" : "border-[--color-border]",
-          ].join(" ")}
           autoCapitalize="none"
           spellCheck={false}
         />
@@ -143,21 +141,21 @@ function LoginCard() {
       </div>
 
       <form onSubmit={handleLogin} className="space-y-3">
-        <input
+        <Input
           type="email"
+          inputSize="md"
           value={email}
           onChange={(e) => { setEmail(e.target.value); setError(""); }}
           placeholder="E-mail"
           autoComplete="email"
-          className="w-full rounded-lg border border-[--color-border] px-4 py-3 text-sm bg-[--color-background] text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
         />
-        <input
+        <Input
           type="password"
+          inputSize="md"
           value={senha}
           onChange={(e) => { setSenha(e.target.value); setError(""); }}
           placeholder="Senha"
           autoComplete="current-password"
-          className="w-full rounded-lg border border-[--color-border] px-4 py-3 text-sm bg-[--color-background] text-[--color-text-primary] placeholder:text-[--color-text-muted] focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
         />
         {error && <p className="text-xs text-[--color-error]">{error}</p>}
         <button

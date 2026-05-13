@@ -1,9 +1,6 @@
 @import "tailwindcss";
 @import "@di-mata/theme/tokens/base.css";
 @import "@di-mata/theme/tokens/floresta.css";
-@import "@di-mata/theme/tokens/oliva.css";
-@import "@di-mata/theme/tokens/terra.css";
-@import "@di-mata/theme/tokens/brisa.css";
 
 @theme {
   --color-primary: var(--color-primary);

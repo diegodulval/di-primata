@@ -14,6 +14,20 @@ from app.repositories.store import Store
 logger = logging.getLogger(__name__)
 
 _WHATSAPP_PREFIX = "whatsapp:"
+
+# Opções de atividade exibidas ao produtor via menu numerado
+_ATIVIDADE_OPCOES: list[tuple[str, str, TipoEvento]] = [
+    ("adubacao",     "Adubação / Fertilização",   TipoEvento.ENTRADA_INSUMO),
+    ("irrigacao",    "Irrigação",                 TipoEvento.OPERACAO),
+    ("colheita",     "Colheita",                  TipoEvento.COLHEITA),
+    ("poda",         "Poda",                      TipoEvento.OPERACAO),
+    ("pulverizacao", "Pulverização",              TipoEvento.OPERACAO),
+    ("outro",        "Outra (descreva a seguir)", TipoEvento.OPERACAO),
+]
+
+_MENU_ATIVIDADES = "\n".join(
+    f"• *{i + 1}* — {label}" for i, (_, label, _) in enumerate(_ATIVIDADE_OPCOES)
+)
 _RESET_KEYWORDS = {"menu", "reiniciar", "início", "inicio", "0", "voltar", "cancelar"}
 
 _ATIVIDADE_MAP: dict[str, str] = {
@@ -145,7 +159,9 @@ class WhatsappService:
                 conta = self.store.accounts.find_one(whatsapp_phone=phone)
                 if conta:
                     sessao.account_id = conta.id
-                    logger.info("Sessão vinculada a account | phone=%s account_id=%s", phone, conta.id)
+                    logger.info(
+                        "Sessão vinculada a account | phone=%s account_id=%s", phone, conta.id
+                    )
                 else:
                     phones_cadastrados = [
                         a.whatsapp_phone for a in self.store.accounts.list_all()
@@ -282,7 +298,7 @@ class WhatsappService:
             sessao.contexto_json["fluxo"] = "registrar_atividade"
             sessao.contexto_json["passo"] = "tipo_atividade"
             self.store.whatsapp_sessoes.save(sessao)
-            return "Qual atividade foi realizada?\nEx: *adubação*, *irrigação*, *colheita*, *poda*"
+            return f"Qual atividade foi realizada?\n{_MENU_ATIVIDADES}"
         if opcao == "2":
             return "Funcionalidade de consulta de ciclo em breve. 🚜"
         if opcao == "3":
@@ -344,7 +360,9 @@ class WhatsappService:
                 )
                 self.store.accounts.save(account)
                 sessao.account_id = account.id
-                logger.info("Propriedade criada via WhatsApp | account=%s phone=%s", account.id, phone)
+                logger.info(
+                    "Propriedade criada via WhatsApp | account=%s phone=%s", account.id, phone
+                )
                 pergunta = self._montar_pergunta_talhao(sessao)
                 self.store.whatsapp_sessoes.save(sessao)
                 return f"Propriedade *{nome_prop}* cadastrada! ✅\n\n{pergunta}"
@@ -391,10 +409,46 @@ class WhatsappService:
             sessao.unit_id = unit.id
             sessao.contexto_json.clear()
             self.store.whatsapp_sessoes.save(sessao)
-            logger.info("Talhão criado via WhatsApp | unit=%s account=%s", unit.id, sessao.account_id)
+            logger.info(
+                "Talhão criado via WhatsApp | unit=%s account=%s", unit.id, sessao.account_id
+            )
             return self._menu(sessao, f"Talhão *{nome}* cadastrado! ✅\n\n")
 
         return self._handle_fallback(sessao, body, 0, {})
+
+    def _passo_apos_tipo(self, sessao: WhatsappSessao, label: str) -> str:
+        """Após tipo escolhido: pula ou pergunta talhão, depois vai para valor_gasto."""
+        if sessao.unit_id:
+            sessao.contexto_json["unit_id"] = str(sessao.unit_id)
+            sessao.contexto_json["passo"] = "valor_gasto"
+            self.store.whatsapp_sessoes.save(sessao)
+            return (
+                f"Qual o valor gasto com *{label}*? (R$)\n"
+                "Ex: *350,00* — ou *0* se não houver custo"
+            )
+
+        units = self.store.units.list_by(account_id=sessao.account_id, ativo=True)
+        if not units:
+            sessao.estado = EstadoAgente.OCIOSO
+            sessao.contexto_json.clear()
+            self.store.whatsapp_sessoes.save(sessao)
+            return "Nenhuma unidade cadastrada para sua propriedade. Fale com seu técnico. 📞"
+
+        if len(units) == 1:
+            sessao.contexto_json["unit_id"] = str(units[0].id)
+            sessao.contexto_json["passo"] = "valor_gasto"
+            self.store.whatsapp_sessoes.save(sessao)
+            return (
+                f"Talhão: *{units[0].nome}*\n"
+                f"Qual o valor gasto com *{label}*? (R$)\nEx: *350,00* — ou *0* se não houver custo"
+            )
+
+        opcoes = [{"id": str(u.id), "nome": u.nome} for u in units]
+        sessao.contexto_json["units_opcoes"] = opcoes
+        sessao.contexto_json["passo"] = "selecionar_talhao"
+        self.store.whatsapp_sessoes.save(sessao)
+        lista = "\n".join(f"• *{i + 1}* — {u['nome']}" for i, u in enumerate(opcoes))
+        return f"Em qual talhão?\n{lista}"
 
     def _passo_registrar_atividade(self, sessao: WhatsappSessao, body: str) -> str:
         passo = sessao.contexto_json.get("passo", "tipo_atividade")
@@ -409,50 +463,30 @@ class WhatsappService:
                     "Fale com seu técnico para fazer o cadastro. 📞"
                 )
 
-            tipo = _normalizar_atividade(body)
-            if not tipo:
-                return (
-                    "Atividade não reconhecida. Tente:\n"
-                    "*adubação*, *irrigação*, *colheita*, *poda*, *pulverização*"
-                )
+            try:
+                idx = int(body.strip()) - 1
+                if idx < 0 or idx >= len(_ATIVIDADE_OPCOES):
+                    raise ValueError
+            except ValueError:
+                return f"Opção inválida. Escolha:\n{_MENU_ATIVIDADES}"
+
+            tipo, label, _ = _ATIVIDADE_OPCOES[idx]
+
+            if tipo == "outro":
+                sessao.contexto_json["passo"] = "descricao_livre"
+                self.store.whatsapp_sessoes.save(sessao)
+                return "Descreva brevemente a atividade realizada:"
 
             sessao.contexto_json["tipo"] = tipo
+            return self._passo_apos_tipo(sessao, label)
 
-            # Talhão pré-vinculado pelo admin — pula a etapa de seleção
-            if sessao.unit_id:
-                sessao.contexto_json["unit_id"] = str(sessao.unit_id)
-                sessao.contexto_json["passo"] = "valor_gasto"
-                self.store.whatsapp_sessoes.save(sessao)
-                return (
-                    f"Qual o valor gasto com *{_label_atividade(tipo)}*? (R$)\n"
-                    "Ex: *350,00*"
-                )
-
-            units = self.store.units.list_by(account_id=sessao.account_id, ativo=True)
-            if not units:
-                sessao.estado = EstadoAgente.OCIOSO
-                sessao.contexto_json.clear()
-                self.store.whatsapp_sessoes.save(sessao)
-                return (
-                    "Nenhuma unidade cadastrada para sua propriedade. "
-                    "Fale com seu técnico. 📞"
-                )
-
-            if len(units) == 1:
-                sessao.contexto_json["unit_id"] = str(units[0].id)
-                sessao.contexto_json["passo"] = "valor_gasto"
-                self.store.whatsapp_sessoes.save(sessao)
-                return (
-                    f"Qual o valor gasto com *{_label_atividade(tipo)}*? (R$)\n"
-                    "Ex: *350,00*"
-                )
-
-            opcoes = [{"id": str(u.id), "nome": u.nome} for u in units]
-            sessao.contexto_json["units_opcoes"] = opcoes
-            sessao.contexto_json["passo"] = "selecionar_talhao"
-            self.store.whatsapp_sessoes.save(sessao)
-            lista = "\n".join(f"• *{i + 1}* — {u['nome']}" for i, u in enumerate(opcoes))
-            return f"Qual talhão?\n{lista}"
+        if passo == "descricao_livre":
+            descricao = body.strip()
+            if len(descricao) < 3:
+                return "Descreva a atividade com pelo menos 3 caracteres."
+            sessao.contexto_json["tipo"] = "outro"
+            sessao.contexto_json["descricao"] = descricao
+            return self._passo_apos_tipo(sessao, descricao)
 
         if passo == "selecionar_talhao":
             opcoes = sessao.contexto_json.get("units_opcoes") or []
@@ -464,7 +498,10 @@ class WhatsappService:
                     sessao.estado = EstadoAgente.OCIOSO
                     sessao.contexto_json.clear()
                     self.store.whatsapp_sessoes.save(sessao)
-                    return "Nenhuma unidade cadastrada para sua propriedade. Fale com seu técnico. 📞"
+                    return (
+                        "Nenhuma unidade cadastrada para sua propriedade. "
+                        "Fale com seu técnico. 📞"
+                    )
                 opcoes = [{"id": str(u.id), "nome": u.nome} for u in units]
                 sessao.contexto_json["units_opcoes"] = opcoes
                 self.store.whatsapp_sessoes.save(sessao)
@@ -525,9 +562,10 @@ class WhatsappService:
         payload: dict[str, Any],
     ) -> str:
         if body.lower() in ("sim", "s", "yes", "1"):
+            confirmacao = "Registrado com sucesso! ✅"
             if sessao.contexto_json.get("fluxo") == "registrar_atividade":
                 try:
-                    self._persistir_evento_atividade(sessao)
+                    confirmacao = self._persistir_evento_atividade(sessao)
                 except Exception:
                     logger.exception(
                         "Falha ao persistir atividade | sessao=%s ctx=%s",
@@ -536,22 +574,33 @@ class WhatsappService:
                     sessao.estado = EstadoAgente.OCIOSO
                     sessao.contexto_json.clear()
                     self.store.whatsapp_sessoes.save(sessao)
-                    return "Ocorreu um erro ao registrar. Tente novamente ou fale com seu técnico. 📞"
+                    return (
+                        "Ocorreu um erro ao registrar. "
+                        "Tente novamente ou fale com seu técnico. 📞"
+                    )
             sessao.estado = EstadoAgente.OCIOSO
             sessao.contexto_json.clear()
             self.store.whatsapp_sessoes.save(sessao)
-            return "Registrado com sucesso! ✅"
+            return confirmacao + "\n\nDigite qualquer mensagem para registrar outra atividade."
 
         sessao.estado = EstadoAgente.ESCUTANDO
         sessao.contexto_json.clear()
         self.store.whatsapp_sessoes.save(sessao)
         return "Operação cancelada. Digite *1*, *2* ou *3* para continuar."
 
-    def _persistir_evento_atividade(self, sessao: WhatsappSessao) -> None:
+    def _persistir_evento_atividade(self, sessao: WhatsappSessao) -> str:
+        """Persiste o evento e retorna mensagem de confirmação."""
         account_id = sessao.account_id
         unit_id = UUID(sessao.contexto_json["unit_id"])
-        tipo = sessao.contexto_json.get("tipo", "operacao")
+        tipo = sessao.contexto_json.get("tipo", "outro")
         valor = float(sessao.contexto_json.get("valor", "0"))
+        descricao = sessao.contexto_json.get("descricao") or _label_atividade(tipo)
+
+        # Resolve TipoEvento a partir das opções cadastradas
+        tipo_evento = next(
+            (te for (k, _, te) in _ATIVIDADE_OPCOES if k == tipo),
+            TipoEvento.OPERACAO,
+        )
 
         ciclos = self.store.cycles.list_by(account_id=account_id, unit_id=unit_id)
         ciclo = next(
@@ -573,15 +622,30 @@ class WhatsappService:
 
         event = Event(
             ciclo_id=ciclo.id,
-            tipo_evento=TipoEvento.OPERACAO,
-            descricao=_label_atividade(tipo),
-            payload_json={"tipo_atividade": tipo, "valor_gasto": valor},
+            tipo_evento=tipo_evento,
+            descricao=descricao,
+            custo=valor if valor > 0 else None,
+            payload_json={"origem_wpp": True},
             origem=OrigemCaptura.VOZ,
         )
         self.store.events.save(event)
         logger.info(
             "Evento registrado via WhatsApp | ciclo=%s tipo=%s valor=%s",
             ciclo.id, tipo, valor,
+        )
+
+        unit = self.store.units.get(unit_id)
+        unit_nome = unit.nome if unit else "—"
+        if valor > 0:
+            custo_str = f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        else:
+            custo_str = "sem custo"
+        return (
+            f"✅ *Atividade registrada!*\n"
+            f"📋 {descricao}\n"
+            f"🌱 {unit_nome}\n"
+            f"💰 {custo_str}\n"
+            f"📅 {datetime.now(UTC).strftime('%d/%m/%Y')}"
         )
 
     def _handle_fallback(

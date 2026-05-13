@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -13,7 +13,7 @@ class EventLocation(BaseModel):
     lat: float
     lng: float
     accuracy: float | None = None
-    capturado_em: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    capturado_em: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class EventAttachment(BaseModel):
@@ -22,7 +22,7 @@ class EventAttachment(BaseModel):
     tipo: str
     url: str
     filename: str | None = None
-    criado_em: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    criado_em: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class Event(BaseModel):
@@ -35,9 +35,10 @@ class Event(BaseModel):
     payload_json: dict[str, Any] = Field(default_factory=dict)
     status_validacao: StatusValidacao = StatusValidacao.PENDENTE
     origem: OrigemCaptura
-    capturado_em: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    capturado_em: datetime = Field(default_factory=lambda: datetime.now(UTC))
     sincronizado_em: datetime | None = None
     aditamento_de_id: UUID | None = None
+    custo: float | None = None
     visivel_publico: bool = True
     attachments: list[EventAttachment] = Field(default_factory=list)
     location: EventLocation | None = None
@@ -49,6 +50,6 @@ class EventCreate(BaseModel):
     descricao: str
     payload_json: dict[str, Any] = Field(default_factory=dict)
     origem: OrigemCaptura = OrigemCaptura.MANUAL
-    capturado_em: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    capturado_em: datetime = Field(default_factory=lambda: datetime.now(UTC))
     aditamento_de_id: UUID | None = None
     visivel_publico: bool = True
