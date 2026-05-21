@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, Field
@@ -97,7 +97,7 @@ class EntradaNfeResponse(BaseModel):
     fornecedor_id: uuid.UUID | None
     chave_nfe:     str | None
     numero_nf:     str | None
-    data_emissao:  str | None
+    data_emissao:  date | None
     valor_total:   Decimal | None
     status:        str
     criado_em:     datetime

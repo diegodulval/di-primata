@@ -4,6 +4,7 @@ Retorna estruturas de dados simples — sem dependência de banco ou ORM.
 """
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
+from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 
 _NS = "http://www.portalfiscal.inf.br/nfe"
@@ -13,6 +14,15 @@ def _t(elem, tag: str, default: str = "") -> str:
     """Retorna o texto do primeiro filho com `tag`, ou `default`."""
     found = elem.find(f"{{{_NS}}}{tag}")
     return (found.text or default) if found is not None else default
+
+
+def _parse_date(s: str) -> date | None:
+    if not s:
+        return None
+    try:
+        return datetime.fromisoformat(s).date()
+    except (ValueError, TypeError):
+        return None
 
 
 def _d(valor: str) -> Decimal:
@@ -36,14 +46,14 @@ class ItemNFe:
 
 @dataclass
 class NFeParseResult:
-    chave:       str
-    numero:      str
-    serie:       str
-    data_emissao: str          # ISO 8601 completo do XML
-    emit_cnpj:   str
-    emit_nome:   str
-    valor_total: Decimal
-    itens:       list[ItemNFe] = field(default_factory=list)
+    chave:        str
+    numero:       str
+    serie:        str
+    data_emissao: date | None
+    emit_cnpj:    str
+    emit_nome:    str
+    valor_total:  Decimal
+    itens:        list[ItemNFe] = field(default_factory=list)
 
 
 def parse_nfe(xml_bytes: bytes) -> NFeParseResult:
@@ -93,7 +103,7 @@ def parse_nfe(xml_bytes: bytes) -> NFeParseResult:
         chave=chave,
         numero=_t(ide, "nNF"),
         serie=_t(ide, "serie"),
-        data_emissao=data_raw,
+        data_emissao=_parse_date(data_raw),
         emit_cnpj=_t(emit, "CNPJ"),
         emit_nome=_t(emit, "xNome"),
         valor_total=valor_total,

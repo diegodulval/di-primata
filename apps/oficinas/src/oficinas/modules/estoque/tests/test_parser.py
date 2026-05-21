@@ -76,8 +76,9 @@ def test_parse_dois_itens_e_ipi():
 
 
 def test_parse_data_emissao(xml_fixture):
+    from datetime import date
     r = parse_nfe(xml_fixture)
-    assert "2023-12-01" in r.data_emissao
+    assert r.data_emissao == date(2023, 12, 1)
 
 
 def test_parse_xml_invalido_levanta_value_error():
