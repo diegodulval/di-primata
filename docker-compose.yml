@@ -1,11 +1,50 @@
 services:
-  api:
-    build: .
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: oficinas
+      POSTGRES_USER: oficinas
+      POSTGRES_PASSWORD: oficinas
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oficinas"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  producao:
+    build:
+      context: .
+      dockerfile: apps/producao/Dockerfile
     ports:
       - "8000:8000"
-    volumes:
-      - .:/app
     env_file: .env
+    restart: unless-stopped
+
+  oficinas:
+    build:
+      context: .
+      dockerfile: apps/oficinas/Dockerfile
+    ports:
+      - "8001:8001"
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://oficinas:oficinas@postgres:5432/oficinas
+    volumes:
+      - ./apps/oficinas:/workspace/apps/oficinas
+      - ./packages:/workspace/packages
+    command: >
+      uv run --package oficinas fastapi dev
+      apps/oficinas/src/oficinas/main.py
+      --host 0.0.0.0 --port 8001
+    working_dir: /workspace
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   web:
@@ -20,5 +59,8 @@ services:
     environment:
       - VITE_API_URL=http://localhost:8000
     depends_on:
-      - api
+      - producao
     restart: unless-stopped
+
+volumes:
+  postgres_data:

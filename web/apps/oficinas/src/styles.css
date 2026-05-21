@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@import "@di-mata/theme/tokens/base.css";
+@import "@di-mata/theme/tokens/terra.css";
+
+@theme {
+  --color-primary: var(--color-primary);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+}

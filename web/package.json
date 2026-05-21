@@ -6,7 +6,7 @@
     "pnpm": ">=9"
   },
   "scripts": {
-    "dev": "pnpm --filter dashboard dev & pnpm --filter portal dev",
+    "dev": "pnpm --filter dashboard dev & pnpm --filter portal dev & pnpm --filter oficinas dev",
     "build": "pnpm -r build",
     "check": "biome check .",
     "fmt": "biome format --write .",

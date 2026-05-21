@@ -1,43 +1,82 @@
-.PHONY: install dev hooks run test cov lint fmt check clean \
-        web-install web-dev web-build web-check web-generate seed
+SHELL := /bin/bash
 
-VENV   = .venv
-PYTHON = $(VENV)/bin/python
-UV     = source $(HOME)/.local/bin/env && uv
+.PHONY: install dev hooks \
+        run run-producao run-oficinas \
+        test cov lint fmt check \
+        migrate-producao migrate-oficinas \
+        web-install web-dev web-dev-oficinas web-build web-check web-generate \
+        seed seed-oficinas \
+        docker-up docker-down docker-logs docker-build \
+        docker-up-producao docker-down-producao docker-logs-producao \
+        docker-up-oficinas docker-down-oficinas docker-logs-oficinas \
+        clean
+
+UV = source $(HOME)/.local/bin/env && uv
+
+# ── Workspace ──────────────────────────────────────────────────────────────────
 
 install:
-	$(UV) venv --python 3.12
-	$(UV) pip install -e "."
+	$(UV) sync
 
 dev:
-	$(UV) pip install -e ".[dev]"
+	$(UV) sync --all-extras
 
 hooks:
 	git config core.hooksPath .githooks
 	chmod +x .githooks/*
-	@echo "✅  Hooks instalados (.githooks/: pre-commit, commit-msg, pre-push)"
+	@echo "Hooks instalados (.githooks/)"
 
-run:
-	$(VENV)/bin/uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# ── Apps ───────────────────────────────────────────────────────────────────────
+
+run: run-producao
+
+run-producao:
+	$(UV) run --package producao fastapi dev apps/producao/src/producao/main.py --port 8000
+
+run-oficinas:
+	$(UV) run --package oficinas fastapi dev apps/oficinas/src/oficinas/main.py --port 8001
+
+# ── Testes e qualidade ─────────────────────────────────────────────────────────
 
 test:
-	$(VENV)/bin/pytest
+	cd apps/producao && $(UV) run --package producao pytest tests -v --tb=short
 
 cov:
-	$(VENV)/bin/pytest --cov=app --cov-report=term-missing --cov-report=html
+	cd apps/producao && $(UV) run --package producao pytest tests \
+		--cov=producao --cov-report=term-missing --cov-report=html
 
 lint:
-	$(VENV)/bin/ruff check app tests
+	$(UV) run --package producao ruff check \
+		apps/producao/src apps/producao/tests \
+		packages/core/src packages/auth/src packages/utils/src
 
 fmt:
-	$(VENV)/bin/ruff format app tests
+	$(UV) run --package producao ruff format \
+		apps/producao/src apps/producao/tests \
+		packages/core/src packages/auth/src packages/utils/src
 
 check: lint
-	$(VENV)/bin/pytest --cov=app -q
+	cd apps/producao && $(UV) run --package producao pytest tests -q
 
-clean:
-	rm -rf .venv __pycache__ .pytest_cache htmlcov .coverage
-	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+# ── Migrations (por app) ───────────────────────────────────────────────────────
+# Quando o producao migrar para banco real, Alembic ficará em apps/producao/.
+# Cada app tem suas próprias migrations — nunca compartilhadas pelo core.
+
+migrate-producao:
+	@if [ -z "$(DATABASE_URL)" ]; then \
+	  echo "DATABASE_URL não definida."; exit 1; \
+	fi
+	psql "$(DATABASE_URL)" -f apps/producao/src/producao/db/migrations/001_message_queue.sql
+
+migrate-oficinas:
+	@if [ -z "$(OFICINAS_DATABASE_URL)" ]; then \
+	  echo "OFICINAS_DATABASE_URL não definida."; exit 1; \
+	fi
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/001_global_schema.sql
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/002_tenant_schema.sql
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/003_rls_policies.sql
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/004_seed.sql
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/005_iam_adjustments.sql
 
 # ── Web (frontend) ─────────────────────────────────────────────────────────────
 
@@ -46,6 +85,9 @@ web-install:
 
 web-dev:
 	cd web && pnpm dev
+
+web-dev-oficinas:
+	cd web && pnpm --filter oficinas dev
 
 web-build:
 	cd web && pnpm build
@@ -56,5 +98,47 @@ web-check:
 web-generate:
 	cd web && pnpm generate:api
 
+# ── Seed e limpeza ─────────────────────────────────────────────────────────────
+
 seed:
-	$(VENV)/bin/python scripts/seed.py
+	$(UV) run --package producao python scripts/seed.py
+
+seed-oficinas:
+	$(UV) run --package oficinas python scripts/seed_oficinas.py
+
+# ── Docker ─────────────────────────────────────────────────────────────────────
+
+docker-up:
+	docker compose up -d
+
+docker-down:
+	docker compose down
+
+docker-logs:
+	docker compose logs -f
+
+docker-build:
+	docker compose build --no-cache
+
+docker-up-producao:
+	docker compose up -d producao
+
+docker-down-producao:
+	docker compose stop producao
+
+docker-logs-producao:
+	docker compose logs -f producao
+
+docker-up-oficinas:
+	docker compose up -d oficinas
+
+docker-down-oficinas:
+	docker compose stop oficinas
+
+docker-logs-oficinas:
+	docker compose logs -f oficinas
+
+clean:
+	rm -rf .venv __pycache__ .pytest_cache htmlcov .coverage
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true

@@ -5,7 +5,8 @@
       "**/node_modules/**",
       "**/dist/**",
       "**/build/**",
-      "packages/api-client/src/generated/**"
+      "packages/api-client/src/generated/**",
+      "**/routeTree.gen.ts"
     ]
   },
   "organizeImports": { "enabled": true },
