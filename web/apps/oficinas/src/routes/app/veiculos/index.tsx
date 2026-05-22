@@ -1,6 +1,6 @@
 import { ApiError, api } from "@/lib/api";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@di-mata/ui";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
 
@@ -27,10 +27,24 @@ interface VeiculoDetalhe {
   historico_publico: HistoricoItem[];
 }
 
+const TIPOS = ["carro", "moto", "caminhao", "van"] as const;
+
 function VeiculosPage() {
+  const queryClient = useQueryClient();
   const [placa, setPlaca] = useState("");
   const [query, setQuery] = useState<string | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+
+  // form de cadastro
+  const [fPlaca, setFPlaca] = useState("");
+  const [fMarca, setFMarca] = useState("");
+  const [fModelo, setFModelo] = useState("");
+  const [fAnoFab, setFAnoFab] = useState("");
+  const [fAnoMod, setFAnoMod] = useState("");
+  const [fCor, setFCor] = useState("");
+  const [fTipo, setFTipo] = useState<(typeof TIPOS)[number] | "">("");
+  const [formErro, setFormErro] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["veiculo", query],
@@ -56,11 +70,48 @@ function VeiculosPage() {
     if (normalized) setQuery(normalized);
   }
 
-  return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-[--color-text-primary] mb-6">Veículos</h1>
+  const salvar = useMutation({
+    mutationFn: () =>
+      api.post<VeiculoDetalhe>("/veiculos", {
+        placa: fPlaca.trim().toUpperCase(),
+        marca: fMarca || null,
+        modelo: fModelo || null,
+        ano_fab: fAnoFab ? Number(fAnoFab) : null,
+        ano_mod: fAnoMod ? Number(fAnoMod) : null,
+        cor: fCor || null,
+        tipo: fTipo || null,
+      }),
+    onSuccess: (v) => {
+      void queryClient.invalidateQueries({ queryKey: ["veiculo"] });
+      setQuery(v.placa);
+      setShowForm(false);
+      setFormErro(null);
+    },
+    onError: (err: Error) => setFormErro(err.message),
+  });
 
-      <form onSubmit={handleSearch} className="flex gap-2 mb-6">
+  function abrirFormNovo() {
+    setFPlaca(placa);
+    setFMarca("");
+    setFModelo("");
+    setFAnoFab("");
+    setFAnoMod("");
+    setFCor("");
+    setFTipo("");
+    setFormErro(null);
+    setShowForm(true);
+  }
+
+  return (
+    <div className="p-8 space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-[--color-text-primary]">Veículos</h1>
+        <Button size="sm" onClick={abrirFormNovo}>
+          + Cadastrar veículo
+        </Button>
+      </div>
+
+      <form onSubmit={handleSearch} className="flex gap-2">
         <input
           value={placa}
           onChange={(e) => setPlaca(e.target.value.toUpperCase())}
@@ -68,15 +119,155 @@ function VeiculosPage() {
           maxLength={8}
           className="rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm font-mono uppercase w-48 focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
         />
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" size="sm" disabled={isLoading}>
           {isLoading ? "Buscando..." : "Buscar"}
         </Button>
       </form>
 
       {notFound && (
-        <p className="text-sm text-[--color-text-muted]">
-          Veículo com placa <strong>{query}</strong> não encontrado no cadastro.
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-[--color-text-muted]">
+            Placa <strong>{query}</strong> não encontrada.
+          </p>
+          <Button size="sm" variant="outline" onClick={abrirFormNovo}>
+            Cadastrar esta placa
+          </Button>
+        </div>
+      )}
+
+      {showForm && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Cadastrar veículo</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label
+                  htmlFor="v-placa"
+                  className="text-sm font-medium text-[--color-text-primary]"
+                >
+                  Placa *
+                </label>
+                <input
+                  id="v-placa"
+                  required
+                  value={fPlaca}
+                  onChange={(e) => setFPlaca(e.target.value.toUpperCase())}
+                  maxLength={8}
+                  placeholder="ABC1234"
+                  className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                />
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="v-tipo" className="text-sm font-medium text-[--color-text-primary]">
+                  Tipo
+                </label>
+                <select
+                  id="v-tipo"
+                  value={fTipo}
+                  onChange={(e) => setFTipo(e.target.value as (typeof TIPOS)[number] | "")}
+                  className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                >
+                  <option value="">Selecione...</option>
+                  {TIPOS.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label
+                  htmlFor="v-marca"
+                  className="text-sm font-medium text-[--color-text-primary]"
+                >
+                  Marca
+                </label>
+                <input
+                  id="v-marca"
+                  value={fMarca}
+                  onChange={(e) => setFMarca(e.target.value)}
+                  placeholder="Toyota"
+                  className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                />
+              </div>
+              <div className="space-y-1">
+                <label
+                  htmlFor="v-modelo"
+                  className="text-sm font-medium text-[--color-text-primary]"
+                >
+                  Modelo
+                </label>
+                <input
+                  id="v-modelo"
+                  value={fModelo}
+                  onChange={(e) => setFModelo(e.target.value)}
+                  placeholder="Corolla"
+                  className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                />
+              </div>
+              <div className="space-y-1">
+                <label
+                  htmlFor="v-ano-fab"
+                  className="text-sm font-medium text-[--color-text-primary]"
+                >
+                  Ano fab.
+                </label>
+                <input
+                  id="v-ano-fab"
+                  type="number"
+                  value={fAnoFab}
+                  onChange={(e) => setFAnoFab(e.target.value)}
+                  placeholder="2020"
+                  className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                />
+              </div>
+              <div className="space-y-1">
+                <label
+                  htmlFor="v-ano-mod"
+                  className="text-sm font-medium text-[--color-text-primary]"
+                >
+                  Ano mod.
+                </label>
+                <input
+                  id="v-ano-mod"
+                  type="number"
+                  value={fAnoMod}
+                  onChange={(e) => setFAnoMod(e.target.value)}
+                  placeholder="2021"
+                  className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                />
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="v-cor" className="text-sm font-medium text-[--color-text-primary]">
+                  Cor
+                </label>
+                <input
+                  id="v-cor"
+                  value={fCor}
+                  onChange={(e) => setFCor(e.target.value)}
+                  placeholder="Prata"
+                  className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                />
+              </div>
+            </div>
+            {formErro && <p className="text-sm text-[--color-error] mt-2">{formErro}</p>}
+            <div className="flex gap-2 justify-end mt-4">
+              <Button type="button" size="sm" variant="outline" onClick={() => setShowForm(false)}>
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                disabled={!fPlaca || salvar.isPending}
+                onClick={() => salvar.mutate()}
+              >
+                {salvar.isPending ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {data && (

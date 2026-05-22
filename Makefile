@@ -77,6 +77,7 @@ migrate-oficinas:
 	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/003_rls_policies.sql
 	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/004_seed.sql
 	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/005_iam_adjustments.sql
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/006_nfe_rascunho.sql
 
 # ── Web (frontend) ─────────────────────────────────────────────────────────────
 

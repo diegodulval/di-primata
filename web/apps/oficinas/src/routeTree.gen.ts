@@ -13,12 +13,19 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AppVendasIndexRouteImport } from './routes/app/vendas/index'
 import { Route as AppVeiculosIndexRouteImport } from './routes/app/veiculos/index'
 import { Route as AppUsuariosIndexRouteImport } from './routes/app/usuarios/index'
+import { Route as AppOsIndexRouteImport } from './routes/app/os/index'
+import { Route as AppFornecedoresIndexRouteImport } from './routes/app/fornecedores/index'
 import { Route as AppEstoqueIndexRouteImport } from './routes/app/estoque/index'
 import { Route as AppClientesIndexRouteImport } from './routes/app/clientes/index'
+import { Route as AppVendasNovaRouteImport } from './routes/app/vendas/nova'
+import { Route as AppOsNovaRouteImport } from './routes/app/os/nova'
+import { Route as AppOsOsIdRouteImport } from './routes/app/os/$osId'
 import { Route as AppEstoqueEntradasRouteImport } from './routes/app/estoque/entradas'
 import { Route as AppClientesClienteIdRouteImport } from './routes/app/clientes/$clienteId'
+import { Route as AppEstoqueNfeRevisaoRascunhoIdRouteImport } from './routes/app/estoque/nfe-revisao.$rascunhoId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -40,6 +47,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppVendasIndexRoute = AppVendasIndexRouteImport.update({
+  id: '/vendas/',
+  path: '/vendas/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppVeiculosIndexRoute = AppVeiculosIndexRouteImport.update({
   id: '/veiculos/',
   path: '/veiculos/',
@@ -48,6 +60,16 @@ const AppVeiculosIndexRoute = AppVeiculosIndexRouteImport.update({
 const AppUsuariosIndexRoute = AppUsuariosIndexRouteImport.update({
   id: '/usuarios/',
   path: '/usuarios/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOsIndexRoute = AppOsIndexRouteImport.update({
+  id: '/os/',
+  path: '/os/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFornecedoresIndexRoute = AppFornecedoresIndexRouteImport.update({
+  id: '/fornecedores/',
+  path: '/fornecedores/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppEstoqueIndexRoute = AppEstoqueIndexRouteImport.update({
@@ -60,6 +82,21 @@ const AppClientesIndexRoute = AppClientesIndexRouteImport.update({
   path: '/clientes/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppVendasNovaRoute = AppVendasNovaRouteImport.update({
+  id: '/vendas/nova',
+  path: '/vendas/nova',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOsNovaRoute = AppOsNovaRouteImport.update({
+  id: '/os/nova',
+  path: '/os/nova',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOsOsIdRoute = AppOsOsIdRouteImport.update({
+  id: '/os/$osId',
+  path: '/os/$osId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppEstoqueEntradasRoute = AppEstoqueEntradasRouteImport.update({
   id: '/estoque/entradas',
   path: '/estoque/entradas',
@@ -70,6 +107,12 @@ const AppClientesClienteIdRoute = AppClientesClienteIdRouteImport.update({
   path: '/clientes/$clienteId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppEstoqueNfeRevisaoRascunhoIdRoute =
+  AppEstoqueNfeRevisaoRascunhoIdRouteImport.update({
+    id: '/estoque/nfe-revisao/$rascunhoId',
+    path: '/estoque/nfe-revisao/$rascunhoId',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -78,10 +121,17 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/app/clientes/$clienteId': typeof AppClientesClienteIdRoute
   '/app/estoque/entradas': typeof AppEstoqueEntradasRoute
+  '/app/os/$osId': typeof AppOsOsIdRoute
+  '/app/os/nova': typeof AppOsNovaRoute
+  '/app/vendas/nova': typeof AppVendasNovaRoute
   '/app/clientes/': typeof AppClientesIndexRoute
   '/app/estoque/': typeof AppEstoqueIndexRoute
+  '/app/fornecedores/': typeof AppFornecedoresIndexRoute
+  '/app/os/': typeof AppOsIndexRoute
   '/app/usuarios/': typeof AppUsuariosIndexRoute
   '/app/veiculos/': typeof AppVeiculosIndexRoute
+  '/app/vendas/': typeof AppVendasIndexRoute
+  '/app/estoque/nfe-revisao/$rascunhoId': typeof AppEstoqueNfeRevisaoRascunhoIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -89,10 +139,17 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/app/clientes/$clienteId': typeof AppClientesClienteIdRoute
   '/app/estoque/entradas': typeof AppEstoqueEntradasRoute
+  '/app/os/$osId': typeof AppOsOsIdRoute
+  '/app/os/nova': typeof AppOsNovaRoute
+  '/app/vendas/nova': typeof AppVendasNovaRoute
   '/app/clientes': typeof AppClientesIndexRoute
   '/app/estoque': typeof AppEstoqueIndexRoute
+  '/app/fornecedores': typeof AppFornecedoresIndexRoute
+  '/app/os': typeof AppOsIndexRoute
   '/app/usuarios': typeof AppUsuariosIndexRoute
   '/app/veiculos': typeof AppVeiculosIndexRoute
+  '/app/vendas': typeof AppVendasIndexRoute
+  '/app/estoque/nfe-revisao/$rascunhoId': typeof AppEstoqueNfeRevisaoRascunhoIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -102,10 +159,17 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/app/clientes/$clienteId': typeof AppClientesClienteIdRoute
   '/app/estoque/entradas': typeof AppEstoqueEntradasRoute
+  '/app/os/$osId': typeof AppOsOsIdRoute
+  '/app/os/nova': typeof AppOsNovaRoute
+  '/app/vendas/nova': typeof AppVendasNovaRoute
   '/app/clientes/': typeof AppClientesIndexRoute
   '/app/estoque/': typeof AppEstoqueIndexRoute
+  '/app/fornecedores/': typeof AppFornecedoresIndexRoute
+  '/app/os/': typeof AppOsIndexRoute
   '/app/usuarios/': typeof AppUsuariosIndexRoute
   '/app/veiculos/': typeof AppVeiculosIndexRoute
+  '/app/vendas/': typeof AppVendasIndexRoute
+  '/app/estoque/nfe-revisao/$rascunhoId': typeof AppEstoqueNfeRevisaoRascunhoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -116,10 +180,17 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/clientes/$clienteId'
     | '/app/estoque/entradas'
+    | '/app/os/$osId'
+    | '/app/os/nova'
+    | '/app/vendas/nova'
     | '/app/clientes/'
     | '/app/estoque/'
+    | '/app/fornecedores/'
+    | '/app/os/'
     | '/app/usuarios/'
     | '/app/veiculos/'
+    | '/app/vendas/'
+    | '/app/estoque/nfe-revisao/$rascunhoId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -127,10 +198,17 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/clientes/$clienteId'
     | '/app/estoque/entradas'
+    | '/app/os/$osId'
+    | '/app/os/nova'
+    | '/app/vendas/nova'
     | '/app/clientes'
     | '/app/estoque'
+    | '/app/fornecedores'
+    | '/app/os'
     | '/app/usuarios'
     | '/app/veiculos'
+    | '/app/vendas'
+    | '/app/estoque/nfe-revisao/$rascunhoId'
   id:
     | '__root__'
     | '/'
@@ -139,10 +217,17 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/clientes/$clienteId'
     | '/app/estoque/entradas'
+    | '/app/os/$osId'
+    | '/app/os/nova'
+    | '/app/vendas/nova'
     | '/app/clientes/'
     | '/app/estoque/'
+    | '/app/fornecedores/'
+    | '/app/os/'
     | '/app/usuarios/'
     | '/app/veiculos/'
+    | '/app/vendas/'
+    | '/app/estoque/nfe-revisao/$rascunhoId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -181,6 +266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/vendas/': {
+      id: '/app/vendas/'
+      path: '/vendas'
+      fullPath: '/app/vendas/'
+      preLoaderRoute: typeof AppVendasIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/veiculos/': {
       id: '/app/veiculos/'
       path: '/veiculos'
@@ -193,6 +285,20 @@ declare module '@tanstack/react-router' {
       path: '/usuarios'
       fullPath: '/app/usuarios/'
       preLoaderRoute: typeof AppUsuariosIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/os/': {
+      id: '/app/os/'
+      path: '/os'
+      fullPath: '/app/os/'
+      preLoaderRoute: typeof AppOsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/fornecedores/': {
+      id: '/app/fornecedores/'
+      path: '/fornecedores'
+      fullPath: '/app/fornecedores/'
+      preLoaderRoute: typeof AppFornecedoresIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/estoque/': {
@@ -209,6 +315,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientesIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/vendas/nova': {
+      id: '/app/vendas/nova'
+      path: '/vendas/nova'
+      fullPath: '/app/vendas/nova'
+      preLoaderRoute: typeof AppVendasNovaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/os/nova': {
+      id: '/app/os/nova'
+      path: '/os/nova'
+      fullPath: '/app/os/nova'
+      preLoaderRoute: typeof AppOsNovaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/os/$osId': {
+      id: '/app/os/$osId'
+      path: '/os/$osId'
+      fullPath: '/app/os/$osId'
+      preLoaderRoute: typeof AppOsOsIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/estoque/entradas': {
       id: '/app/estoque/entradas'
       path: '/estoque/entradas'
@@ -223,6 +350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientesClienteIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/estoque/nfe-revisao/$rascunhoId': {
+      id: '/app/estoque/nfe-revisao/$rascunhoId'
+      path: '/estoque/nfe-revisao/$rascunhoId'
+      fullPath: '/app/estoque/nfe-revisao/$rascunhoId'
+      preLoaderRoute: typeof AppEstoqueNfeRevisaoRascunhoIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -230,20 +364,34 @@ interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppClientesClienteIdRoute: typeof AppClientesClienteIdRoute
   AppEstoqueEntradasRoute: typeof AppEstoqueEntradasRoute
+  AppOsOsIdRoute: typeof AppOsOsIdRoute
+  AppOsNovaRoute: typeof AppOsNovaRoute
+  AppVendasNovaRoute: typeof AppVendasNovaRoute
   AppClientesIndexRoute: typeof AppClientesIndexRoute
   AppEstoqueIndexRoute: typeof AppEstoqueIndexRoute
+  AppFornecedoresIndexRoute: typeof AppFornecedoresIndexRoute
+  AppOsIndexRoute: typeof AppOsIndexRoute
   AppUsuariosIndexRoute: typeof AppUsuariosIndexRoute
   AppVeiculosIndexRoute: typeof AppVeiculosIndexRoute
+  AppVendasIndexRoute: typeof AppVendasIndexRoute
+  AppEstoqueNfeRevisaoRascunhoIdRoute: typeof AppEstoqueNfeRevisaoRascunhoIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppClientesClienteIdRoute: AppClientesClienteIdRoute,
   AppEstoqueEntradasRoute: AppEstoqueEntradasRoute,
+  AppOsOsIdRoute: AppOsOsIdRoute,
+  AppOsNovaRoute: AppOsNovaRoute,
+  AppVendasNovaRoute: AppVendasNovaRoute,
   AppClientesIndexRoute: AppClientesIndexRoute,
   AppEstoqueIndexRoute: AppEstoqueIndexRoute,
+  AppFornecedoresIndexRoute: AppFornecedoresIndexRoute,
+  AppOsIndexRoute: AppOsIndexRoute,
   AppUsuariosIndexRoute: AppUsuariosIndexRoute,
   AppVeiculosIndexRoute: AppVeiculosIndexRoute,
+  AppVendasIndexRoute: AppVendasIndexRoute,
+  AppEstoqueNfeRevisaoRascunhoIdRoute: AppEstoqueNfeRevisaoRascunhoIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

@@ -12,10 +12,8 @@ const buttonVariants = cva(
           "bg-[--color-primary] text-[--color-primary-fg] hover:opacity-90 focus-visible:ring-[--color-primary]",
         outline:
           "border border-[--color-border] bg-[--color-surface] hover:bg-[--color-background] text-[--color-text-primary]",
-        ghost:
-          "hover:bg-[--color-background] text-[--color-text-primary]",
-        destructive:
-          "bg-[--color-error] text-white hover:opacity-90",
+        ghost: "hover:bg-[--color-background] text-[--color-text-primary]",
+        destructive: "bg-[--color-error] text-white hover:opacity-90",
         link: "text-[--color-primary] underline-offset-4 hover:underline",
       },
       size: {
@@ -42,11 +40,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
+      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
     );
   }
 );

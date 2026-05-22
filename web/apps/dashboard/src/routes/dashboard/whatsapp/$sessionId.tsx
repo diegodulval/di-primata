@@ -128,12 +128,8 @@ function UnitSelector({ session }: { session: Session }) {
           </option>
         ))}
       </select>
-      {linked && (
-        <span className="text-xs text-[--color-success]">✓ {linked.nome}</span>
-      )}
-      {link.isError && (
-        <span className="text-xs text-[--color-error]">Erro ao salvar</span>
-      )}
+      {linked && <span className="text-xs text-[--color-success]">✓ {linked.nome}</span>}
+      {link.isError && <span className="text-xs text-[--color-error]">Erro ao salvar</span>}
     </div>
   );
 }
@@ -239,7 +235,9 @@ function SessionDetail() {
           </p>
         )}
 
-        {messages?.map((msg) => <Bubble key={msg.id} msg={msg} />)}
+        {messages?.map((msg) => (
+          <Bubble key={msg.id} msg={msg} />
+        ))}
       </div>
 
       <p className="text-xs text-[--color-text-muted] text-right">

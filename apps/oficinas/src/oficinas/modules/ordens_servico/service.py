@@ -11,7 +11,7 @@ from oficinas.core.exceptions import NaoEncontrado, OSJaFechada, TransicaoInvali
 from oficinas.modules.estoque.service import EstoqueService
 from oficinas.modules.ordens_servico.models import ItemOS, OrdemServico
 from oficinas.modules.ordens_servico.schemas import FecharOS, ItemOSAdd, OSCreate
-from oficinas.shared.veiculo_global.models import HistoricoVeiculo
+from oficinas.shared.veiculo_global.models import HistoricoVeiculo, Veiculo
 
 log = structlog.get_logger()
 
@@ -70,12 +70,17 @@ class OrdensServicoService:
         tenant_id: uuid.UUID,
         status: StatusOS | None = None,
         mecanico_id: uuid.UUID | None = None,
+        placa: str | None = None,
     ) -> list[OrdemServico]:
         stmt = select(OrdemServico).where(OrdemServico.tenant_id == tenant_id)
         if status:
             stmt = stmt.where(OrdemServico.status == status)
         if mecanico_id:
             stmt = stmt.where(OrdemServico.mecanico_id == mecanico_id)
+        if placa:
+            stmt = stmt.join(Veiculo, OrdemServico.veiculo_id == Veiculo.id).where(
+                Veiculo.placa == placa.strip().upper()
+            )
         stmt = stmt.order_by(OrdemServico.aberta_em.desc())
         return list((await self.db.execute(stmt)).scalars().all())
 

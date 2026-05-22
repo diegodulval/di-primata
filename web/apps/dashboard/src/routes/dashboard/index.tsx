@@ -58,9 +58,7 @@ function DashboardHome() {
     <div className="p-6 space-y-6">
       <header>
         <h1 className="text-2xl font-bold text-[--color-text-primary]">Visão Geral</h1>
-        <p className="text-[--color-text-muted] text-sm mt-1">
-          Painel operacional da plataforma
-        </p>
+        <p className="text-[--color-text-muted] text-sm mt-1">Painel operacional da plataforma</p>
       </header>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

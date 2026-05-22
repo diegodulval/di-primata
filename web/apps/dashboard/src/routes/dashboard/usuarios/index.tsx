@@ -58,9 +58,7 @@ function UsuariosPage() {
         </Link>
       </header>
 
-      {isError && (
-        <p className="text-sm text-[--color-error]">Erro ao carregar dados.</p>
-      )}
+      {isError && <p className="text-sm text-[--color-error]">Erro ao carregar dados.</p>}
 
       {isLoading && (
         <div className="space-y-3">
@@ -73,9 +71,7 @@ function UsuariosPage() {
       {users && users.length === 0 && (
         <Card>
           <CardContent className="py-12 text-center space-y-3">
-            <p className="text-[--color-text-muted] text-sm">
-              Nenhum usuário cadastrado ainda.
-            </p>
+            <p className="text-[--color-text-muted] text-sm">Nenhum usuário cadastrado ainda.</p>
             <Link
               to="/dashboard/usuarios/novo"
               className="inline-flex items-center gap-1 text-sm text-[--color-primary] hover:underline"
@@ -91,12 +87,24 @@ function UsuariosPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-[--color-surface] border-b border-[--color-border]">
-                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">Usuário</th>
-                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">Organização</th>
-                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">Perfil</th>
-                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">Portal</th>
-                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">Cadastro</th>
-                <th className="px-4 py-3 text-center font-medium text-[--color-text-muted]">Status</th>
+                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">
+                  Usuário
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">
+                  Organização
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">
+                  Perfil
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">
+                  Portal
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">
+                  Cadastro
+                </th>
+                <th className="px-4 py-3 text-center font-medium text-[--color-text-muted]">
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[--color-border]">

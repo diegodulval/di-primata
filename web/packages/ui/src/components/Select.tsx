@@ -28,11 +28,7 @@ interface SelectProps
 
 const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ className, selectSize, ...props }, ref) => (
-    <select
-      ref={ref}
-      className={cn(selectVariants({ selectSize, className }))}
-      {...props}
-    />
+    <select ref={ref} className={cn(selectVariants({ selectSize, className }))} {...props} />
   )
 );
 

@@ -17,6 +17,7 @@ from oficinas.modules.estoque.models import (
 from oficinas.modules.estoque.parser import NFeParseResult, parse_nfe
 from oficinas.modules.estoque.schemas import (
     FornecedorCreate,
+    FornecedorUpdate,
     ProdutoCreate,
     ProdutoUpdate,
 )
@@ -52,6 +53,16 @@ class EstoqueService:
         f = (await self.db.execute(stmt)).scalar_one_or_none()
         if not f:
             raise NaoEncontrado(f"Fornecedor {fornecedor_id} não encontrado")
+        return f
+
+    async def atualizar_fornecedor(
+        self, fornecedor_id: uuid.UUID, tenant_id: uuid.UUID, payload: FornecedorUpdate
+    ) -> Fornecedor:
+        f = await self.buscar_fornecedor(fornecedor_id, tenant_id)
+        for campo, valor in payload.model_dump(exclude_unset=True).items():
+            setattr(f, campo, valor)
+        await self.db.commit()
+        await self.db.refresh(f)
         return f
 
     # ─── Produto ──────────────────────────────────────────────────────────────

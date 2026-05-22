@@ -30,7 +30,10 @@ function AppLayout() {
     { to: "/app" as const, label: "Início", exact: true },
     { to: "/app/clientes" as const, label: "Clientes", exact: false },
     { to: "/app/veiculos" as const, label: "Veículos", exact: false },
+    { to: "/app/os" as const, label: "OS", exact: false },
     { to: "/app/estoque" as const, label: "Estoque", exact: false },
+    { to: "/app/vendas" as const, label: "Vendas", exact: false },
+    { to: "/app/fornecedores" as const, label: "Fornecedores", exact: false },
     ...(perfil === "ADMIN"
       ? [{ to: "/app/usuarios" as const, label: "Usuários", exact: false }]
       : []),

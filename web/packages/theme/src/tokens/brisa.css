@@ -1,30 +1,30 @@
 /* Paleta Brisa — Documentação técnica, AI insights, portal dev, Primata API
    Mensagem: precisão, automação, inovação */
 .theme-brisa {
-  --color-primary-900: #234D4D;
-  --color-primary-800: #2C6060;
+  --color-primary-900: #234d4d;
+  --color-primary-800: #2c6060;
   --color-primary-700: #357373;
-  --color-primary-600: #3E8686;
+  --color-primary-600: #3e8686;
   --color-primary-500: #479999;
-  --color-primary-400: #6CAFAF;
-  --color-primary-300: #91C5C5;
-  --color-primary-200: #B6DBDB;
-  --color-primary-100: #CEEAEA;
-  --color-primary-50:  #8DBDB6;
+  --color-primary-400: #6cafaf;
+  --color-primary-300: #91c5c5;
+  --color-primary-200: #b6dbdb;
+  --color-primary-100: #ceeaea;
+  --color-primary-50: #8dbdb6;
 
-  --color-primary:     var(--color-primary-700);
-  --color-primary-fg:  #FFFFFF;
+  --color-primary: var(--color-primary-700);
+  --color-primary-fg: #ffffff;
 
-  --color-background:  #F2F7F7;
-  --color-surface:     #FFFFFF;
-  --color-border:      #C5DADA;
+  --color-background: #f2f7f7;
+  --color-surface: #ffffff;
+  --color-border: #c5dada;
 
-  --color-text-primary:   #162E2E;
-  --color-text-secondary: #234D4D;
-  --color-text-muted:     #4A7A7A;
+  --color-text-primary: #162e2e;
+  --color-text-secondary: #234d4d;
+  --color-text-muted: #4a7a7a;
 
   --color-success: #357373;
-  --color-warning: #D4A017;
-  --color-error:   #C0392B;
-  --color-info:    #2980B9;
+  --color-warning: #d4a017;
+  --color-error: #c0392b;
+  --color-info: #2980b9;
 }

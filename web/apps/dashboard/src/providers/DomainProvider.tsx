@@ -34,11 +34,7 @@ export function DomainProvider({ children }: { children: ReactNode }) {
     staleTime: Infinity,
   });
 
-  return (
-    <DomainContext.Provider value={data ?? DEFAULT_SCHEMA}>
-      {children}
-    </DomainContext.Provider>
-  );
+  return <DomainContext.Provider value={data ?? DEFAULT_SCHEMA}>{children}</DomainContext.Provider>;
 }
 
 export function useDomain(): DomainSchema {

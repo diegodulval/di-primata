@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     whatsapp_token: str = ""
     whatsapp_verify_token: str = ""
     whatsapp_phone_id: str = ""
+    # App Secret para validação HMAC-SHA256 do webhook (opcional em dev)
+    whatsapp_app_secret: str = ""
 
     # Claude AI (agente)
     anthropic_api_key: str = ""

@@ -1,30 +1,30 @@
 /* Paleta Floresta — Institucional: B2B, landing, pitch investidores
    Mensagem: confiança, autoridade, estabilidade */
 .theme-floresta {
-  --color-primary-900: #1F3D2B;
-  --color-primary-800: #2A5239;
+  --color-primary-900: #1f3d2b;
+  --color-primary-800: #2a5239;
   --color-primary-700: #356648;
-  --color-primary-600: #407A56;
-  --color-primary-500: #4B8E65;
-  --color-primary-400: #6FA882;
-  --color-primary-300: #93C2A0;
-  --color-primary-200: #B7DCBE;
-  --color-primary-100: #CBE7D0;
-  --color-primary-50:  #A7C49A;
+  --color-primary-600: #407a56;
+  --color-primary-500: #4b8e65;
+  --color-primary-400: #6fa882;
+  --color-primary-300: #93c2a0;
+  --color-primary-200: #b7dcbe;
+  --color-primary-100: #cbe7d0;
+  --color-primary-50: #a7c49a;
 
-  --color-primary:     var(--color-primary-700);
-  --color-primary-fg:  #FFFFFF;
+  --color-primary: var(--color-primary-700);
+  --color-primary-fg: #ffffff;
 
-  --color-background:  #F4F7F5;
-  --color-surface:     #FFFFFF;
-  --color-border:      #D1DDD4;
+  --color-background: #f4f7f5;
+  --color-surface: #ffffff;
+  --color-border: #d1ddd4;
 
-  --color-text-primary:   #1F3D2B;
-  --color-text-secondary: #4B6B55;
-  --color-text-muted:     #7A9982;
+  --color-text-primary: #1f3d2b;
+  --color-text-secondary: #4b6b55;
+  --color-text-muted: #7a9982;
 
-  --color-success: #4B8E65;
-  --color-warning: #D4A017;
-  --color-error:   #C0392B;
-  --color-info:    #2980B9;
+  --color-success: #4b8e65;
+  --color-warning: #d4a017;
+  --color-error: #c0392b;
+  --color-info: #2980b9;
 }

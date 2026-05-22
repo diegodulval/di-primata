@@ -1,55 +1,61 @@
 import { ApiError, api } from "@/lib/api";
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from "@di-mata/ui";
-import { useMutation } from "@tanstack/react-query";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Skeleton } from "@di-mata/ui";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { type ChangeEvent, useRef, useState } from "react";
 
 export const Route = createFileRoute("/app/estoque/entradas")({
   component: EntradasPage,
 });
 
-interface ItemEntrada {
+interface RascunhoResumo {
   id: string;
-  codigo_fornecedor: string | null;
-  quantidade: string;
-  preco_unitario: string;
-  icms: string;
-  ipi: string;
-}
-
-interface EntradaNfe {
-  id: string;
-  chave_nfe: string | null;
   numero_nf: string | null;
+  chave_nfe: string | null;
   data_emissao: string | null;
   valor_total: string | null;
   status: string;
-  itens: ItemEntrada[];
+  criado_em: string;
+  pendentes: number;
 }
 
+const STATUS_LABEL: Record<string, string> = {
+  PENDENTE: "Pendente",
+  CONFIRMADA: "Confirmada",
+  CANCELADA: "Cancelada",
+};
+
 function EntradasPage() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [result, setResult] = useState<EntradaNfe | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const { data: rascunhos, isLoading } = useQuery({
+    queryKey: ["rascunhos"],
+    queryFn: () => api.get<RascunhoResumo[]>("/entradas/rascunhos"),
+  });
 
   const importar = useMutation({
     mutationFn: (file: File) => {
       const form = new FormData();
       form.append("arquivo", file);
-      return api.postForm<EntradaNfe>("/entradas/xml", form);
+      return api.postForm<RascunhoResumo>("/entradas/xml", form);
     },
     onSuccess: (data) => {
-      setResult(data);
-      setError(null);
+      void queryClient.invalidateQueries({ queryKey: ["rascunhos"] });
+      void navigate({
+        to: "/app/estoque/nfe-revisao/$rascunhoId",
+        params: { rascunhoId: data.id },
+      });
     },
     onError: (err: Error) => {
-      setResult(null);
-      if (err instanceof ApiError && err.status === 409) {
-        setError("Esta NF-e já foi importada anteriormente.");
-      } else {
-        setError(err.message);
-      }
+      setError(
+        err instanceof ApiError && err.status === 409
+          ? "Esta NF-e já foi importada anteriormente."
+          : err.message
+      );
     },
   });
 
@@ -57,11 +63,13 @@ function EntradasPage() {
     const file = e.target.files?.[0];
     if (file) {
       setFileName(file.name);
-      setResult(null);
       setError(null);
       importar.mutate(file);
     }
   }
+
+  const pendentes = rascunhos?.filter((r) => r.status === "PENDENTE") ?? [];
+  const anteriores = rascunhos?.filter((r) => r.status !== "PENDENTE") ?? [];
 
   return (
     <div className="p-8 space-y-6">
@@ -78,7 +86,7 @@ function EntradasPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Arquivo XML</CardTitle>
+          <CardTitle>Selecionar arquivo XML</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
@@ -99,95 +107,104 @@ function EntradasPage() {
             </Button>
             {fileName && <span className="text-sm text-[--color-text-secondary]">{fileName}</span>}
           </div>
-
           {error && <p className="mt-3 text-sm text-[--color-error]">{error}</p>}
+          <p className="mt-3 text-xs text-[--color-text-muted]">
+            O arquivo será analisado e os itens vinculados automaticamente quando possível. Itens
+            sem correspondência precisarão de revisão manual antes da confirmação.
+          </p>
         </CardContent>
       </Card>
 
-      {result && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <CardTitle>NF-e importada</CardTitle>
-              <Badge variant="success">{result.status}</Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-3 text-sm">
-              <div>
-                <dt className="text-[--color-text-muted]">Número</dt>
-                <dd className="text-[--color-text-primary]">{result.numero_nf ?? "—"}</dd>
-              </div>
-              <div>
-                <dt className="text-[--color-text-muted]">Emissão</dt>
-                <dd className="text-[--color-text-primary]">{result.data_emissao ?? "—"}</dd>
-              </div>
-              <div>
-                <dt className="text-[--color-text-muted]">Total</dt>
-                <dd className="text-[--color-text-primary] font-medium">
-                  {result.valor_total
-                    ? `R$ ${Number.parseFloat(result.valor_total).toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}`
-                    : "—"}
-                </dd>
-              </div>
-              <div className="col-span-2 sm:col-span-3">
-                <dt className="text-[--color-text-muted]">Chave</dt>
-                <dd className="font-mono text-xs text-[--color-text-secondary] break-all">
-                  {result.chave_nfe ?? "—"}
-                </dd>
-              </div>
-            </dl>
+      {isLoading ? (
+        <div className="space-y-2">
+          {[1, 2].map((i) => (
+            <Skeleton key={i} className="h-14 w-full" />
+          ))}
+        </div>
+      ) : (
+        <>
+          {pendentes.length > 0 && (
+            <section className="space-y-2">
+              <h2 className="text-sm font-medium text-[--color-text-primary]">
+                Aguardando revisão
+              </h2>
+              {pendentes.map((r) => (
+                <RascunhoRow key={r.id} rascunho={r} />
+              ))}
+            </section>
+          )}
 
-            {result.itens.length > 0 && (
-              <div>
-                <h3 className="text-sm font-medium text-[--color-text-primary] mb-2">
-                  Itens ({result.itens.length})
-                </h3>
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-[--color-border] text-left text-[--color-text-muted]">
-                      <th className="pb-2 pr-4 font-medium">Cód. fornecedor</th>
-                      <th className="pb-2 pr-4 font-medium text-right">Qtd</th>
-                      <th className="pb-2 pr-4 font-medium text-right">Preço unit.</th>
-                      <th className="pb-2 pr-4 font-medium text-right hidden sm:table-cell">
-                        ICMS %
-                      </th>
-                      <th className="pb-2 font-medium text-right hidden sm:table-cell">IPI %</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[--color-border]">
-                    {result.itens.map((item) => (
-                      <tr key={item.id}>
-                        <td className="py-2 pr-4 font-mono text-xs text-[--color-text-secondary]">
-                          {item.codigo_fornecedor ?? "—"}
-                        </td>
-                        <td className="py-2 pr-4 text-right text-[--color-text-primary]">
-                          {Number.parseFloat(item.quantidade).toFixed(3)}
-                        </td>
-                        <td className="py-2 pr-4 text-right text-[--color-text-primary]">
-                          {Number.parseFloat(item.preco_unitario).toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                        </td>
-                        <td className="py-2 pr-4 text-right text-[--color-text-secondary] hidden sm:table-cell">
-                          {item.icms}
-                        </td>
-                        <td className="py-2 text-right text-[--color-text-secondary] hidden sm:table-cell">
-                          {item.ipi}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          {anteriores.length > 0 && (
+            <section className="space-y-2">
+              <h2 className="text-sm font-medium text-[--color-text-muted]">Anteriores</h2>
+              {anteriores.map((r) => (
+                <RascunhoRow key={r.id} rascunho={r} />
+              ))}
+            </section>
+          )}
+
+          {rascunhos?.length === 0 && (
+            <p className="text-sm text-[--color-text-muted] text-center py-4">
+              Nenhuma importação registrada.
+            </p>
+          )}
+        </>
       )}
     </div>
+  );
+}
+
+function RascunhoRow({ rascunho }: { rascunho: RascunhoResumo }) {
+  const badgeVariant =
+    rascunho.status === "CONFIRMADA"
+      ? "success"
+      : rascunho.status === "CANCELADA"
+        ? "secondary"
+        : "warning";
+
+  return (
+    <Link
+      to="/app/estoque/nfe-revisao/$rascunhoId"
+      params={{ rascunhoId: rascunho.id }}
+      className="block"
+    >
+      <Card className="hover:bg-[--color-background] transition-colors cursor-pointer">
+        <CardContent className="py-3 px-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-[--color-text-primary] truncate">
+                NF-e {rascunho.numero_nf ?? "s/n"}
+                {rascunho.data_emissao && (
+                  <span className="ml-2 text-[--color-text-muted] font-normal">
+                    {rascunho.data_emissao}
+                  </span>
+                )}
+              </p>
+              {rascunho.chave_nfe && (
+                <p className="text-xs font-mono text-[--color-text-muted] truncate">
+                  {rascunho.chave_nfe}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            {rascunho.status === "PENDENTE" && rascunho.pendentes > 0 && (
+              <span className="text-xs text-[--color-warning]">
+                {rascunho.pendentes} pendente{rascunho.pendentes !== 1 ? "s" : ""}
+              </span>
+            )}
+            {rascunho.valor_total && (
+              <span className="text-sm text-[--color-text-secondary]">
+                R${" "}
+                {Number.parseFloat(rascunho.valor_total).toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                })}
+              </span>
+            )}
+            <Badge variant={badgeVariant}>{STATUS_LABEL[rascunho.status] ?? rascunho.status}</Badge>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }

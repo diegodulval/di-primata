@@ -25,7 +25,10 @@ function StepIndicator({ current, total, className }: StepIndicatorProps) {
           </div>
           {i < total - 1 && (
             <div
-              className={cn("h-px w-8", i < current ? "bg-[--color-primary]" : "bg-[--color-border]")}
+              className={cn(
+                "h-px w-8",
+                i < current ? "bg-[--color-primary]" : "bg-[--color-border]"
+              )}
             />
           )}
         </div>

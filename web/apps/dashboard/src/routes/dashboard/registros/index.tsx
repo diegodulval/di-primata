@@ -73,9 +73,7 @@ function RegistrosPage() {
         )}
       </header>
 
-      {isError && (
-        <p className="text-sm text-[--color-error]">Erro ao carregar registros.</p>
-      )}
+      {isError && <p className="text-sm text-[--color-error]">Erro ao carregar registros.</p>}
 
       {isLoading && (
         <div className="space-y-3">
@@ -98,11 +96,21 @@ function RegistrosPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-[--color-surface] border-b border-[--color-border]">
-                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">Produtor</th>
-                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">Propriedade</th>
-                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">Talhão</th>
-                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">Atividade</th>
-                <th className="px-4 py-3 text-right font-medium text-[--color-text-muted]">Valor</th>
+                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">
+                  Produtor
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">
+                  Propriedade
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">
+                  Talhão
+                </th>
+                <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">
+                  Atividade
+                </th>
+                <th className="px-4 py-3 text-right font-medium text-[--color-text-muted]">
+                  Valor
+                </th>
                 <th className="px-4 py-3 text-left font-medium text-[--color-text-muted]">Data</th>
               </tr>
             </thead>
@@ -113,9 +121,13 @@ function RegistrosPage() {
                   className="bg-[--color-surface] hover:bg-[--color-background] transition-colors"
                 >
                   <td className="px-4 py-3">
-                    <div className="font-mono text-xs text-[--color-text-primary]">{r.phone ?? "—"}</div>
+                    <div className="font-mono text-xs text-[--color-text-primary]">
+                      {r.phone ?? "—"}
+                    </div>
                     {r.profile_name && (
-                      <div className="text-xs text-[--color-text-muted] mt-0.5">{r.profile_name}</div>
+                      <div className="text-xs text-[--color-text-muted] mt-0.5">
+                        {r.profile_name}
+                      </div>
                     )}
                   </td>
                   <td className="px-4 py-3 text-[--color-text-secondary]">

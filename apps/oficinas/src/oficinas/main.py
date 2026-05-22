@@ -17,6 +17,8 @@ from oficinas.core.exceptions import (
     OficinaDomainError,
     OSJaFechada,
     PlacaInvalida,
+    RascunhoJaConfirmado,
+    RascunhoPendente,
     TransicaoInvalida,
     UsuarioInativo,
     WhatsappJaCadastrado,
@@ -39,10 +41,12 @@ if not _app_logger.handlers:
 logger = logging.getLogger(__name__)
 
 
+from oficinas.agente.webhook import router as webhook_router
 from oficinas.modules.cadastros.router import router as cadastros_router
 from oficinas.modules.estoque.router import entradas_router, fornecedores_router, produtos_router
 from oficinas.modules.iam.router import router as auth_router, usuarios_router
 from oficinas.modules.ordens_servico.router import router as os_router
+from oficinas.modules.vendas.router import router as vendas_router
 from oficinas.shared.veiculo_global.router import router as veiculos_router
 
 
@@ -86,6 +90,8 @@ app.include_router(produtos_router)
 app.include_router(fornecedores_router)
 app.include_router(entradas_router)
 app.include_router(os_router)
+app.include_router(vendas_router)
+app.include_router(webhook_router)
 
 
 # ─── Exception handlers ───────────────────────────────────────────────────────
@@ -97,10 +103,12 @@ _STATUS = {
     EmailJaCadastrado: 409,
     WhatsappJaCadastrado: 409,
     NFeJaImportada: 409,
+    RascunhoJaConfirmado: 409,
     OSJaFechada: 409,
     WhatsappObrigatorioParaMecanico: 422,
     PlacaInvalida: 422,
     EstoqueInsuficiente: 422,
+    RascunhoPendente: 422,
     TransicaoInvalida: 422,
     MecanicoObrigatorio: 422,
 }

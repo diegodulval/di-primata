@@ -1,30 +1,30 @@
 /* Paleta Oliva — Dashboard admin/manager, relatórios, análise
    Mensagem: clareza operacional, alto contraste para sessões longas */
 .theme-oliva {
-  --color-primary-900: #556B2F;
-  --color-primary-800: #637D37;
-  --color-primary-700: #718F3F;
-  --color-primary-600: #7FA147;
-  --color-primary-500: #8DB350;
-  --color-primary-400: #A4C26B;
-  --color-primary-300: #BBD186;
-  --color-primary-200: #D2E0A2;
-  --color-primary-100: #E3EDBF;
-  --color-primary-50:  #C8C27A;
+  --color-primary-900: #556b2f;
+  --color-primary-800: #637d37;
+  --color-primary-700: #718f3f;
+  --color-primary-600: #7fa147;
+  --color-primary-500: #8db350;
+  --color-primary-400: #a4c26b;
+  --color-primary-300: #bbd186;
+  --color-primary-200: #d2e0a2;
+  --color-primary-100: #e3edbf;
+  --color-primary-50: #c8c27a;
 
-  --color-primary:     var(--color-primary-700);
-  --color-primary-fg:  #FFFFFF;
+  --color-primary: var(--color-primary-700);
+  --color-primary-fg: #ffffff;
 
-  --color-background:  #F5F5F0;
-  --color-surface:     #FFFFFF;
-  --color-border:      #D5D5C0;
+  --color-background: #f5f5f0;
+  --color-surface: #ffffff;
+  --color-border: #d5d5c0;
 
-  --color-text-primary:   #3A4A20;
-  --color-text-secondary: #556B2F;
-  --color-text-muted:     #7A8A5A;
+  --color-text-primary: #3a4a20;
+  --color-text-secondary: #556b2f;
+  --color-text-muted: #7a8a5a;
 
-  --color-success: #718F3F;
-  --color-warning: #D4A017;
-  --color-error:   #C0392B;
-  --color-info:    #2980B9;
+  --color-success: #718f3f;
+  --color-warning: #d4a017;
+  --color-error: #c0392b;
+  --color-info: #2980b9;
 }

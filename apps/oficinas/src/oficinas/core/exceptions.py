@@ -52,3 +52,11 @@ class PlacaInvalida(OficinaDomainError):
 
 class NFeJaImportada(OficinaDomainError):
     """Tentativa de importar NF-e com chave que já existe no banco."""
+
+
+class RascunhoPendente(OficinaDomainError):
+    """Tentativa de confirmar NF-e com itens ainda pendentes de vinculação."""
+
+
+class RascunhoJaConfirmado(OficinaDomainError):
+    """Tentativa de operar em rascunho já confirmado ou cancelado."""

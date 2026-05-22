@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Numeric, String, Text
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -35,6 +35,7 @@ class Produto(Base):
     estoque_minimo: Mapped[Decimal] = mapped_column(Numeric(12, 3), default=Decimal("0"))
     estoque_maximo: Mapped[Decimal] = mapped_column(Numeric(12, 3), default=Decimal("0"))
     ativo:          Mapped[bool] = mapped_column(Boolean, default=True)
+    ean:            Mapped[str | None] = mapped_column(String(14), nullable=True)
 
 
 class EntradaNfe(Base):
@@ -82,3 +83,48 @@ class MovimentacaoEstoque(Base):
     criado_em:        Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+
+
+class MapeamentoFornecedorProduto(Base):
+    __tablename__ = "mapeamento_fornecedor_produto"
+    __table_args__ = (UniqueConstraint("tenant_id", "fornecedor_id", "codigo_fornecedor"),)
+
+    id:                Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id:         Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("tenant.id"))
+    fornecedor_id:     Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("fornecedor.id"))
+    codigo_fornecedor: Mapped[str] = mapped_column(Text, nullable=False)
+    produto_id:        Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("produto.id"))
+
+
+class RascunhoEntrada(Base):
+    __tablename__ = "rascunho_entrada"
+
+    id:            Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id:     Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("tenant.id"))
+    fornecedor_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("fornecedor.id"), nullable=True)
+    chave_nfe:     Mapped[str | None] = mapped_column(String(44), nullable=True)
+    numero_nf:     Mapped[str | None] = mapped_column(Text, nullable=True)
+    data_emissao:  Mapped[date | None] = mapped_column(Date, nullable=True)
+    valor_total:   Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
+    status:        Mapped[str] = mapped_column(String(20), nullable=False, default="PENDENTE")
+    criado_em:     Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+
+
+class ItemRascunhoEntrada(Base):
+    __tablename__ = "item_rascunho_entrada"
+
+    id:                Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    rascunho_id:       Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("rascunho_entrada.id"))
+    produto_id:        Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("produto.id"), nullable=True)
+    codigo_fornecedor: Mapped[str] = mapped_column(Text, nullable=False)
+    codigo_ref:        Mapped[str | None] = mapped_column(Text, nullable=True)
+    ean:               Mapped[str | None] = mapped_column(String(14), nullable=True)
+    descricao_nfe:     Mapped[str] = mapped_column(Text, nullable=False)
+    ncm:               Mapped[str | None] = mapped_column(String(8), nullable=True)
+    quantidade:        Mapped[Decimal] = mapped_column(Numeric(12, 3), nullable=False)
+    preco_unitario:    Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    icms:              Mapped[Decimal] = mapped_column(Numeric(5, 2), default=Decimal("0"))
+    ipi:               Mapped[Decimal] = mapped_column(Numeric(5, 2), default=Decimal("0"))
+    status_item:       Mapped[str] = mapped_column(String(20), nullable=False, default="PENDENTE")

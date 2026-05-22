@@ -54,7 +54,10 @@ function DashboardLayout() {
               to={item.to}
               activeOptions={{ exact: item.to === "/dashboard" }}
               className="block px-3 py-2 rounded-md text-sm text-[--color-text-secondary] hover:bg-[--color-background] hover:text-[--color-text-primary] transition-colors"
-              activeProps={{ className: "block px-3 py-2 rounded-md text-sm bg-[--color-background] text-[--color-text-primary] font-medium" }}
+              activeProps={{
+                className:
+                  "block px-3 py-2 rounded-md text-sm bg-[--color-background] text-[--color-text-primary] font-medium",
+              }}
             >
               {item.label}
             </Link>

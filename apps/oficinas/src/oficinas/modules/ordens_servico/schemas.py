@@ -61,6 +61,9 @@ class OSResponse(BaseModel):
     total_servicos: Decimal
     desconto: Decimal
     total_final: Decimal
+    # campos de display — preenchidos pelo router, não pelo service
+    cliente_nome: str | None = None
+    veiculo_placa: str | None = None
 
     model_config = {"from_attributes": True}
 

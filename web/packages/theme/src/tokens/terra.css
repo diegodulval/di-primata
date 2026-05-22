@@ -1,30 +1,30 @@
 /* Paleta Terra — App operador/campo, Primata UI, materiais de treinamento
    Mensagem: acessível, intuitivo para usuários em transição digital */
 .theme-terra {
-  --color-primary-900: #7A4E2D;
-  --color-primary-800: #8C5C35;
-  --color-primary-700: #9E6A3D;
-  --color-primary-600: #B07845;
-  --color-primary-500: #C2864D;
-  --color-primary-400: #CD9D70;
-  --color-primary-300: #D8B493;
-  --color-primary-200: #E3CBB6;
-  --color-primary-100: #EDE0D0;
-  --color-primary-50:  #D6B38A;
+  --color-primary-900: #7a4e2d;
+  --color-primary-800: #8c5c35;
+  --color-primary-700: #9e6a3d;
+  --color-primary-600: #b07845;
+  --color-primary-500: #c2864d;
+  --color-primary-400: #cd9d70;
+  --color-primary-300: #d8b493;
+  --color-primary-200: #e3cbb6;
+  --color-primary-100: #ede0d0;
+  --color-primary-50: #d6b38a;
 
-  --color-primary:     var(--color-primary-700);
-  --color-primary-fg:  #FFFFFF;
+  --color-primary: var(--color-primary-700);
+  --color-primary-fg: #ffffff;
 
-  --color-background:  #FAF6F2;
-  --color-surface:     #FFFFFF;
-  --color-border:      #E0D0C0;
+  --color-background: #faf6f2;
+  --color-surface: #ffffff;
+  --color-border: #e0d0c0;
 
-  --color-text-primary:   #4A2E1A;
-  --color-text-secondary: #7A4E2D;
-  --color-text-muted:     #A07060;
+  --color-text-primary: #4a2e1a;
+  --color-text-secondary: #7a4e2d;
+  --color-text-muted: #a07060;
 
-  --color-success: #5A8A3A;
-  --color-warning: #D4A017;
-  --color-error:   #C0392B;
-  --color-info:    #2980B9;
+  --color-success: #5a8a3a;
+  --color-warning: #d4a017;
+  --color-error: #c0392b;
+  --color-info: #2980b9;
 }

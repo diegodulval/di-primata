@@ -67,8 +67,15 @@ const ROLES = [
 ];
 
 const INDUSTRIAL_KEYS = new Set([
-  "industrial", "industria", "manufatura", "fabrica",
-  "textil", "metalurgica", "alimenticia", "quimica", "moveleira",
+  "industrial",
+  "industria",
+  "manufatura",
+  "fabrica",
+  "textil",
+  "metalurgica",
+  "alimenticia",
+  "quimica",
+  "moveleira",
 ]);
 
 function detectDomain(setor: string) {
@@ -264,7 +271,9 @@ function Step3({
   const unitLabel = detectDomain(form.setor_primario) === "rural" ? "talhão" : "unidade";
 
   function addUnit() {
-    onChange({ unidades: [...form.unidades, { nome: "", tipo: defaultTipo, area_capacidade: "" }] });
+    onChange({
+      unidades: [...form.unidades, { nome: "", tipo: defaultTipo, area_capacidade: "" }],
+    });
   }
 
   function removeUnit(idx: number) {
@@ -383,8 +392,7 @@ function validate(step: number, form: FormState): Partial<Record<keyof FormState
   }
   if (step === 1) {
     if (!form.role) errs.role = "Selecione um perfil";
-    if (form.role === "PRODUTOR" && !form.setor_primario)
-      errs.setor_primario = "Selecione o setor";
+    if (form.role === "PRODUTOR" && !form.setor_primario) errs.setor_primario = "Selecione o setor";
   }
   if (step === 2) {
     if (!form.nome_conta.trim()) errs.nome_conta = "Nome da organização é obrigatório";
@@ -512,12 +520,7 @@ function NovoUsuarioPage() {
 
           {step === 0 && <Step1 form={form} onChange={onChange} errors={errors} />}
           {step === 1 && (
-            <Step2
-              form={form}
-              onChange={onChange}
-              errors={errors}
-              setorOptions={setorOptions}
-            />
+            <Step2 form={form} onChange={onChange} errors={errors} setorOptions={setorOptions} />
           )}
           {step === 2 && <Step3 form={form} onChange={onChange} errors={errors} />}
 

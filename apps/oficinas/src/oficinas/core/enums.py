@@ -43,3 +43,16 @@ class TipoVeiculo(StrEnum):
     MOTO     = "moto"
     CAMINHAO = "caminhao"
     VAN      = "van"
+
+
+class StatusRascunho(StrEnum):
+    PENDENTE   = "PENDENTE"
+    CONFIRMADA = "CONFIRMADA"
+    CANCELADA  = "CANCELADA"
+
+
+class StatusItem(StrEnum):
+    AUTO_VINCULADO = "AUTO_VINCULADO"
+    VINCULADO      = "VINCULADO"
+    NOVO           = "NOVO"
+    PENDENTE       = "PENDENTE"

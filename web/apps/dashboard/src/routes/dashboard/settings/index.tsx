@@ -1,5 +1,14 @@
 import { api } from "@di-mata/api-client";
-import { Button, Card, CardContent, CardHeader, CardTitle, Field, Input, Skeleton } from "@di-mata/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Field,
+  Input,
+  Skeleton,
+} from "@di-mata/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -55,17 +64,16 @@ function Settings() {
       whatsapp_phone: phone.trim() || null,
     };
     if (nome) payload.nome = nome;
-    update.mutate(
-      payload,
-      { onSuccess: () => setSaved(true) },
-    );
+    update.mutate(payload, { onSuccess: () => setSaved(true) });
   }
 
   return (
     <div className="p-6 max-w-lg space-y-6">
       <header>
         <h1 className="text-2xl font-bold text-[--color-text-primary]">Configurações</h1>
-        <p className="text-sm text-[--color-text-muted] mt-1">Dados da conta e integração WhatsApp</p>
+        <p className="text-sm text-[--color-text-muted] mt-1">
+          Dados da conta e integração WhatsApp
+        </p>
       </header>
 
       <Card>
@@ -89,10 +97,7 @@ function Settings() {
                 />
               </Field>
 
-              <Field
-                label="Telefone WhatsApp"
-                hint="Formato internacional, ex: +5511999990000"
-              >
+              <Field label="Telefone WhatsApp" hint="Formato internacional, ex: +5511999990000">
                 <Input
                   type="tel"
                   value={phone}
@@ -133,7 +138,6 @@ function Settings() {
     </div>
   );
 }
-
 
 function Row({ label, value }: { label: string; value: string | undefined }) {
   return (

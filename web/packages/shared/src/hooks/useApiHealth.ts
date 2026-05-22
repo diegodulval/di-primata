@@ -21,7 +21,9 @@ export function useApiHealth(): { status: Status; retry: () => void } {
     }
 
     void check();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [tick]);
 
   return { status, retry: () => setTick((t) => t + 1) };

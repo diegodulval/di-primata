@@ -145,7 +145,10 @@ function LoginCard() {
           type="email"
           inputSize="md"
           value={email}
-          onChange={(e) => { setEmail(e.target.value); setError(""); }}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setError("");
+          }}
           placeholder="E-mail"
           autoComplete="email"
         />
@@ -153,7 +156,10 @@ function LoginCard() {
           type="password"
           inputSize="md"
           value={senha}
-          onChange={(e) => { setSenha(e.target.value); setError(""); }}
+          onChange={(e) => {
+            setSenha(e.target.value);
+            setError("");
+          }}
           placeholder="Senha"
           autoComplete="current-password"
         />

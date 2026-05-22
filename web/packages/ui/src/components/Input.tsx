@@ -34,11 +34,7 @@ interface InputProps
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ className, inputSize, state, ...props }, ref) => (
-    <input
-      ref={ref}
-      className={cn(inputVariants({ inputSize, state, className }))}
-      {...props}
-    />
+    <input ref={ref} className={cn(inputVariants({ inputSize, state, className }))} {...props} />
   )
 );
 
