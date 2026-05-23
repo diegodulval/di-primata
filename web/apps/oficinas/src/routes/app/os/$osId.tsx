@@ -2,7 +2,7 @@ import { api } from "@/lib/api";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Skeleton } from "@di-mata/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 
 export const Route = createFileRoute("/app/os/$osId")({
   component: OSDetalhePage,
@@ -41,6 +41,28 @@ interface Produto {
   descricao: string;
   preco_venda: string;
   estoque_atual: string;
+}
+
+interface Apontamento {
+  id: string;
+  usuario_id: string;
+  usuario_nome: string | null;
+  item_os_id: string | null;
+  descricao: string;
+  duracao_minutos: number;
+  data_apontamento: string;
+}
+
+interface UsuarioSimples {
+  id: string;
+  nome: string;
+  perfil: string;
+}
+
+function fmtDuracao(min: number): string {
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
 const STATUS_BADGE: Record<string, "default" | "warning" | "error" | "success" | "outline"> = {
@@ -345,6 +367,233 @@ function FecharDialog({
   );
 }
 
+// ─── Apontamentos ─────────────────────────────────────────────────────────────
+
+function ApontamentosSection({ osId, itens }: { osId: string; itens: ItemOS[] }) {
+  const queryClient = useQueryClient();
+  const [aba, setAba] = useState<"realizados" | "lancar">("realizados");
+  const [usuarioId, setUsuarioId] = useState("");
+  const [itemOsId, setItemOsId] = useState("");
+  const [descricao, setDescricao] = useState("");
+  const [horas, setHoras] = useState("0");
+  const [minutos, setMinutos] = useState("0");
+  const [dataApt, setDataApt] = useState(new Date().toISOString().slice(0, 10));
+  const [erro, setErro] = useState<string | null>(null);
+
+  const { data: apontamentos, isLoading: loadingApts } = useQuery({
+    queryKey: ["apontamentos", osId],
+    queryFn: () => api.get<Apontamento[]>(`/os/${osId}/apontamentos`),
+  });
+
+  const { data: usuarios } = useQuery({
+    queryKey: ["usuarios-ativos"],
+    queryFn: () => api.get<UsuarioSimples[]>("/usuarios/ativos"),
+    enabled: aba === "lancar",
+  });
+
+  const lancar = useMutation({
+    mutationFn: () =>
+      api.post(`/os/${osId}/apontamentos`, {
+        usuario_id: usuarioId,
+        item_os_id: itemOsId || null,
+        descricao: itemOsId
+          ? (itens.find((i) => i.id === itemOsId)?.descricao ?? descricao)
+          : descricao,
+        duracao_minutos: Number(horas) * 60 + Number(minutos),
+        data_apontamento: dataApt,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["apontamentos", osId] });
+      setAba("realizados");
+      setUsuarioId("");
+      setItemOsId("");
+      setDescricao("");
+      setHoras("0");
+      setMinutos("0");
+      setErro(null);
+    },
+    onError: (err: Error) => setErro(err.message),
+  });
+
+  const remover = useMutation({
+    mutationFn: (aptId: string) => api.delete(`/os/${osId}/apontamentos/${aptId}`),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["apontamentos", osId] }),
+  });
+
+  const descricaoFinal = itemOsId
+    ? (itens.find((i) => i.id === itemOsId)?.descricao ?? "")
+    : descricao;
+
+  const podeLancar =
+    usuarioId.length > 0 &&
+    descricaoFinal.trim().length > 0 &&
+    Number(horas) * 60 + Number(minutos) > 0;
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-1">
+          {(["realizados", "lancar"] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setAba(t)}
+              className={`px-3 py-1 rounded-md text-sm transition-colors ${
+                aba === t
+                  ? "bg-[--color-primary] text-[--color-primary-fg] font-medium"
+                  : "text-[--color-text-secondary] hover:text-[--color-text-primary]"
+              }`}
+            >
+              {t === "realizados" ? "Apontamentos Realizados" : "Lançar Apontamento"}
+            </button>
+          ))}
+        </div>
+      </CardHeader>
+
+      <CardContent>
+        {aba === "realizados" ? (
+          loadingApts ? (
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          ) : !apontamentos?.length ? (
+            <p className="text-sm text-[--color-text-muted] text-center py-4">
+              Nenhum apontamento registrado.
+            </p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[--color-border] text-xs font-medium text-[--color-text-muted] text-left">
+                  <th className="pb-2 pr-4">Funcionário</th>
+                  <th className="pb-2 pr-4">Descrição</th>
+                  <th className="pb-2 pr-4 text-center">Duração</th>
+                  <th className="pb-2 pr-4">Data</th>
+                  <th className="pb-2" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[--color-border]">
+                {apontamentos.map((apt) => (
+                  <tr key={apt.id}>
+                    <td className="py-2 pr-4 text-[--color-text-primary]">
+                      {apt.usuario_nome ?? "—"}
+                    </td>
+                    <td className="py-2 pr-4 text-[--color-text-secondary] max-w-xs truncate">
+                      {apt.descricao}
+                    </td>
+                    <td className="py-2 pr-4 text-center font-mono text-xs text-[--color-text-secondary]">
+                      {fmtDuracao(apt.duracao_minutos)}
+                    </td>
+                    <td className="py-2 pr-4 text-[--color-text-secondary] text-xs">
+                      {new Date(apt.data_apontamento + "T00:00:00").toLocaleDateString("pt-BR")}
+                    </td>
+                    <td className="py-2 text-right">
+                      <button
+                        type="button"
+                        onClick={() => remover.mutate(apt.id)}
+                        disabled={remover.isPending}
+                        className="text-xs text-[--color-text-muted] hover:text-[--color-error] transition-colors"
+                      >
+                        Remover
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )
+        ) : (
+          <form
+            onSubmit={(e: FormEvent) => { e.preventDefault(); lancar.mutate(); }}
+            className="space-y-4"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs text-[--color-text-muted]">Funcionário *</label>
+                <select
+                  value={usuarioId}
+                  onChange={(e) => setUsuarioId(e.target.value)}
+                  required
+                  className="w-full rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                >
+                  <option value="">Selecionar...</option>
+                  {(usuarios ?? []).map((u) => (
+                    <option key={u.id} value={u.id}>{u.nome}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-[--color-text-muted]">Item da OS</label>
+                <select
+                  value={itemOsId}
+                  onChange={(e) => { setItemOsId(e.target.value); setDescricao(""); }}
+                  className="w-full rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                >
+                  <option value="">Nenhum (descrever abaixo)</option>
+                  {itens.map((i) => (
+                    <option key={i.id} value={i.id}>{i.descricao}</option>
+                  ))}
+                </select>
+              </div>
+              {!itemOsId && (
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="text-xs text-[--color-text-muted]">Descrição *</label>
+                  <input
+                    value={descricao}
+                    onChange={(e) => setDescricao(e.target.value)}
+                    required={!itemOsId}
+                    placeholder="O que foi realizado..."
+                    className="w-full rounded border border-[--color-border] bg-[--color-surface] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  />
+                </div>
+              )}
+              <div className="space-y-1">
+                <label className="text-xs text-[--color-text-muted]">Duração *</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="0"
+                    max="99"
+                    value={horas}
+                    onChange={(e) => setHoras(e.target.value)}
+                    className="w-20 rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  />
+                  <span className="text-xs text-[--color-text-muted]">h</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="59"
+                    value={minutos}
+                    onChange={(e) => setMinutos(e.target.value)}
+                    className="w-20 rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  />
+                  <span className="text-xs text-[--color-text-muted]">min</span>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-[--color-text-muted]">Data *</label>
+                <input
+                  type="date"
+                  value={dataApt}
+                  onChange={(e) => setDataApt(e.target.value)}
+                  required
+                  className="rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                />
+              </div>
+            </div>
+            {erro && <p className="text-xs text-[--color-error]">{erro}</p>}
+            <div className="flex justify-end">
+              <Button type="submit" size="sm" disabled={!podeLancar || lancar.isPending}>
+                {lancar.isPending ? "Salvando..." : "Lançar"}
+              </Button>
+            </div>
+          </form>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 function OSDetalhePage() {
@@ -564,6 +813,9 @@ function OSDetalhePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* ── Apontamentos ──────────────────────────────────────────────────── */}
+      <ApontamentosSection osId={osId} itens={itens ?? []} />
     </div>
   );
 }

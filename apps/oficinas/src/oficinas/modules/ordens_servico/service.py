@@ -9,8 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from oficinas.core.enums import StatusOS, TipoItem, TipoMovimentacao
 from oficinas.core.exceptions import NaoEncontrado, OSJaFechada, TransicaoInvalida
 from oficinas.modules.estoque.service import EstoqueService
-from oficinas.modules.ordens_servico.models import ItemOS, OrdemServico
-from oficinas.modules.ordens_servico.schemas import FecharOS, ItemOSAdd, OSCreate
+from oficinas.modules.ordens_servico.models import ApontamentoOS, ItemOS, OrdemServico
+from oficinas.modules.ordens_servico.schemas import ApontamentoCreate, FecharOS, ItemOSAdd, OSCreate
 from oficinas.shared.veiculo_global.models import HistoricoVeiculo, Veiculo
 
 log = structlog.get_logger()
@@ -252,3 +252,49 @@ class OrdensServicoService:
     async def _carregar_itens(self, os_id: uuid.UUID) -> list[ItemOS]:
         stmt = select(ItemOS).where(ItemOS.os_id == os_id)
         return list((await self.db.execute(stmt)).scalars().all())
+
+    async def lancar_apontamento(
+        self,
+        os_id: uuid.UUID,
+        tenant_id: uuid.UUID,
+        payload: ApontamentoCreate,
+    ) -> ApontamentoOS:
+        await self.buscar(os_id, tenant_id)
+        apt = ApontamentoOS(
+            os_id=os_id,
+            usuario_id=payload.usuario_id,
+            item_os_id=payload.item_os_id,
+            descricao=payload.descricao,
+            duracao_minutos=payload.duracao_minutos,
+            data_apontamento=payload.data_apontamento,
+        )
+        self.db.add(apt)
+        await self.db.commit()
+        await self.db.refresh(apt)
+        log.info("apontamento_lancado", apt_id=str(apt.id), os_id=str(os_id))
+        return apt
+
+    async def listar_apontamentos(
+        self, os_id: uuid.UUID, tenant_id: uuid.UUID
+    ) -> list[ApontamentoOS]:
+        await self.buscar(os_id, tenant_id)
+        stmt = (
+            select(ApontamentoOS)
+            .where(ApontamentoOS.os_id == os_id)
+            .order_by(ApontamentoOS.data_apontamento.desc(), ApontamentoOS.criado_em.desc())
+        )
+        return list((await self.db.execute(stmt)).scalars().all())
+
+    async def remover_apontamento(
+        self, os_id: uuid.UUID, apt_id: uuid.UUID, tenant_id: uuid.UUID
+    ) -> None:
+        await self.buscar(os_id, tenant_id)
+        stmt = select(ApontamentoOS).where(
+            ApontamentoOS.id == apt_id, ApontamentoOS.os_id == os_id
+        )
+        apt = (await self.db.execute(stmt)).scalar_one_or_none()
+        if not apt:
+            raise NaoEncontrado(f"Apontamento {apt_id} não encontrado")
+        await self.db.delete(apt)
+        await self.db.commit()
+        log.info("apontamento_removido", apt_id=str(apt_id), os_id=str(os_id))

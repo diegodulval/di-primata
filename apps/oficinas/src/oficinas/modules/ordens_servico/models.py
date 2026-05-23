@@ -1,8 +1,8 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from decimal import Decimal
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -43,3 +43,18 @@ class ItemOS(Base):
     quantidade:     Mapped[Decimal] = mapped_column(Numeric(12, 3), nullable=False)
     preco_unitario: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     subtotal:       Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+
+
+class ApontamentoOS(Base):
+    __tablename__ = "apontamento_os"
+
+    id:               Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    os_id:            Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("ordem_servico.id"))
+    usuario_id:       Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("usuario.id"))
+    item_os_id:       Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("item_os.id"), nullable=True)
+    descricao:        Mapped[str] = mapped_column(Text, nullable=False)
+    duracao_minutos:  Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    data_apontamento: Mapped[date] = mapped_column(Date, nullable=False)
+    criado_em:        Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )

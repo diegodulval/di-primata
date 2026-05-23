@@ -109,6 +109,14 @@ class IamService:
 
     # ─── Listagem e detalhe ───────────────────────────────────────────────────
 
+    async def listar_usuarios_ativos(self, tenant_id: uuid.UUID) -> list[Usuario]:
+        stmt = (
+            select(Usuario)
+            .where(Usuario.tenant_id == tenant_id, Usuario.ativo.is_(True))
+            .order_by(Usuario.nome)
+        )
+        return list((await self.db.execute(stmt)).scalars().all())
+
     async def listar_usuarios(self, tenant_id: uuid.UUID) -> list[Usuario]:
         stmt = (
             select(Usuario)

@@ -60,3 +60,7 @@ class RascunhoPendente(OficinaDomainError):
 
 class RascunhoJaConfirmado(OficinaDomainError):
     """Tentativa de operar em rascunho já confirmado ou cancelado."""
+
+
+class EntradaJaProcessada(OficinaDomainError):
+    """Tentativa de editar ou processar entrada que já está PROCESSADA."""

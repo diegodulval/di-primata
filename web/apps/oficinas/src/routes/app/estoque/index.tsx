@@ -1,7 +1,7 @@
 import { api } from "@/lib/api";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Skeleton } from "@di-mata/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
 
 export const Route = createFileRoute("/app/estoque/")({
@@ -153,17 +153,10 @@ function EstoquePage() {
   return (
     <div className="p-8">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-[--color-text-primary]">Estoque</h1>
-        <div className="flex gap-2">
-          <Link to="/app/estoque/entradas">
-            <Button variant="outline" size="sm">
-              Importar NF-e
-            </Button>
-          </Link>
-          <Button size="sm" onClick={() => setShowForm((v) => !v)}>
-            {showForm ? "Cancelar" : "+ Novo produto"}
-          </Button>
-        </div>
+        <h1 className="text-2xl font-bold text-[--color-text-primary]">Listagem de Produtos</h1>
+        <Button size="sm" onClick={() => setShowForm((v) => !v)}>
+          {showForm ? "Cancelar" : "+ Novo produto"}
+        </Button>
       </div>
 
       {showForm && <NovoProdutoForm onClose={() => setShowForm(false)} />}

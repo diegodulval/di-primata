@@ -12,6 +12,77 @@ export const Route = createFileRoute("/app")({
   component: AppLayout,
 });
 
+// ─── Nav tree types ───────────────────────────────────────────────────────────
+
+type NavLink = { type: "link"; to: string; label: string; exact?: boolean };
+type NavSection = { type: "section"; label: string; children: NavNode[] };
+type NavGroup = { type: "group"; label: string; children: NavNode[] };
+type NavNode = NavLink | NavSection | NavGroup;
+
+// ─── Nav renderers ────────────────────────────────────────────────────────────
+
+function NavLinkItem({ node }: { node: NavLink }) {
+  return (
+    <Link
+      to={node.to}
+      activeOptions={{ exact: node.exact ?? false }}
+      className="block px-3 py-1.5 rounded-md text-sm text-[--color-text-secondary] hover:bg-[--color-background] hover:text-[--color-text-primary] transition-colors"
+      activeProps={{
+        className:
+          "block px-3 py-1.5 rounded-md text-sm bg-[--color-background] text-[--color-text-primary] font-medium",
+      }}
+    >
+      {node.label}
+    </Link>
+  );
+}
+
+function NavSectionItem({ node, depth }: { node: NavSection; depth: number }) {
+  return (
+    <div>
+      <p
+        className="px-3 pt-3 pb-0.5 text-[11px] font-semibold uppercase tracking-wider text-[--color-text-muted] select-none"
+        style={{ paddingLeft: `${12 + depth * 8}px` }}
+      >
+        {node.label}
+      </p>
+      <NavNodes nodes={node.children} depth={depth + 1} />
+    </div>
+  );
+}
+
+function NavGroupItem({ node }: { node: NavGroup }) {
+  return (
+    <div>
+      <p className="px-3 pt-4 pb-1 text-xs font-semibold uppercase tracking-wider text-[--color-text-muted] select-none border-t border-[--color-border] mt-2">
+        {node.label}
+      </p>
+      <NavNodes nodes={node.children} depth={1} />
+    </div>
+  );
+}
+
+function NavNodes({ nodes, depth = 0 }: { nodes: NavNode[]; depth?: number }) {
+  return (
+    <>
+      {nodes.map((node, i) => {
+        const key = node.type === "link" ? node.to : `${node.type}-${node.label}-${i}`;
+        if (node.type === "link") {
+          return (
+            <div key={key} style={{ paddingLeft: `${depth * 8}px` }}>
+              <NavLinkItem node={node} />
+            </div>
+          );
+        }
+        if (node.type === "section") return <NavSectionItem key={key} node={node} depth={depth} />;
+        return <NavGroupItem key={key} node={node} />;
+      })}
+    </>
+  );
+}
+
+// ─── Layout ───────────────────────────────────────────────────────────────────
+
 function AppLayout() {
   const tenant = useTenant();
   const navigate = useNavigate();
@@ -26,16 +97,22 @@ function AppLayout() {
     return () => window.removeEventListener("auth:unauthorized", handler);
   }, [navigate]);
 
-  const NAV_ITEMS = [
-    { to: "/app" as const, label: "Início", exact: true },
-    { to: "/app/clientes" as const, label: "Clientes", exact: false },
-    { to: "/app/veiculos" as const, label: "Veículos", exact: false },
-    { to: "/app/os" as const, label: "OS", exact: false },
-    { to: "/app/estoque" as const, label: "Estoque", exact: false },
-    { to: "/app/vendas" as const, label: "Vendas", exact: false },
-    { to: "/app/fornecedores" as const, label: "Fornecedores", exact: false },
+  const NAV: NavNode[] = [
+    { type: "link", to: "/app", label: "Início", exact: true },
+    { type: "link", to: "/app/clientes", label: "Clientes" },
+    { type: "link", to: "/app/veiculos", label: "Veículos" },
+    { type: "link", to: "/app/vendas", label: "Vendas / OS" },
+    {
+      type: "group",
+      label: "Produtos",
+      children: [
+        { type: "link", to: "/app/estoque", label: "Listagem de produtos" },
+        { type: "link", to: "/app/estoque/entradas", label: "Entrada de compra" },
+      ],
+    },
+    { type: "link", to: "/app/fornecedores", label: "Fornecedores" },
     ...(perfil === "ADMIN"
-      ? [{ to: "/app/usuarios" as const, label: "Usuários", exact: false }]
+      ? ([{ type: "link", to: "/app/usuarios", label: "Usuários" }] as NavNode[])
       : []),
   ];
 
@@ -47,21 +124,8 @@ function AppLayout() {
             {tenant.brandName}
           </span>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              activeOptions={{ exact: item.exact }}
-              className="block px-3 py-2 rounded-md text-sm text-[--color-text-secondary] hover:bg-[--color-background] hover:text-[--color-text-primary] transition-colors"
-              activeProps={{
-                className:
-                  "block px-3 py-2 rounded-md text-sm bg-[--color-background] text-[--color-text-primary] font-medium",
-              }}
-            >
-              {item.label}
-            </Link>
-          ))}
+        <nav className="flex-1 px-3 py-4">
+          <NavNodes nodes={NAV} />
         </nav>
         <div className="px-3 py-4 border-t border-[--color-border]">
           <button

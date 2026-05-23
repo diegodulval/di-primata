@@ -108,7 +108,7 @@ function NovaVendaPage() {
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["vendas"] });
-      void navigate({ to: "/app/vendas" });
+      void navigate({ to: "/app/vendas", search: { busca: undefined } });
     },
     onError: (err: Error) => setErro(err.message),
   });
@@ -120,7 +120,7 @@ function NovaVendaPage() {
     <div className="p-8 space-y-6 max-w-3xl">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-[--color-text-primary]">Nova venda</h1>
-        <Button size="sm" variant="outline" onClick={() => void navigate({ to: "/app/vendas" })}>
+        <Button size="sm" variant="outline" onClick={() => void navigate({ to: "/app/vendas", search: { busca: undefined } })}>
           Cancelar
         </Button>
       </div>

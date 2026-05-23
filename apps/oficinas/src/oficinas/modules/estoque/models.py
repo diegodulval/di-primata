@@ -12,11 +12,17 @@ from oficinas.core.database import Base
 class Fornecedor(Base):
     __tablename__ = "fornecedor"
 
-    id:           Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    tenant_id:    Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("tenant.id"))
-    razao_social: Mapped[str] = mapped_column(Text, nullable=False)
-    cnpj:         Mapped[str | None] = mapped_column(String(14), nullable=True)
-    contato:      Mapped[str | None] = mapped_column(Text, nullable=True)
+    id:                  Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id:           Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("tenant.id"))
+    razao_social:        Mapped[str] = mapped_column(Text, nullable=False)
+    nome_fantasia:       Mapped[str | None] = mapped_column(Text, nullable=True)
+    cnpj:                Mapped[str | None] = mapped_column(String(14), nullable=True)
+    inscricao_estadual:  Mapped[str | None] = mapped_column(String(20), nullable=True)
+    telefone:            Mapped[str | None] = mapped_column(String(20), nullable=True)
+    email:               Mapped[str | None] = mapped_column(Text, nullable=True)
+    contato:             Mapped[str | None] = mapped_column(Text, nullable=True)
+    ativo:               Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    tipo_pessoa:         Mapped[str | None] = mapped_column(String(10), nullable=True, default="Juridica")
 
 
 class Produto(Base):
@@ -47,9 +53,10 @@ class EntradaNfe(Base):
     chave_nfe:     Mapped[str | None] = mapped_column(String(44), unique=True, nullable=True)
     numero_nf:     Mapped[str | None] = mapped_column(Text, nullable=True)
     data_emissao:  Mapped[date | None] = mapped_column(Date, nullable=True)
+    data_entrada:  Mapped[date | None] = mapped_column(Date, nullable=True)
     valor_total:   Mapped[Decimal | None] = mapped_column(Numeric(12, 2), nullable=True)
     xml_path:      Mapped[str | None] = mapped_column(Text, nullable=True)
-    status:        Mapped[str] = mapped_column(String(20), default="processada")
+    status:        Mapped[str] = mapped_column(String(20), default="PROCESSADA")
     criado_em:     Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
@@ -66,6 +73,7 @@ class ItemEntrada(Base):
     preco_unitario:    Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     icms:              Mapped[Decimal] = mapped_column(Numeric(5, 2), default=Decimal("0"))
     ipi:               Mapped[Decimal] = mapped_column(Numeric(5, 2), default=Decimal("0"))
+    data_entrada:      Mapped[date | None] = mapped_column(Date, nullable=True)
 
 
 class MovimentacaoEstoque(Base):
@@ -127,4 +135,6 @@ class ItemRascunhoEntrada(Base):
     preco_unitario:    Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
     icms:              Mapped[Decimal] = mapped_column(Numeric(5, 2), default=Decimal("0"))
     ipi:               Mapped[Decimal] = mapped_column(Numeric(5, 2), default=Decimal("0"))
+    cfop:              Mapped[str | None] = mapped_column(String(4), nullable=True)
+    cst:               Mapped[str | None] = mapped_column(String(3), nullable=True)
     status_item:       Mapped[str] = mapped_column(String(20), nullable=False, default="PENDENTE")

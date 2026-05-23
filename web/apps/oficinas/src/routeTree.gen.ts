@@ -23,9 +23,11 @@ import { Route as AppClientesIndexRouteImport } from './routes/app/clientes/inde
 import { Route as AppVendasNovaRouteImport } from './routes/app/vendas/nova'
 import { Route as AppOsNovaRouteImport } from './routes/app/os/nova'
 import { Route as AppOsOsIdRouteImport } from './routes/app/os/$osId'
+import { Route as AppFornecedoresFornecedorIdRouteImport } from './routes/app/fornecedores/$fornecedorId'
 import { Route as AppEstoqueEntradasRouteImport } from './routes/app/estoque/entradas'
 import { Route as AppClientesClienteIdRouteImport } from './routes/app/clientes/$clienteId'
 import { Route as AppEstoqueNfeRevisaoRascunhoIdRouteImport } from './routes/app/estoque/nfe-revisao.$rascunhoId'
+import { Route as AppEstoqueEntradaEntradaIdRouteImport } from './routes/app/estoque/entrada/$entradaId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -97,6 +99,12 @@ const AppOsOsIdRoute = AppOsOsIdRouteImport.update({
   path: '/os/$osId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFornecedoresFornecedorIdRoute =
+  AppFornecedoresFornecedorIdRouteImport.update({
+    id: '/fornecedores/$fornecedorId',
+    path: '/fornecedores/$fornecedorId',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppEstoqueEntradasRoute = AppEstoqueEntradasRouteImport.update({
   id: '/estoque/entradas',
   path: '/estoque/entradas',
@@ -113,6 +121,12 @@ const AppEstoqueNfeRevisaoRascunhoIdRoute =
     path: '/estoque/nfe-revisao/$rascunhoId',
     getParentRoute: () => AppRoute,
   } as any)
+const AppEstoqueEntradaEntradaIdRoute =
+  AppEstoqueEntradaEntradaIdRouteImport.update({
+    id: '/estoque/entrada/$entradaId',
+    path: '/estoque/entrada/$entradaId',
+    getParentRoute: () => AppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -121,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/app/clientes/$clienteId': typeof AppClientesClienteIdRoute
   '/app/estoque/entradas': typeof AppEstoqueEntradasRoute
+  '/app/fornecedores/$fornecedorId': typeof AppFornecedoresFornecedorIdRoute
   '/app/os/$osId': typeof AppOsOsIdRoute
   '/app/os/nova': typeof AppOsNovaRoute
   '/app/vendas/nova': typeof AppVendasNovaRoute
@@ -131,6 +146,7 @@ export interface FileRoutesByFullPath {
   '/app/usuarios/': typeof AppUsuariosIndexRoute
   '/app/veiculos/': typeof AppVeiculosIndexRoute
   '/app/vendas/': typeof AppVendasIndexRoute
+  '/app/estoque/entrada/$entradaId': typeof AppEstoqueEntradaEntradaIdRoute
   '/app/estoque/nfe-revisao/$rascunhoId': typeof AppEstoqueNfeRevisaoRascunhoIdRoute
 }
 export interface FileRoutesByTo {
@@ -139,6 +155,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/app/clientes/$clienteId': typeof AppClientesClienteIdRoute
   '/app/estoque/entradas': typeof AppEstoqueEntradasRoute
+  '/app/fornecedores/$fornecedorId': typeof AppFornecedoresFornecedorIdRoute
   '/app/os/$osId': typeof AppOsOsIdRoute
   '/app/os/nova': typeof AppOsNovaRoute
   '/app/vendas/nova': typeof AppVendasNovaRoute
@@ -149,6 +166,7 @@ export interface FileRoutesByTo {
   '/app/usuarios': typeof AppUsuariosIndexRoute
   '/app/veiculos': typeof AppVeiculosIndexRoute
   '/app/vendas': typeof AppVendasIndexRoute
+  '/app/estoque/entrada/$entradaId': typeof AppEstoqueEntradaEntradaIdRoute
   '/app/estoque/nfe-revisao/$rascunhoId': typeof AppEstoqueNfeRevisaoRascunhoIdRoute
 }
 export interface FileRoutesById {
@@ -159,6 +177,7 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/app/clientes/$clienteId': typeof AppClientesClienteIdRoute
   '/app/estoque/entradas': typeof AppEstoqueEntradasRoute
+  '/app/fornecedores/$fornecedorId': typeof AppFornecedoresFornecedorIdRoute
   '/app/os/$osId': typeof AppOsOsIdRoute
   '/app/os/nova': typeof AppOsNovaRoute
   '/app/vendas/nova': typeof AppVendasNovaRoute
@@ -169,6 +188,7 @@ export interface FileRoutesById {
   '/app/usuarios/': typeof AppUsuariosIndexRoute
   '/app/veiculos/': typeof AppVeiculosIndexRoute
   '/app/vendas/': typeof AppVendasIndexRoute
+  '/app/estoque/entrada/$entradaId': typeof AppEstoqueEntradaEntradaIdRoute
   '/app/estoque/nfe-revisao/$rascunhoId': typeof AppEstoqueNfeRevisaoRascunhoIdRoute
 }
 export interface FileRouteTypes {
@@ -180,6 +200,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/clientes/$clienteId'
     | '/app/estoque/entradas'
+    | '/app/fornecedores/$fornecedorId'
     | '/app/os/$osId'
     | '/app/os/nova'
     | '/app/vendas/nova'
@@ -190,6 +211,7 @@ export interface FileRouteTypes {
     | '/app/usuarios/'
     | '/app/veiculos/'
     | '/app/vendas/'
+    | '/app/estoque/entrada/$entradaId'
     | '/app/estoque/nfe-revisao/$rascunhoId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -198,6 +220,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/clientes/$clienteId'
     | '/app/estoque/entradas'
+    | '/app/fornecedores/$fornecedorId'
     | '/app/os/$osId'
     | '/app/os/nova'
     | '/app/vendas/nova'
@@ -208,6 +231,7 @@ export interface FileRouteTypes {
     | '/app/usuarios'
     | '/app/veiculos'
     | '/app/vendas'
+    | '/app/estoque/entrada/$entradaId'
     | '/app/estoque/nfe-revisao/$rascunhoId'
   id:
     | '__root__'
@@ -217,6 +241,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/clientes/$clienteId'
     | '/app/estoque/entradas'
+    | '/app/fornecedores/$fornecedorId'
     | '/app/os/$osId'
     | '/app/os/nova'
     | '/app/vendas/nova'
@@ -227,6 +252,7 @@ export interface FileRouteTypes {
     | '/app/usuarios/'
     | '/app/veiculos/'
     | '/app/vendas/'
+    | '/app/estoque/entrada/$entradaId'
     | '/app/estoque/nfe-revisao/$rascunhoId'
   fileRoutesById: FileRoutesById
 }
@@ -336,6 +362,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOsOsIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/fornecedores/$fornecedorId': {
+      id: '/app/fornecedores/$fornecedorId'
+      path: '/fornecedores/$fornecedorId'
+      fullPath: '/app/fornecedores/$fornecedorId'
+      preLoaderRoute: typeof AppFornecedoresFornecedorIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/estoque/entradas': {
       id: '/app/estoque/entradas'
       path: '/estoque/entradas'
@@ -357,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppEstoqueNfeRevisaoRascunhoIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/estoque/entrada/$entradaId': {
+      id: '/app/estoque/entrada/$entradaId'
+      path: '/estoque/entrada/$entradaId'
+      fullPath: '/app/estoque/entrada/$entradaId'
+      preLoaderRoute: typeof AppEstoqueEntradaEntradaIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -364,6 +404,7 @@ interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppClientesClienteIdRoute: typeof AppClientesClienteIdRoute
   AppEstoqueEntradasRoute: typeof AppEstoqueEntradasRoute
+  AppFornecedoresFornecedorIdRoute: typeof AppFornecedoresFornecedorIdRoute
   AppOsOsIdRoute: typeof AppOsOsIdRoute
   AppOsNovaRoute: typeof AppOsNovaRoute
   AppVendasNovaRoute: typeof AppVendasNovaRoute
@@ -374,6 +415,7 @@ interface AppRouteChildren {
   AppUsuariosIndexRoute: typeof AppUsuariosIndexRoute
   AppVeiculosIndexRoute: typeof AppVeiculosIndexRoute
   AppVendasIndexRoute: typeof AppVendasIndexRoute
+  AppEstoqueEntradaEntradaIdRoute: typeof AppEstoqueEntradaEntradaIdRoute
   AppEstoqueNfeRevisaoRascunhoIdRoute: typeof AppEstoqueNfeRevisaoRascunhoIdRoute
 }
 
@@ -381,6 +423,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppClientesClienteIdRoute: AppClientesClienteIdRoute,
   AppEstoqueEntradasRoute: AppEstoqueEntradasRoute,
+  AppFornecedoresFornecedorIdRoute: AppFornecedoresFornecedorIdRoute,
   AppOsOsIdRoute: AppOsOsIdRoute,
   AppOsNovaRoute: AppOsNovaRoute,
   AppVendasNovaRoute: AppVendasNovaRoute,
@@ -391,6 +434,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppUsuariosIndexRoute: AppUsuariosIndexRoute,
   AppVeiculosIndexRoute: AppVeiculosIndexRoute,
   AppVendasIndexRoute: AppVendasIndexRoute,
+  AppEstoqueEntradaEntradaIdRoute: AppEstoqueEntradaEntradaIdRoute,
   AppEstoqueNfeRevisaoRascunhoIdRoute: AppEstoqueNfeRevisaoRascunhoIdRoute,
 }
 

@@ -14,12 +14,21 @@ interface Cliente {
   cpf_cnpj: string | null;
   telefone: string | null;
   email: string | null;
+  endereco: string | null;
 }
 
 interface ClienteList {
   total: number;
   items: Cliente[];
 }
+
+function whatsappUrl(telefone: string): string {
+  const digits = telefone.replace(/\D/g, "");
+  const num = digits.startsWith("55") ? digits : `55${digits}`;
+  return `https://wa.me/${num}`;
+}
+
+// ─── Novo cliente ─────────────────────────────────────────────────────────────
 
 function NovoClienteForm({ onClose }: { onClose: () => void }) {
   const queryClient = useQueryClient();
@@ -120,10 +129,138 @@ function NovoClienteForm({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ─── Editar cliente ───────────────────────────────────────────────────────────
+
+function EditarClienteModal({
+  cliente,
+  onClose,
+}: {
+  cliente: Cliente;
+  onClose: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const [nome, setNome] = useState(cliente.nome);
+  const [cpf, setCpf] = useState(cliente.cpf_cnpj ?? "");
+  const [telefone, setTelefone] = useState(cliente.telefone ?? "");
+  const [email, setEmail] = useState(cliente.email ?? "");
+  const [endereco, setEndereco] = useState(cliente.endereco ?? "");
+  const [error, setError] = useState<string | null>(null);
+
+  const salvar = useMutation({
+    mutationFn: () =>
+      api.patch(`/clientes/${cliente.id}`, {
+        nome: nome || undefined,
+        cpf_cnpj: cpf || null,
+        telefone: telefone || null,
+        email: email || null,
+        endereco: endereco || null,
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["clientes"] });
+      onClose();
+    },
+    onError: (err: Error) => setError(err.message),
+  });
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      onClick={onClose}
+      onKeyDown={(e) => { if (e.key === "Escape") onClose(); }}
+    >
+      <div
+        className="bg-[--color-surface] rounded-xl shadow-xl w-full max-w-lg mx-4 p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="text-lg font-semibold text-[--color-text-primary] mb-4">Editar cliente</h2>
+        <form
+          onSubmit={(e: FormEvent) => {
+            e.preventDefault();
+            salvar.mutate();
+          }}
+          className="space-y-3"
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="sm:col-span-2 space-y-1">
+              <label htmlFor="ec-nome" className="text-sm font-medium text-[--color-text-primary]">
+                Nome *
+              </label>
+              <input
+                id="ec-nome"
+                required
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                className="w-full rounded-md border border-[--color-border] bg-[--color-background] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+              />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="ec-cpf" className="text-sm font-medium text-[--color-text-primary]">
+                CPF/CNPJ
+              </label>
+              <input
+                id="ec-cpf"
+                value={cpf}
+                onChange={(e) => setCpf(e.target.value)}
+                className="w-full rounded-md border border-[--color-border] bg-[--color-background] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+              />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="ec-tel" className="text-sm font-medium text-[--color-text-primary]">
+                Telefone
+              </label>
+              <input
+                id="ec-tel"
+                value={telefone}
+                onChange={(e) => setTelefone(e.target.value)}
+                className="w-full rounded-md border border-[--color-border] bg-[--color-background] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+              />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="ec-email" className="text-sm font-medium text-[--color-text-primary]">
+                E-mail
+              </label>
+              <input
+                id="ec-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-md border border-[--color-border] bg-[--color-background] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+              />
+            </div>
+            <div className="sm:col-span-2 space-y-1">
+              <label htmlFor="ec-end" className="text-sm font-medium text-[--color-text-primary]">
+                Endereço
+              </label>
+              <input
+                id="ec-end"
+                value={endereco}
+                onChange={(e) => setEndereco(e.target.value)}
+                className="w-full rounded-md border border-[--color-border] bg-[--color-background] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+              />
+            </div>
+          </div>
+          {error && <p className="text-sm text-[--color-error]">{error}</p>}
+          <div className="flex gap-2 justify-end pt-2">
+            <Button type="button" variant="outline" size="sm" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button type="submit" size="sm" disabled={salvar.isPending}>
+              {salvar.isPending ? "Salvando..." : "Salvar"}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 function ClientesPage() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [editando, setEditando] = useState<Cliente | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["clientes", q],
@@ -132,6 +269,10 @@ function ClientesPage() {
 
   return (
     <div className="p-8">
+      {editando && (
+        <EditarClienteModal cliente={editando} onClose={() => setEditando(null)} />
+      )}
+
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-[--color-text-primary]">Clientes</h1>
         <Button size="sm" onClick={() => setShowForm((v) => !v)}>
@@ -170,7 +311,8 @@ function ClientesPage() {
                   <th className="pb-2 pr-4 font-medium">Nome</th>
                   <th className="pb-2 pr-4 font-medium hidden sm:table-cell">CPF/CNPJ</th>
                   <th className="pb-2 pr-4 font-medium hidden md:table-cell">Telefone</th>
-                  <th className="pb-2 font-medium hidden md:table-cell">E-mail</th>
+                  <th className="pb-2 pr-4 font-medium hidden md:table-cell">E-mail</th>
+                  <th className="pb-2 font-medium">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[--color-border]">
@@ -196,8 +338,36 @@ function ClientesPage() {
                     <td className="py-3 pr-4 text-[--color-text-secondary] hidden md:table-cell">
                       {c.telefone ?? "—"}
                     </td>
-                    <td className="py-3 text-[--color-text-secondary] hidden md:table-cell">
+                    <td className="py-3 pr-4 text-[--color-text-secondary] hidden md:table-cell">
                       {c.email ?? "—"}
+                    </td>
+                    <td className="py-3" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-2">
+                        <Link
+                          to="/app/vendas"
+                          search={{ busca: c.nome }}
+                          className="text-xs text-[--color-primary] hover:underline whitespace-nowrap"
+                        >
+                          OS / Vendas
+                        </Link>
+                        {c.telefone && (
+                          <a
+                            href={whatsappUrl(c.telefone)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs text-green-600 hover:underline whitespace-nowrap"
+                          >
+                            WhatsApp
+                          </a>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setEditando(c)}
+                          className="text-xs text-[--color-text-muted] hover:text-[--color-text-primary] hover:underline whitespace-nowrap"
+                        >
+                          Editar
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

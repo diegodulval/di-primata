@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from oficinas.core.enums import StatusItem, StatusRascunho, TipoMovimentacao
+from oficinas.core.enums import StatusEntradaNfe, StatusItem, StatusRascunho, TipoMovimentacao
 from oficinas.core.exceptions import (
     NaoEncontrado,
     NFeJaImportada,
@@ -82,6 +82,8 @@ class RascunhoService:
                 preco_unitario=item_nfe.preco_unitario,
                 icms=item_nfe.icms,
                 ipi=item_nfe.ipi,
+                cfop=item_nfe.cfop,
+                cst=item_nfe.cst,
                 status_item=status_item,
             )
             self.db.add(item)
@@ -120,9 +122,30 @@ class RascunhoService:
         )
         return list((await self.db.execute(stmt)).scalars().all())
 
+    async def listar_com_fornecedor(
+        self, tenant_id: uuid.UUID
+    ) -> list[tuple[RascunhoEntrada, Fornecedor | None]]:
+        stmt = (
+            select(RascunhoEntrada, Fornecedor)
+            .outerjoin(Fornecedor, RascunhoEntrada.fornecedor_id == Fornecedor.id)
+            .where(RascunhoEntrada.tenant_id == tenant_id)
+            .order_by(RascunhoEntrada.criado_em.desc())
+        )
+        return [(row[0], row[1]) for row in (await self.db.execute(stmt)).all()]
+
     async def carregar_itens(self, rascunho_id: uuid.UUID) -> list[ItemRascunhoEntrada]:
         stmt = select(ItemRascunhoEntrada).where(ItemRascunhoEntrada.rascunho_id == rascunho_id)
         return list((await self.db.execute(stmt)).scalars().all())
+
+    async def carregar_itens_com_produto(
+        self, rascunho_id: uuid.UUID
+    ) -> list[tuple[ItemRascunhoEntrada, Produto | None]]:
+        stmt = (
+            select(ItemRascunhoEntrada, Produto)
+            .outerjoin(Produto, ItemRascunhoEntrada.produto_id == Produto.id)
+            .where(ItemRascunhoEntrada.rascunho_id == rascunho_id)
+        )
+        return [(row[0], row[1]) for row in (await self.db.execute(stmt)).all()]
 
     # ─── Vincular item ────────────────────────────────────────────────────────
 
@@ -163,6 +186,7 @@ class RascunhoService:
                 descricao=item.descricao_nfe,
                 ncm=item.ncm,
                 ean=item.ean,
+                marca=payload.marca or None,
                 preco_custo=item.preco_unitario,
                 preco_venda=item.preco_unitario,
                 estoque_atual=Decimal("0"),
@@ -201,6 +225,7 @@ class RascunhoService:
             numero_nf=rascunho.numero_nf,
             data_emissao=rascunho.data_emissao,
             valor_total=rascunho.valor_total,
+            status=StatusEntradaNfe.ABERTA,
         )
         self.db.add(entrada)
         await self.db.flush()
@@ -306,7 +331,10 @@ class RascunhoService:
             f = Fornecedor(
                 tenant_id=tenant_id,
                 razao_social=dados.emit_nome,
+                nome_fantasia=dados.emit_nome_fantasia,
                 cnpj=dados.emit_cnpj,
+                inscricao_estadual=dados.emit_ie,
+                telefone=dados.emit_telefone,
             )
             self.db.add(f)
             await self.db.flush()

@@ -5,8 +5,8 @@ import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from oficinas.core.enums import TipoMovimentacao
-from oficinas.core.exceptions import EstoqueInsuficiente, NaoEncontrado, NFeJaImportada
+from oficinas.core.enums import StatusEntradaNfe, TipoMovimentacao
+from oficinas.core.exceptions import EntradaJaProcessada, EstoqueInsuficiente, NaoEncontrado, NFeJaImportada
 from oficinas.modules.estoque.models import (
     EntradaNfe,
     Fornecedor,
@@ -44,9 +44,157 @@ class EstoqueService:
         log.info("fornecedor_criado", fornecedor_id=str(f.id))
         return f
 
-    async def listar_fornecedores(self, tenant_id: uuid.UUID) -> list[Fornecedor]:
-        stmt = select(Fornecedor).where(Fornecedor.tenant_id == tenant_id).order_by(Fornecedor.razao_social)
+    async def listar_fornecedores(
+        self,
+        tenant_id: uuid.UUID,
+        q: str | None = None,
+        ativo: bool | None = None,
+        tipo_pessoa: str | None = None,
+    ) -> list[Fornecedor]:
+        stmt = select(Fornecedor).where(Fornecedor.tenant_id == tenant_id)
+        if q:
+            pattern = f"%{q}%"
+            from sqlalchemy import or_
+            stmt = stmt.where(or_(
+                Fornecedor.razao_social.ilike(pattern),
+                Fornecedor.nome_fantasia.ilike(pattern),
+                Fornecedor.cnpj.ilike(pattern),
+            ))
+        if ativo is not None:
+            stmt = stmt.where(Fornecedor.ativo.is_(ativo))
+        if tipo_pessoa:
+            stmt = stmt.where(Fornecedor.tipo_pessoa == tipo_pessoa)
+        stmt = stmt.order_by(Fornecedor.razao_social)
         return list((await self.db.execute(stmt)).scalars().all())
+
+    async def importar_fornecedores_xlsx(
+        self, tenant_id: uuid.UUID, conteudo: bytes
+    ) -> dict:
+        import io
+        import openpyxl
+
+        try:
+            wb = openpyxl.load_workbook(io.BytesIO(conteudo), data_only=True)
+        except Exception as exc:
+            raise ValueError(f"Arquivo inválido: {exc}") from exc
+
+        ws = wb.active
+        rows = list(ws.iter_rows(values_only=True))
+        if not rows:
+            raise ValueError("Planilha vazia")
+
+        # Mapeia cabeçalhos para índice (case-insensitive)
+        cabecalhos = {str(c).strip().lower() if c else "": i for i, c in enumerate(rows[0])}
+
+        def col(row: tuple, *nomes: str):
+            for nome in nomes:
+                idx = cabecalhos.get(nome.lower())
+                if idx is not None and idx < len(row):
+                    val = row[idx]
+                    return str(val).strip() if val is not None else None
+            return None
+
+        criados = atualizados = ignorados = 0
+        erros: list[str] = []
+
+        for num, row in enumerate(rows[1:], start=2):
+            try:
+                razao = col(row, "razão social", "razao social", "nome")
+                if not razao:
+                    ignorados += 1
+                    continue
+
+                cnpj_raw = col(row, "cnpj", "cpf/cnpj", "cpf")
+                cnpj = cnpj_raw.replace(".", "").replace("/", "").replace("-", "").replace(" ", "") if cnpj_raw else None
+                if cnpj and len(cnpj) not in (11, 14):
+                    cnpj = cnpj_raw  # mantém original se não normalizar
+
+                status_str = col(row, "status") or "Ativo"
+                ativo = status_str.lower() != "inativo"
+
+                tipo_str = col(row, "tipo de pessoa", "tipo") or "Juridica"
+                tipo_pessoa = "Fisica" if "fis" in tipo_str.lower() else "Juridica"
+
+                dados = {
+                    "razao_social":       razao,
+                    "nome_fantasia":      col(row, "nome fantasia", "fantasia"),
+                    "cnpj":               cnpj,
+                    "inscricao_estadual": col(row, "inscrição estadual", "inscricao estadual", "ie"),
+                    "telefone":           col(row, "telefone comercial", "telefone", "celular"),
+                    "email":              col(row, "e-mail", "email"),
+                    "contato":            col(row, "responsável", "responsavel", "contato"),
+                    "ativo":              ativo,
+                    "tipo_pessoa":        tipo_pessoa,
+                }
+
+                # Upsert por CNPJ dentro do tenant
+                existente = None
+                if cnpj:
+                    stmt = select(Fornecedor).where(
+                        Fornecedor.cnpj == cnpj,
+                        Fornecedor.tenant_id == tenant_id,
+                    )
+                    existente = (await self.db.execute(stmt)).scalar_one_or_none()
+
+                if existente:
+                    for campo, valor in dados.items():
+                        if valor is not None:
+                            setattr(existente, campo, valor)
+                    atualizados += 1
+                else:
+                    self.db.add(Fornecedor(tenant_id=tenant_id, **dados))
+                    criados += 1
+
+            except Exception as exc:
+                erros.append(f"Linha {num}: {exc}")
+
+        await self.db.commit()
+        log.info("fornecedores_importados", criados=criados, atualizados=atualizados, tenant_id=str(tenant_id))
+        return {"criados": criados, "atualizados": atualizados, "ignorados": ignorados, "erros": erros}
+
+    async def listar_produtos_fornecedor(
+        self, fornecedor_id: uuid.UUID, tenant_id: uuid.UUID, q: str | None = None
+    ) -> list[dict]:
+        from sqlalchemy import and_
+        from oficinas.modules.estoque.models import MapeamentoFornecedorProduto
+        stmt = (
+            select(
+                MapeamentoFornecedorProduto.id,
+                MapeamentoFornecedorProduto.produto_id,
+                MapeamentoFornecedorProduto.codigo_fornecedor,
+                Produto.codigo,
+                Produto.descricao,
+                Produto.marca,
+            )
+            .join(Produto, MapeamentoFornecedorProduto.produto_id == Produto.id)
+            .where(
+                and_(
+                    MapeamentoFornecedorProduto.fornecedor_id == fornecedor_id,
+                    MapeamentoFornecedorProduto.tenant_id == tenant_id,
+                )
+            )
+        )
+        if q:
+            pattern = f"%{q}%"
+            from sqlalchemy import or_
+            stmt = stmt.where(or_(
+                Produto.codigo.ilike(pattern),
+                Produto.descricao.ilike(pattern),
+                MapeamentoFornecedorProduto.codigo_fornecedor.ilike(pattern),
+            ))
+        stmt = stmt.order_by(Produto.descricao)
+        rows = (await self.db.execute(stmt)).all()
+        return [
+            {
+                "mapeamento_id": r[0],
+                "produto_id":    r[1],
+                "codigo_fornecedor": r[2],
+                "codigo_interno": r[3],
+                "descricao":     r[4],
+                "marca":         r[5],
+            }
+            for r in rows
+        ]
 
     async def buscar_fornecedor(self, fornecedor_id: uuid.UUID, tenant_id: uuid.UUID) -> Fornecedor:
         stmt = select(Fornecedor).where(Fornecedor.id == fornecedor_id, Fornecedor.tenant_id == tenant_id)
@@ -83,6 +231,15 @@ class EstoqueService:
             stmt = stmt.where(or_(Produto.descricao.ilike(pattern), Produto.codigo.ilike(pattern)))
         stmt = stmt.order_by(Produto.descricao)
         return list((await self.db.execute(stmt)).scalars().all())
+
+    async def listar_marcas(self, tenant_id: uuid.UUID) -> list[str]:
+        stmt = (
+            select(Produto.marca)
+            .where(Produto.tenant_id == tenant_id, Produto.ativo.is_(True), Produto.marca.isnot(None))
+            .distinct()
+            .order_by(Produto.marca)
+        )
+        return [r for r in (await self.db.execute(stmt)).scalars().all() if r]
 
     async def buscar_produto(self, produto_id: uuid.UUID, tenant_id: uuid.UUID) -> Produto:
         stmt = select(Produto).where(Produto.id == produto_id, Produto.tenant_id == tenant_id)
@@ -236,6 +393,51 @@ class EstoqueService:
             self.db.add(f)
             await self.db.flush()
         return f
+
+    # ─── Entrada NF-e (pós-rascunho) ─────────────────────────────────────────
+
+    async def buscar_entrada(self, entrada_id: uuid.UUID, tenant_id: uuid.UUID) -> EntradaNfe:
+        stmt = select(EntradaNfe).where(
+            EntradaNfe.id == entrada_id, EntradaNfe.tenant_id == tenant_id
+        )
+        e = (await self.db.execute(stmt)).scalar_one_or_none()
+        if not e:
+            raise NaoEncontrado(f"Entrada {entrada_id} não encontrada")
+        return e
+
+    async def listar_itens_entrada(self, entrada_id: uuid.UUID) -> list[ItemEntrada]:
+        stmt = select(ItemEntrada).where(ItemEntrada.entrada_id == entrada_id)
+        return list((await self.db.execute(stmt)).scalars().all())
+
+    async def processar_entrada(
+        self,
+        entrada_id: uuid.UUID,
+        tenant_id: uuid.UUID,
+        data_entrada_nota,
+        itens_update: list,
+    ) -> EntradaNfe:
+        entrada = await self.buscar_entrada(entrada_id, tenant_id)
+        if entrada.status == StatusEntradaNfe.PROCESSADA:
+            raise EntradaJaProcessada(f"Entrada {entrada_id} já está processada")
+
+        if data_entrada_nota is not None:
+            entrada.data_entrada = data_entrada_nota
+
+        if itens_update:
+            itens = await self.listar_itens_entrada(entrada_id)
+            itens_por_id = {i.id: i for i in itens}
+            for upd in itens_update:
+                item = itens_por_id.get(upd.id)
+                if item and upd.data_entrada is not None:
+                    item.data_entrada = upd.data_entrada
+
+        entrada.status = StatusEntradaNfe.PROCESSADA
+        await self.db.commit()
+        await self.db.refresh(entrada)
+        log.info("entrada_processada", entrada_id=str(entrada_id))
+        return entrada
+
+    # ─── Helpers internos ─────────────────────────────────────────────────────
 
     async def _upsert_produto(self, tenant_id: uuid.UUID, item) -> Produto:
         stmt = select(Produto).where(

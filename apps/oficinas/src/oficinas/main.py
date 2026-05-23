@@ -10,6 +10,7 @@ from oficinas.core.config import settings
 from oficinas.core.exceptions import (
     CredenciaisInvalidas,
     EmailJaCadastrado,
+    EntradaJaProcessada,
     EstoqueInsuficiente,
     MecanicoObrigatorio,
     NaoEncontrado,
@@ -45,6 +46,7 @@ from oficinas.agente.webhook import router as webhook_router
 from oficinas.modules.cadastros.router import router as cadastros_router
 from oficinas.modules.estoque.router import entradas_router, fornecedores_router, produtos_router
 from oficinas.modules.iam.router import router as auth_router, usuarios_router
+from oficinas.modules.movimentos.router import router as movimentos_router
 from oficinas.modules.ordens_servico.router import router as os_router
 from oficinas.modules.vendas.router import router as vendas_router
 from oficinas.shared.veiculo_global.router import router as veiculos_router
@@ -89,6 +91,7 @@ app.include_router(cadastros_router)
 app.include_router(produtos_router)
 app.include_router(fornecedores_router)
 app.include_router(entradas_router)
+app.include_router(movimentos_router)
 app.include_router(os_router)
 app.include_router(vendas_router)
 app.include_router(webhook_router)
@@ -104,6 +107,7 @@ _STATUS = {
     WhatsappJaCadastrado: 409,
     NFeJaImportada: 409,
     RascunhoJaConfirmado: 409,
+    EntradaJaProcessada: 409,
     OSJaFechada: 409,
     WhatsappObrigatorioParaMecanico: 422,
     PlacaInvalida: 422,

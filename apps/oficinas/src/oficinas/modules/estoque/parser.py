@@ -71,18 +71,23 @@ class ItemNFe:
     ipi:            Decimal = Decimal("0")
     ean:            str | None = None   # cEAN se válido
     codigo_ref:     str | None = None  # código extraído do início de xProd
+    cfop:           str | None = None
+    cst:            str | None = None
 
 
 @dataclass
 class NFeParseResult:
-    chave:        str
-    numero:       str
-    serie:        str
-    data_emissao: date | None
-    emit_cnpj:    str
-    emit_nome:    str
-    valor_total:  Decimal
-    itens:        list[ItemNFe] = field(default_factory=list)
+    chave:              str
+    numero:             str
+    serie:              str
+    data_emissao:       date | None
+    emit_cnpj:          str
+    emit_nome:          str
+    emit_nome_fantasia: str | None
+    emit_ie:            str | None
+    emit_telefone:      str | None
+    valor_total:        Decimal
+    itens:              list[ItemNFe] = field(default_factory=list)
 
 
 def parse_nfe(xml_bytes: bytes) -> NFeParseResult:
@@ -120,6 +125,22 @@ def parse_nfe(xml_bytes: bytes) -> NFeParseResult:
         descricao = _t(prod, "xProd")
         ean_raw   = _t(prod, "cEAN")
 
+        cfop = _t(prod, "CFOP") or None
+
+        cst: str | None = None
+        icms_group = det.find(f"{{{_NS}}}imposto/{{{_NS}}}ICMS")
+        if icms_group is None:
+            icms_group = det.find(f".//{{{_NS}}}ICMS")
+        if icms_group is not None:
+            for child in list(icms_group):
+                for tag in ("CST", "CSOSN"):
+                    cst_elem = child.find(f"{{{_NS}}}{tag}")
+                    if cst_elem is not None and cst_elem.text:
+                        cst = cst_elem.text.zfill(3)
+                        break
+                if cst:
+                    break
+
         itens.append(ItemNFe(
             codigo=_t(prod, "cProd"),
             descricao=descricao,
@@ -130,7 +151,13 @@ def parse_nfe(xml_bytes: bytes) -> NFeParseResult:
             ipi=_d(ipi_elem.text)  if ipi_elem  is not None else Decimal("0"),
             ean=ean_raw if _ean_valido(ean_raw) else None,
             codigo_ref=extrair_codigo_ref(descricao),
+            cfop=cfop,
+            cst=cst,
         ))
+
+    xfant = _t(emit, "xFant") or None
+    emit_ie = _t(emit, "IE") or None
+    emit_fone = _t(emit, "fone") or None
 
     return NFeParseResult(
         chave=chave,
@@ -139,6 +166,9 @@ def parse_nfe(xml_bytes: bytes) -> NFeParseResult:
         data_emissao=_parse_date(data_raw),
         emit_cnpj=_t(emit, "CNPJ"),
         emit_nome=_t(emit, "xNome"),
+        emit_nome_fantasia=xfant,
+        emit_ie=emit_ie,
+        emit_telefone=emit_fone,
         valor_total=valor_total,
         itens=itens,
     )

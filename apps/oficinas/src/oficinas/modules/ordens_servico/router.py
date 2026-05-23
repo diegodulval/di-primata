@@ -8,8 +8,11 @@ from oficinas.core.database import make_db
 from oficinas.core.enums import StatusOS
 from oficinas.core.security import requer_atendente_acima, requer_autenticado
 from oficinas.modules.cadastros.models import Cliente
+from oficinas.modules.iam.models import Usuario
 from oficinas.modules.ordens_servico.models import OrdemServico
 from oficinas.modules.ordens_servico.schemas import (
+    ApontamentoCreate,
+    ApontamentoResponse,
     AtualizarStatusOS,
     FecharOS,
     ItemOSAdd,
@@ -35,6 +38,26 @@ async def _enrich(os: OrdemServico, db: AsyncSession) -> OSResponse:
     resp.cliente_nome = cliente
     resp.veiculo_placa = veiculo
     return resp
+
+
+async def _enrich_apontamentos(
+    apts: list, db: AsyncSession
+) -> list[ApontamentoResponse]:
+    if not apts:
+        return []
+    usuario_ids = list({a.usuario_id for a in apts})
+    usuarios = {
+        str(r.id): r.nome
+        for r in (
+            await db.execute(select(Usuario.id, Usuario.nome).where(Usuario.id.in_(usuario_ids)))
+        ).all()
+    }
+    result = []
+    for apt in apts:
+        resp = ApontamentoResponse.model_validate(apt)
+        resp.usuario_nome = usuarios.get(str(apt.usuario_id))
+        result.append(resp)
+    return result
 
 
 async def _enrich_lista(items: list[OrdemServico], db: AsyncSession) -> list[OSResponse]:
@@ -199,3 +222,47 @@ async def cancelar_os(
 ):
     os = await OrdensServicoService(db).cancelar(os_id, usuario.tenant_id)
     return await _enrich(os, db)
+
+
+@router.get(
+    "/{os_id}/apontamentos",
+    response_model=list[ApontamentoResponse],
+    summary="Listar apontamentos de horas da OS",
+)
+async def listar_apontamentos_os(
+    os_id: uuid.UUID,
+    usuario=Depends(requer_autenticado),
+    db: AsyncSession = Depends(make_db(requer_autenticado)),
+):
+    apts = await OrdensServicoService(db).listar_apontamentos(os_id, usuario.tenant_id)
+    return await _enrich_apontamentos(apts, db)
+
+
+@router.post(
+    "/{os_id}/apontamentos",
+    response_model=ApontamentoResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Lançar apontamento de horas na OS",
+)
+async def lancar_apontamento_os(
+    os_id: uuid.UUID,
+    payload: ApontamentoCreate,
+    usuario=Depends(requer_autenticado),
+    db: AsyncSession = Depends(make_db(requer_autenticado)),
+):
+    apt = await OrdensServicoService(db).lancar_apontamento(os_id, usuario.tenant_id, payload)
+    return (await _enrich_apontamentos([apt], db))[0]
+
+
+@router.delete(
+    "/{os_id}/apontamentos/{apt_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Remover apontamento",
+)
+async def remover_apontamento_os(
+    os_id: uuid.UUID,
+    apt_id: uuid.UUID,
+    usuario=Depends(requer_autenticado),
+    db: AsyncSession = Depends(make_db(requer_autenticado)),
+):
+    await OrdensServicoService(db).remover_apontamento(os_id, apt_id, usuario.tenant_id)

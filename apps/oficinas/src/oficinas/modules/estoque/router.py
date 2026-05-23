@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from oficinas.core.database import make_db
@@ -9,12 +9,16 @@ from oficinas.core.security import requer_admin, requer_atendente_acima
 from oficinas.modules.estoque.rascunho_service import RascunhoService
 from oficinas.modules.estoque.schemas import (
     EntradaNfeResponse,
+    EntradaUpdate,
     FornecedorCreate,
     FornecedorResponse,
     FornecedorUpdate,
+    ImportacaoFornecedorResponse,
+    ItemEntradaResponse,
     ItemRascunhoResponse,
     MovimentacaoResponse,
     ProdutoCreate,
+    ProdutoFornecedorResponse,
     ProdutoResponse,
     ProdutoUpdate,
     RascunhoResponse,
@@ -27,11 +31,27 @@ fornecedores_router = APIRouter(prefix="/fornecedores", tags=["estoque"])
 entradas_router    = APIRouter(prefix="/entradas",    tags=["estoque"])
 
 
-def _build_rascunho_response(rascunho, itens) -> RascunhoResponse:
-    item_responses = [ItemRascunhoResponse.model_validate(i) for i in itens]
+def _build_entrada_response(entrada, itens) -> EntradaNfeResponse:
+    resp = EntradaNfeResponse.model_validate(entrada)
+    resp.itens = [ItemEntradaResponse.model_validate(i) for i in itens]
+    return resp
+
+
+def _build_rascunho_response(rascunho, itens_com_produto) -> RascunhoResponse:
+    item_responses = []
+    for entry in itens_com_produto:
+        if isinstance(entry, tuple):
+            item, produto = entry
+        else:
+            item, produto = entry, None
+        r = ItemRascunhoResponse.model_validate(item)
+        if produto is not None:
+            r.codigo_produto = produto.codigo
+            r.marca_produto = produto.marca
+        item_responses.append(r)
     resp = RascunhoResponse.model_validate(rascunho)
     resp.itens = item_responses
-    resp.pendentes = sum(1 for i in itens if i.status_item == StatusItem.PENDENTE)
+    resp.pendentes = sum(1 for r in item_responses if r.status_item == StatusItem.PENDENTE)
     return resp
 
 
@@ -55,6 +75,15 @@ async def listar_produtos(
     db: AsyncSession = Depends(make_db(requer_atendente_acima)),
 ):
     return await EstoqueService(db).listar_produtos(usuario.tenant_id, q)
+
+
+@produtos_router.get("/marcas", response_model=list[str],
+                     summary="Listar marcas distintas dos produtos ativos (ATENDENTE/ADMIN)")
+async def listar_marcas(
+    usuario=Depends(requer_atendente_acima),
+    db: AsyncSession = Depends(make_db(requer_atendente_acima)),
+):
+    return await EstoqueService(db).listar_marcas(usuario.tenant_id)
 
 
 @produtos_router.get("/{produto_id}", response_model=ProdutoResponse,
@@ -90,6 +119,23 @@ async def movimentacoes_produto(
 
 # ─── Fornecedores ─────────────────────────────────────────────────────────────
 
+@fornecedores_router.post("/importar", response_model=ImportacaoFornecedorResponse,
+                           summary="Importar fornecedores via planilha XLSX (ADMIN)")
+async def importar_fornecedores(
+    arquivo: UploadFile,
+    usuario=Depends(requer_admin),
+    db: AsyncSession = Depends(make_db(requer_admin)),
+):
+    if not arquivo.filename or not arquivo.filename.lower().endswith(".xlsx"):
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Envie um arquivo .xlsx")
+    conteudo = await arquivo.read()
+    try:
+        resultado = await EstoqueService(db).importar_fornecedores_xlsx(usuario.tenant_id, conteudo)
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    return resultado
+
+
 @fornecedores_router.post("", response_model=FornecedorResponse, status_code=status.HTTP_201_CREATED,
                            summary="Criar fornecedor (ADMIN)")
 async def criar_fornecedor(
@@ -101,12 +147,15 @@ async def criar_fornecedor(
 
 
 @fornecedores_router.get("", response_model=list[FornecedorResponse],
-                          summary="Listar fornecedores (ATENDENTE/ADMIN)")
+                          summary="Listar fornecedores. Filtre por ?q=, ?ativo=, ?tipo_pessoa= (ATENDENTE/ADMIN)")
 async def listar_fornecedores(
+    q: str | None = None,
+    ativo: bool | None = None,
+    tipo_pessoa: str | None = None,
     usuario=Depends(requer_atendente_acima),
     db: AsyncSession = Depends(make_db(requer_atendente_acima)),
 ):
-    return await EstoqueService(db).listar_fornecedores(usuario.tenant_id)
+    return await EstoqueService(db).listar_fornecedores(usuario.tenant_id, q=q, ativo=ativo, tipo_pessoa=tipo_pessoa)
 
 
 @fornecedores_router.get("/{fornecedor_id}", response_model=FornecedorResponse,
@@ -117,6 +166,17 @@ async def detalhar_fornecedor(
     db: AsyncSession = Depends(make_db(requer_atendente_acima)),
 ):
     return await EstoqueService(db).buscar_fornecedor(fornecedor_id, usuario.tenant_id)
+
+
+@fornecedores_router.get("/{fornecedor_id}/produtos", response_model=list[ProdutoFornecedorResponse],
+                          summary="Produtos mapeados ao fornecedor (ATENDENTE/ADMIN)")
+async def listar_produtos_fornecedor(
+    fornecedor_id: uuid.UUID,
+    q: str | None = None,
+    usuario=Depends(requer_atendente_acima),
+    db: AsyncSession = Depends(make_db(requer_atendente_acima)),
+):
+    return await EstoqueService(db).listar_produtos_fornecedor(fornecedor_id, usuario.tenant_id, q=q)
 
 
 @fornecedores_router.patch("/{fornecedor_id}", response_model=FornecedorResponse,
@@ -151,11 +211,13 @@ async def listar_rascunhos(
     db: AsyncSession = Depends(make_db(requer_atendente_acima)),
 ):
     svc = RascunhoService(db)
-    rascunhos = await svc.listar(usuario.tenant_id)
+    rascunhos_com_forn = await svc.listar_com_fornecedor(usuario.tenant_id)
     result = []
-    for r in rascunhos:
-        itens = await svc.carregar_itens(r.id)
-        result.append(_build_rascunho_response(r, itens))
+    for r, fornecedor in rascunhos_com_forn:
+        itens = await svc.carregar_itens_com_produto(r.id)
+        resp = _build_rascunho_response(r, itens)
+        resp.fornecedor_nome = fornecedor.razao_social if fornecedor else None
+        result.append(resp)
     return result
 
 
@@ -168,7 +230,7 @@ async def detalhar_rascunho(
 ):
     svc = RascunhoService(db)
     rascunho = await svc.buscar(rascunho_id, usuario.tenant_id)
-    itens = await svc.carregar_itens(rascunho_id)
+    itens = await svc.carregar_itens_com_produto(rascunho_id)
     return _build_rascunho_response(rascunho, itens)
 
 
@@ -213,5 +275,42 @@ async def cancelar_rascunho(
 ):
     svc = RascunhoService(db)
     rascunho = await svc.cancelar(rascunho_id, usuario.tenant_id)
-    itens = await svc.carregar_itens(rascunho_id)
+    itens = await svc.carregar_itens_com_produto(rascunho_id)
     return _build_rascunho_response(rascunho, itens)
+
+
+# ─── Entradas NF-e — pós-confirmação ─────────────────────────────────────────
+
+@entradas_router.get(
+    "/{entrada_id}",
+    response_model=EntradaNfeResponse,
+    summary="Detalhar entrada com itens (ATENDENTE/ADMIN)",
+)
+async def detalhar_entrada(
+    entrada_id: uuid.UUID,
+    usuario=Depends(requer_atendente_acima),
+    db: AsyncSession = Depends(make_db(requer_atendente_acima)),
+):
+    svc = EstoqueService(db)
+    entrada = await svc.buscar_entrada(entrada_id, usuario.tenant_id)
+    itens = await svc.listar_itens_entrada(entrada_id)
+    return _build_entrada_response(entrada, itens)
+
+
+@entradas_router.patch(
+    "/{entrada_id}",
+    response_model=EntradaNfeResponse,
+    summary="Salvar datas e processar entrada para financeiro (ADMIN)",
+)
+async def processar_entrada(
+    entrada_id: uuid.UUID,
+    payload: EntradaUpdate,
+    usuario=Depends(requer_admin),
+    db: AsyncSession = Depends(make_db(requer_admin)),
+):
+    svc = EstoqueService(db)
+    entrada = await svc.processar_entrada(
+        entrada_id, usuario.tenant_id, payload.data_entrada, payload.itens
+    )
+    itens = await svc.listar_itens_entrada(entrada_id)
+    return _build_entrada_response(entrada, itens)

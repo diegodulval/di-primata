@@ -56,3 +56,7 @@ class StatusItem(StrEnum):
     VINCULADO      = "VINCULADO"
     NOVO           = "NOVO"
     PENDENTE       = "PENDENTE"
+
+class StatusEntradaNfe(StrEnum):
+    ABERTA     = "ABERTA"
+    PROCESSADA = "PROCESSADA"

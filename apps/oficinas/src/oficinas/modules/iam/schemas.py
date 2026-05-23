@@ -88,3 +88,11 @@ class UsuarioResponse(BaseModel):
 class UsuarioListResponse(BaseModel):
     total: int
     items: list[UsuarioResponse]
+
+
+class UsuarioSimples(BaseModel):
+    id: uuid.UUID
+    nome: str
+    perfil: Perfil
+
+    model_config = {"from_attributes": True}

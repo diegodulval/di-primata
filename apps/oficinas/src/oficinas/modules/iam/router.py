@@ -20,6 +20,7 @@ from oficinas.modules.iam.schemas import (
     UsuarioCreate,
     UsuarioListResponse,
     UsuarioResponse,
+    UsuarioSimples,
     UsuarioUpdate,
 )
 from oficinas.modules.iam.service import IamService
@@ -106,6 +107,19 @@ async def trocar_minha_senha(
         await IamService(db).trocar_senha(usuario, payload.senha_atual, payload.nova_senha)
     except CredenciaisInvalidas as exc:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(exc))
+
+
+@usuarios_router.get(
+    "/ativos",
+    response_model=list[UsuarioSimples],
+    summary="Lista simplificada de usuários ativos do tenant (qualquer autenticado)",
+)
+async def listar_usuarios_ativos(
+    usuario=Depends(requer_autenticado),
+    db: AsyncSession = Depends(make_db(requer_autenticado)),
+):
+    items = await IamService(db).listar_usuarios_ativos(usuario.tenant_id)
+    return [UsuarioSimples.model_validate(u) for u in items]
 
 
 @usuarios_router.get(

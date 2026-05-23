@@ -9,25 +9,59 @@ from oficinas.core.enums import TipoMovimentacao
 
 
 class FornecedorCreate(BaseModel):
-    razao_social: str
-    cnpj:         str | None = None
-    contato:      str | None = None
+    razao_social:       str
+    nome_fantasia:      str | None = None
+    cnpj:               str | None = None
+    inscricao_estadual: str | None = None
+    telefone:           str | None = None
+    email:              str | None = None
+    contato:            str | None = None
+    ativo:              bool = True
+    tipo_pessoa:        str | None = "Juridica"
 
 
 class FornecedorUpdate(BaseModel):
-    razao_social: str | None = None
-    cnpj:         str | None = None
-    contato:      str | None = None
+    razao_social:       str | None = None
+    nome_fantasia:      str | None = None
+    cnpj:               str | None = None
+    inscricao_estadual: str | None = None
+    telefone:           str | None = None
+    email:              str | None = None
+    contato:            str | None = None
+    ativo:              bool | None = None
+    tipo_pessoa:        str | None = None
 
 
 class FornecedorResponse(BaseModel):
-    id:           uuid.UUID
-    tenant_id:    uuid.UUID
-    razao_social: str
-    cnpj:         str | None
-    contato:      str | None
+    id:                 uuid.UUID
+    tenant_id:          uuid.UUID
+    razao_social:       str
+    nome_fantasia:      str | None
+    cnpj:               str | None
+    inscricao_estadual: str | None
+    telefone:           str | None
+    email:              str | None
+    contato:            str | None
+    ativo:              bool
+    tipo_pessoa:        str | None
 
     model_config = {"from_attributes": True}
+
+
+class ProdutoFornecedorResponse(BaseModel):
+    mapeamento_id:     uuid.UUID
+    produto_id:        uuid.UUID
+    codigo_interno:    str
+    codigo_fornecedor: str
+    descricao:         str
+    marca:             str | None
+
+
+class ImportacaoFornecedorResponse(BaseModel):
+    criados:    int
+    atualizados: int
+    ignorados:  int
+    erros:      list[str]
 
 
 class ProdutoCreate(BaseModel):
@@ -97,6 +131,7 @@ class ItemEntradaResponse(BaseModel):
     preco_unitario:    Decimal
     icms:              Decimal
     ipi:               Decimal
+    data_entrada:      date | None
 
     model_config = {"from_attributes": True}
 
@@ -108,6 +143,7 @@ class EntradaNfeResponse(BaseModel):
     chave_nfe:     str | None
     numero_nf:     str | None
     data_emissao:  date | None
+    data_entrada:  date | None
     valor_total:   Decimal | None
     status:        str
     criado_em:     datetime
@@ -116,17 +152,30 @@ class EntradaNfeResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ItemEntradaUpdate(BaseModel):
+    id:           uuid.UUID
+    data_entrada: date | None = None
+
+
+class EntradaUpdate(BaseModel):
+    data_entrada: date | None = None
+    itens:        list[ItemEntradaUpdate] = []
+
+
 # ─── Rascunho NF-e ────────────────────────────────────────────────────────────
 
 class VincularItemPayload(BaseModel):
     acao:       Literal["vincular", "criar_novo"]
     produto_id: uuid.UUID | None = None
+    marca:      str | None = None
 
 
 class ItemRascunhoResponse(BaseModel):
     id:                uuid.UUID
     rascunho_id:       uuid.UUID
     produto_id:        uuid.UUID | None
+    codigo_produto:    str | None = None   # produto.codigo — populado via join
+    marca_produto:     str | None = None   # produto.marca  — populado via join
     codigo_fornecedor: str
     codigo_ref:        str | None
     ean:               str | None
@@ -136,22 +185,25 @@ class ItemRascunhoResponse(BaseModel):
     preco_unitario:    Decimal
     icms:              Decimal
     ipi:               Decimal
+    cfop:              str | None
+    cst:               str | None
     status_item:       str
 
     model_config = {"from_attributes": True}
 
 
 class RascunhoResponse(BaseModel):
-    id:            uuid.UUID
-    tenant_id:     uuid.UUID
-    fornecedor_id: uuid.UUID | None
-    chave_nfe:     str | None
-    numero_nf:     str | None
-    data_emissao:  date | None
-    valor_total:   Decimal | None
-    status:        str
-    criado_em:     datetime
-    itens:         list[ItemRascunhoResponse] = []
-    pendentes:     int = 0
+    id:              uuid.UUID
+    tenant_id:       uuid.UUID
+    fornecedor_id:   uuid.UUID | None
+    fornecedor_nome: str | None = None
+    chave_nfe:       str | None
+    numero_nf:       str | None
+    data_emissao:    date | None
+    valor_total:     Decimal | None
+    status:          str
+    criado_em:       datetime
+    itens:           list[ItemRascunhoResponse] = []
+    pendentes:       int = 0
 
     model_config = {"from_attributes": True}

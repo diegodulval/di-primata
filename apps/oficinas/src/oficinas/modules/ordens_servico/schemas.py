@@ -1,8 +1,8 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from oficinas.core.enums import StatusOS, TipoItem
 
@@ -71,3 +71,25 @@ class OSResponse(BaseModel):
 class OSListResponse(BaseModel):
     total: int
     items: list[OSResponse]
+
+
+class ApontamentoCreate(BaseModel):
+    usuario_id:       uuid.UUID
+    item_os_id:       uuid.UUID | None = None
+    descricao:        str
+    duracao_minutos:  int = Field(ge=0)
+    data_apontamento: date = Field(default_factory=date.today)
+
+
+class ApontamentoResponse(BaseModel):
+    id:               uuid.UUID
+    os_id:            uuid.UUID
+    usuario_id:       uuid.UUID
+    usuario_nome:     str | None = None
+    item_os_id:       uuid.UUID | None
+    descricao:        str
+    duracao_minutos:  int
+    data_apontamento: date
+    criado_em:        datetime
+
+    model_config = {"from_attributes": True}
