@@ -57,56 +57,85 @@ class ProdutoFornecedorResponse(BaseModel):
     marca:             str | None
 
 
-class ImportacaoFornecedorResponse(BaseModel):
-    criados:    int
+class ImportacaoResponse(BaseModel):
+    criados:     int
     atualizados: int
-    ignorados:  int
-    erros:      list[str]
+    ignorados:   int
+    erros:       list[str]
+
+
+ImportacaoFornecedorResponse = ImportacaoResponse
 
 
 class ProdutoCreate(BaseModel):
-    codigo:         str
-    descricao:      str
-    ncm:            str | None = None
-    marca:          str | None = None
-    localizacao:    str | None = None
-    ean:            str | None = None
-    preco_custo:    Decimal = Field(default=Decimal("0"), ge=0)
-    preco_venda:    Decimal = Field(default=Decimal("0"), ge=0)
-    estoque_minimo: Decimal = Field(default=Decimal("0"), ge=0)
-    estoque_maximo: Decimal = Field(default=Decimal("0"), ge=0)
+    codigo:            str
+    descricao:         str
+    ncm:               str | None = None
+    marca:             str | None = None
+    localizacao:       str | None = None
+    ean:               str | None = None
+    ref_fabricante:    str | None = None
+    unidade_medida:    str = "UN"
+    preco_custo:       Decimal = Field(default=Decimal("0"), ge=0)
+    preco_venda:       Decimal = Field(default=Decimal("0"), ge=0)
+    estoque_minimo:    Decimal = Field(default=Decimal("0"), ge=0)
+    estoque_maximo:    Decimal = Field(default=Decimal("0"), ge=0)
+    peso_liquido:      Decimal = Field(default=Decimal("0"), ge=0)
+    peso_bruto:        Decimal = Field(default=Decimal("0"), ge=0)
+    origem_mercadoria: str = "0"
+    observacoes:       str | None = None
 
 
 class ProdutoUpdate(BaseModel):
-    descricao:      str | None = None
-    ncm:            str | None = None
-    marca:          str | None = None
-    localizacao:    str | None = None
-    ean:            str | None = None
-    preco_custo:    Decimal | None = None
-    preco_venda:    Decimal | None = None
-    estoque_minimo: Decimal | None = None
-    estoque_maximo: Decimal | None = None
-    ativo:          bool | None = None
+    descricao:         str | None = None
+    ncm:               str | None = None
+    marca:             str | None = None
+    localizacao:       str | None = None
+    ean:               str | None = None
+    ref_fabricante:    str | None = None
+    unidade_medida:    str | None = None
+    preco_custo:       Decimal | None = None
+    preco_venda:       Decimal | None = None
+    estoque_minimo:    Decimal | None = None
+    estoque_maximo:    Decimal | None = None
+    peso_liquido:      Decimal | None = None
+    peso_bruto:        Decimal | None = None
+    origem_mercadoria: str | None = None
+    observacoes:       str | None = None
+    ativo:             bool | None = None
 
 
 class ProdutoResponse(BaseModel):
-    id:             uuid.UUID
-    tenant_id:      uuid.UUID
-    codigo:         str
-    descricao:      str
-    ncm:            str | None
-    marca:          str | None
-    localizacao:    str | None
-    ean:            str | None
-    preco_custo:    Decimal
-    preco_venda:    Decimal
-    estoque_atual:  Decimal
-    estoque_minimo: Decimal
-    estoque_maximo: Decimal
-    ativo:          bool
+    id:                uuid.UUID
+    tenant_id:         uuid.UUID
+    codigo:            str
+    descricao:         str
+    ncm:               str | None
+    marca:             str | None
+    localizacao:       str | None
+    ean:               str | None
+    ref_fabricante:    str | None
+    unidade_medida:    str
+    preco_custo:       Decimal
+    preco_venda:       Decimal
+    estoque_atual:     Decimal
+    estoque_minimo:    Decimal
+    estoque_maximo:    Decimal
+    peso_liquido:      Decimal
+    peso_bruto:        Decimal
+    origem_mercadoria: str
+    observacoes:       str | None
+    ativo:             bool
 
     model_config = {"from_attributes": True}
+
+
+class ProdutosPaginados(BaseModel):
+    items:     list[ProdutoResponse]
+    total:     int
+    page:      int
+    page_size: int
+    pages:     int
 
 
 class MovimentacaoResponse(BaseModel):

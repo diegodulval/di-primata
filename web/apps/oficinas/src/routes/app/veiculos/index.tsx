@@ -29,6 +29,34 @@ interface VeiculoDetalhe {
 
 const TIPOS = ["carro", "moto", "caminhao", "van"] as const;
 
+const MARCAS_VEICULOS = [
+  "Acura","ADLY","Agrale","Alfa Romeo","AM General","Amazonas","Aprilia","Asia Motors",
+  "Aston Martin","Atala","Audi","AVELLOZ","Baby","Bajaj","Bee","Benelli","Bepobus",
+  "Beta","Bimota","BMW","Brandy","Brava","BRM","BRP","Buell","Bueno","Bugre","Bull",
+  "byCristo","BYD","CAB Motors","Cagiva","Caloi","Caoa Chery","Case","CBT Jipe","Chana",
+  "Changan","Chery","Chevrolet","Chrysler","Ciccobus","Citroën","Cross Lander","D2D",
+  "DAF","Daelim","Daewoo","Dafra","Daihatsu","Dayang","Dayun","Derbi","DFSK","Dodge",
+  "Ducati","Effa","Effa-JMC","Emme","Engesa","Envemo","Ferrari","Fever","Fiat",
+  "Fibravan","Ford","Foton","Fox","Fusco Motosegura","Fyber","FYM","Garinni","Gas Gas",
+  "Geely","GM - Chevrolet","GMC","Great Wall","Green","Gurgel","GWM","Hafei","Haobao",
+  "Haojue","Harley-Davidson","Hartford","Hero","Hitech Electric","Honda","Husaberg",
+  "Husqvarna","Hyundai","Indian","Iros","Isuzu","Iveco","Jac","Jaguar","Jeep",
+  "Jiapeng Volcano","Jinei","John Deere","Johnnypag","Jonny","JPX","Kahena","Kasinski",
+  "Kawasaki","Kia Motors","KTM","Kymco","L Aquila","Lada","Lamborghini","Land Rover",
+  "Landum","Lavrale","Lerivo","Lexus","Lifan","Lobini","Lon-V","Lotus",
+  "Magrão Triciclos","Mahindra","Malaguti","MAN","Marcopolo","Mascarello","Maserati",
+  "Massey Ferguson","Matra","Maxibus","Mazda","Mclaren","Mercedes-Benz","Mercury","MG",
+  "MINI","Mitsubishi","Miura","Miza","Moto Guzzi","Motocar","Motorino","MRX",
+  "MV Augusta","MVK","Navistar","Neobus","New Holland","NIU","Nissan","Orca","Pegassi",
+  "Peugeot","Piaggio","Plymouth","Polaris","Pontiac","Porsche","Puma-Alfa","RAM",
+  "Regal Raptor","Rely","Renault","Riguete","Rolls-Royce","Rover","Royal Enfield","Saab",
+  "Saab-Scania","Sanyang","Saturn","Scania","Seat","Seres","Shacman","Shineray",
+  "Siamoto","Sinotruk","smart","Ssangyong","Subaru","Sundown","Super Soco","Suzuki",
+  "TAC","Targos","Tiger","Toyota","Traxx","Triumph","Troller","Valtra",
+  "Ventane Motors","Vento","Volkswagen","Voltz","Volvo","Wake","Walk","Walkbus","Watts",
+  "Wuayang","Yamaha","Zontes",
+].sort((a, b) => a.localeCompare(b, "pt-BR"));
+
 function VeiculosPage() {
   const queryClient = useQueryClient();
   const [placa, setPlaca] = useState("");
@@ -186,11 +214,17 @@ function VeiculosPage() {
                 </label>
                 <input
                   id="v-marca"
+                  list="marcas-lista"
                   value={fMarca}
                   onChange={(e) => setFMarca(e.target.value)}
                   placeholder="Toyota"
                   className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                 />
+                <datalist id="marcas-lista">
+                  {MARCAS_VEICULOS.map((m) => (
+                    <option key={m} value={m} />
+                  ))}
+                </datalist>
               </div>
               <div className="space-y-1">
                 <label

@@ -73,17 +73,22 @@ class EstoqueService:
         import io
         import openpyxl
 
+        if conteudo[:4] == b"\xd0\xcf\x11\xe0":
+            raise ValueError(
+                "Formato .xls não suportado. Abra o arquivo no Excel e salve como "
+                "'Pasta de Trabalho do Excel (.xlsx)' antes de importar."
+            )
+
         try:
-            wb = openpyxl.load_workbook(io.BytesIO(conteudo), data_only=True)
+            wb = openpyxl.load_workbook(io.BytesIO(conteudo), data_only=True, read_only=True)
+            ws = wb.active
+            rows = list(ws.iter_rows(values_only=True))
         except Exception as exc:
             raise ValueError(f"Arquivo inválido: {exc}") from exc
 
-        ws = wb.active
-        rows = list(ws.iter_rows(values_only=True))
         if not rows:
             raise ValueError("Planilha vazia")
 
-        # Mapeia cabeçalhos para índice (case-insensitive)
         cabecalhos = {str(c).strip().lower() if c else "": i for i, c in enumerate(rows[0])}
 
         def col(row: tuple, *nomes: str):
@@ -91,7 +96,8 @@ class EstoqueService:
                 idx = cabecalhos.get(nome.lower())
                 if idx is not None and idx < len(row):
                     val = row[idx]
-                    return str(val).strip() if val is not None else None
+                    s = str(val).strip() if val is not None else None
+                    return s if s else None
             return None
 
         criados = atualizados = ignorados = 0
@@ -215,6 +221,105 @@ class EstoqueService:
 
     # ─── Produto ──────────────────────────────────────────────────────────────
 
+    async def importar_produtos_xlsx(
+        self, tenant_id: uuid.UUID, conteudo: bytes
+    ) -> dict:
+        import io
+        import openpyxl
+
+        if conteudo[:4] == b"\xd0\xcf\x11\xe0":
+            raise ValueError(
+                "Formato .xls não suportado. Abra o arquivo no Excel e salve como "
+                "'Pasta de Trabalho do Excel (.xlsx)' antes de importar."
+            )
+
+        try:
+            wb = openpyxl.load_workbook(io.BytesIO(conteudo), data_only=True, read_only=True)
+            ws = wb.active
+            rows = list(ws.iter_rows(values_only=True))
+        except Exception as exc:
+            raise ValueError(f"Arquivo inválido: {exc}") from exc
+
+        if not rows:
+            raise ValueError("Planilha vazia")
+
+        cabecalhos = {str(c).strip().lower() if c else "": i for i, c in enumerate(rows[0])}
+
+        def col(row: tuple, *nomes: str):
+            for nome in nomes:
+                idx = cabecalhos.get(nome.lower())
+                if idx is not None and idx < len(row):
+                    val = row[idx]
+                    s = str(val).strip() if val is not None else None
+                    return s if s else None
+            return None
+
+        # Pré-carrega todos os produtos do tenant para upsert eficiente (evita N+1)
+        stmt = select(Produto).where(Produto.tenant_id == tenant_id)
+        existentes = {p.codigo: p for p in (await self.db.execute(stmt)).scalars().all()}
+
+        criados = atualizados = ignorados = 0
+        erros: list[str] = []
+
+        for num, row in enumerate(rows[1:], start=2):
+            try:
+                codigo = col(row, "código", "codigo")
+                if not codigo:
+                    ignorados += 1
+                    continue
+
+                descricao = col(row, "descrição", "descricao")
+                if not descricao:
+                    ignorados += 1
+                    continue
+
+                status_str = col(row, "status") or "Ativo"
+                ativo = status_str.lower() != "inativo"
+
+                marca = col(row, "marca")
+                localizacao = col(row, "localização", "localizacao")
+
+                valor_str = col(row, "valor")
+                preco = Decimal(str(valor_str).replace(",", ".")) if valor_str else Decimal("0")
+
+                if codigo in existentes:
+                    p = existentes[codigo]
+                    p.descricao = descricao
+                    p.ativo = ativo
+                    if marca is not None:
+                        p.marca = marca
+                    if localizacao is not None:
+                        p.localizacao = localizacao
+                    if preco > 0:
+                        p.preco_venda = preco
+                        p.preco_custo = preco
+                    atualizados += 1
+                else:
+                    estoque_str = col(row, "estoque")
+                    estoque = Decimal(str(estoque_str).replace(",", ".")) if estoque_str else Decimal("0")
+
+                    p = Produto(
+                        tenant_id=tenant_id,
+                        codigo=codigo,
+                        descricao=descricao,
+                        marca=marca,
+                        localizacao=localizacao,
+                        preco_venda=preco,
+                        preco_custo=preco,
+                        estoque_atual=estoque,
+                        ativo=ativo,
+                    )
+                    self.db.add(p)
+                    existentes[codigo] = p
+                    criados += 1
+
+            except Exception as exc:
+                erros.append(f"Linha {num}: {exc}")
+
+        await self.db.commit()
+        log.info("produtos_importados", criados=criados, atualizados=atualizados, tenant_id=str(tenant_id))
+        return {"criados": criados, "atualizados": atualizados, "ignorados": ignorados, "erros": erros}
+
     async def criar_produto(self, tenant_id: uuid.UUID, payload: ProdutoCreate) -> Produto:
         p = Produto(tenant_id=tenant_id, estoque_atual=Decimal("0"), **payload.model_dump())
         self.db.add(p)
@@ -223,14 +328,28 @@ class EstoqueService:
         log.info("produto_criado", produto_id=str(p.id), codigo=p.codigo)
         return p
 
-    async def listar_produtos(self, tenant_id: uuid.UUID, q: str | None = None) -> list[Produto]:
-        stmt = select(Produto).where(Produto.tenant_id == tenant_id, Produto.ativo.is_(True))
+    async def listar_produtos(
+        self,
+        tenant_id: uuid.UUID,
+        q: str | None = None,
+        page: int = 1,
+        page_size: int = 50,
+    ) -> tuple[list[Produto], int]:
+        from sqlalchemy import func, or_
+        base = select(Produto).where(Produto.tenant_id == tenant_id, Produto.ativo.is_(True))
         if q:
             pattern = f"%{q}%"
-            from sqlalchemy import or_
-            stmt = stmt.where(or_(Produto.descricao.ilike(pattern), Produto.codigo.ilike(pattern)))
-        stmt = stmt.order_by(Produto.descricao)
-        return list((await self.db.execute(stmt)).scalars().all())
+            base = base.where(or_(Produto.descricao.ilike(pattern), Produto.codigo.ilike(pattern)))
+
+        total = (await self.db.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+
+        offset = (page - 1) * page_size
+        items = list(
+            (await self.db.execute(base.order_by(Produto.descricao).offset(offset).limit(page_size)))
+            .scalars()
+            .all()
+        )
+        return items, total
 
     async def listar_marcas(self, tenant_id: uuid.UUID) -> list[str]:
         stmt = (

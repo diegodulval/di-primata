@@ -14,12 +14,14 @@ from oficinas.modules.estoque.schemas import (
     FornecedorResponse,
     FornecedorUpdate,
     ImportacaoFornecedorResponse,
+    ImportacaoResponse,
     ItemEntradaResponse,
     ItemRascunhoResponse,
     MovimentacaoResponse,
     ProdutoCreate,
     ProdutoFornecedorResponse,
     ProdutoResponse,
+    ProdutosPaginados,
     ProdutoUpdate,
     RascunhoResponse,
     VincularItemPayload,
@@ -57,6 +59,21 @@ def _build_rascunho_response(rascunho, itens_com_produto) -> RascunhoResponse:
 
 # ─── Produtos ─────────────────────────────────────────────────────────────────
 
+@produtos_router.post("/importar", response_model=ImportacaoResponse,
+                      summary="Importar produtos via planilha XLSX (ADMIN)")
+async def importar_produtos(
+    arquivo: UploadFile,
+    usuario=Depends(requer_admin),
+    db: AsyncSession = Depends(make_db(requer_admin)),
+):
+    conteudo = await arquivo.read()
+    try:
+        resultado = await EstoqueService(db).importar_produtos_xlsx(usuario.tenant_id, conteudo)
+    except ValueError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc))
+    return resultado
+
+
 @produtos_router.post("", response_model=ProdutoResponse, status_code=status.HTTP_201_CREATED,
                       summary="Criar produto (ADMIN)")
 async def criar_produto(
@@ -67,14 +84,24 @@ async def criar_produto(
     return await EstoqueService(db).criar_produto(usuario.tenant_id, payload)
 
 
-@produtos_router.get("", response_model=list[ProdutoResponse],
-                     summary="Listar produtos ativos. Use ?q= para busca.")
+@produtos_router.get("", response_model=ProdutosPaginados,
+                     summary="Listar produtos ativos. Use ?q=, ?page=, ?page_size=")
 async def listar_produtos(
     q: str | None = None,
+    page: int = 1,
+    page_size: int = 50,
     usuario=Depends(requer_atendente_acima),
     db: AsyncSession = Depends(make_db(requer_atendente_acima)),
 ):
-    return await EstoqueService(db).listar_produtos(usuario.tenant_id, q)
+    import math
+    items, total = await EstoqueService(db).listar_produtos(usuario.tenant_id, q, page, page_size)
+    return ProdutosPaginados(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+        pages=max(1, math.ceil(total / page_size)),
+    )
 
 
 @produtos_router.get("/marcas", response_model=list[str],
@@ -126,8 +153,6 @@ async def importar_fornecedores(
     usuario=Depends(requer_admin),
     db: AsyncSession = Depends(make_db(requer_admin)),
 ):
-    if not arquivo.filename or not arquivo.filename.lower().endswith(".xlsx"):
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Envie um arquivo .xlsx")
     conteudo = await arquivo.read()
     try:
         resultado = await EstoqueService(db).importar_fornecedores_xlsx(usuario.tenant_id, conteudo)

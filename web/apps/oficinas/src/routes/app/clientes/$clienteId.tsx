@@ -11,10 +11,33 @@ export const Route = createFileRoute("/app/clientes/$clienteId")({
 interface Cliente {
   id: string;
   nome: string;
+  tipo_pessoa: string | null;
   cpf_cnpj: string | null;
+  rg: string | null;
+  apelido: string | null;
+  sexo: string | null;
   telefone: string | null;
+  celular: string | null;
   email: string | null;
+  cep: string | null;
   endereco: string | null;
+  cidade: string | null;
+  uf: string | null;
+  inscricao_estadual: string | null;
+  consumidor_final: boolean;
+  indicador_ie: string;
+  observacoes: string | null;
+  ativo: boolean;
+}
+
+interface VeiculoResumo {
+  placa: string;
+  marca: string | null;
+  modelo: string | null;
+  ano_fab: number | null;
+  ano_mod: number | null;
+  cor: string | null;
+  tipo: string | null;
 }
 
 interface ClienteVeiculo {
@@ -23,24 +46,20 @@ interface ClienteVeiculo {
   data_inicio: string;
   data_fim: string | null;
   ativo: boolean;
+  veiculo: VeiculoResumo | null;
 }
 
-function VincularVeiculoForm({
-  clienteId,
-  onClose,
-}: {
-  clienteId: string;
-  onClose: () => void;
-}) {
+const INPUT_CLS =
+  "w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]";
+
+function VincularVeiculoForm({ clienteId, onClose }: { clienteId: string; onClose: () => void }) {
   const queryClient = useQueryClient();
   const [placa, setPlaca] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const vincular = useMutation({
     mutationFn: async () => {
-      const veiculo = await api.get<{ id: string }>(
-        `/veiculos/${encodeURIComponent(placa.toUpperCase())}`
-      );
+      const veiculo = await api.get<{ id: string }>(`/veiculos/${encodeURIComponent(placa.toUpperCase())}`);
       await api.post(`/clientes/${clienteId}/veiculos`, { veiculo_id: veiculo.id });
     },
     onSuccess: () => {
@@ -52,10 +71,7 @@ function VincularVeiculoForm({
 
   return (
     <form
-      onSubmit={(e: FormEvent) => {
-        e.preventDefault();
-        vincular.mutate();
-      }}
+      onSubmit={(e: FormEvent) => { e.preventDefault(); vincular.mutate(); }}
       className="flex gap-2 items-end mt-4"
     >
       <div className="space-y-1 flex-1 max-w-xs">
@@ -69,17 +85,85 @@ function VincularVeiculoForm({
           onChange={(e) => setPlaca(e.target.value.toUpperCase())}
           placeholder="ABC1234 ou ABC1D23"
           maxLength={8}
-          className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+          className={`${INPUT_CLS} font-mono uppercase`}
         />
       </div>
       <Button type="submit" size="sm" disabled={vincular.isPending}>
         {vincular.isPending ? "Vinculando..." : "Vincular"}
       </Button>
-      <Button type="button" variant="outline" size="sm" onClick={onClose}>
-        Cancelar
-      </Button>
+      <Button type="button" variant="outline" size="sm" onClick={onClose}>Cancelar</Button>
       {error && <p className="text-sm text-[--color-error] self-center">{error}</p>}
     </form>
+  );
+}
+
+function Campo({ label, value }: { label: string; value: string | null | undefined }) {
+  return (
+    <div>
+      <dt className="text-xs text-[--color-text-muted] mb-0.5">{label}</dt>
+      <dd className="text-sm text-[--color-text-primary]">{value || "—"}</dd>
+    </div>
+  );
+}
+
+function VeiculoCard({ v, onDesassociar }: { v: ClienteVeiculo; onDesassociar: () => void }) {
+  const vei = v.veiculo;
+  const anoLabel = vei?.ano_fab
+    ? vei.ano_mod && vei.ano_mod !== vei.ano_fab
+      ? `${vei.ano_fab}/${vei.ano_mod}`
+      : String(vei.ano_fab)
+    : null;
+
+  return (
+    <div
+      className={`rounded-lg border p-4 flex items-start justify-between gap-4 ${
+        v.ativo
+          ? "border-[--color-border] bg-[--color-surface]"
+          : "border-[--color-border] bg-[--color-background] opacity-60"
+      }`}
+    >
+      <div className="flex items-start gap-4">
+        {/* Placa */}
+        <div className="shrink-0 rounded-md border-2 border-[--color-primary] bg-[--color-primary]/10 px-3 py-1.5 text-center min-w-[6rem]">
+          <p className="font-mono font-bold text-base tracking-widest text-[--color-primary]">
+            {vei?.placa ?? "—"}
+          </p>
+          {vei?.tipo && (
+            <p className="text-[10px] uppercase tracking-wide text-[--color-text-muted] mt-0.5">{vei.tipo}</p>
+          )}
+        </div>
+
+        {/* Detalhes */}
+        <div className="space-y-0.5">
+          <p className="text-sm font-semibold text-[--color-text-primary]">
+            {[vei?.marca, vei?.modelo].filter(Boolean).join(" ") || "Veículo sem dados"}
+          </p>
+          <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-[--color-text-secondary]">
+            {anoLabel && <span>{anoLabel}</span>}
+            {vei?.cor && <span>{vei.cor}</span>}
+          </div>
+          <p className="text-xs text-[--color-text-muted] pt-1">
+            Vinculado em {new Date(v.data_inicio).toLocaleDateString("pt-BR")}
+            {v.data_fim && ` · até ${new Date(v.data_fim).toLocaleDateString("pt-BR")}`}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-end gap-2 shrink-0">
+        <Badge variant={v.ativo ? "success" : "secondary"} className="text-xs">
+          {v.ativo ? "Ativo" : "Encerrado"}
+        </Badge>
+        {v.ativo && (
+          <button
+            type="button"
+            onClick={onDesassociar}
+            className="text-xs text-[--color-error] hover:underline"
+          >
+            Desassociar
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -100,58 +184,126 @@ function ClienteDetalhe() {
 
   const desassociar = useMutation({
     mutationFn: (veiculoId: string) => api.delete(`/clientes/${clienteId}/veiculos/${veiculoId}`),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["cliente-veiculos", clienteId] });
-    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["cliente-veiculos", clienteId] }),
   });
 
+  const ativos   = veiculos?.filter((v) => v.ativo) ?? [];
+  const inativos = veiculos?.filter((v) => !v.ativo) ?? [];
+
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-8 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <Link
-          to="/app/clientes"
-          className="text-sm text-[--color-text-muted] hover:text-[--color-text-primary]"
-        >
+        <Link to="/app/clientes" className="text-sm text-[--color-text-muted] hover:text-[--color-text-primary]">
           ← Clientes
         </Link>
       </div>
 
+      {/* Dados do cliente */}
       <Card>
-        <CardHeader>
-          <CardTitle>{isLoading ? <Skeleton className="h-6 w-48" /> : cliente?.nome}</CardTitle>
+        <CardHeader className="flex flex-row items-start justify-between">
+          <div>
+            {isLoading ? (
+              <Skeleton className="h-7 w-56 mb-1" />
+            ) : (
+              <>
+                <CardTitle className="text-xl">{cliente?.nome}</CardTitle>
+                {cliente?.apelido && (
+                  <p className="text-sm text-[--color-text-muted] mt-0.5">"{cliente.apelido}"</p>
+                )}
+              </>
+            )}
+          </div>
+          {!isLoading && cliente && (
+            <div className="flex items-center gap-2 shrink-0">
+              <Badge variant={cliente.tipo_pessoa === "Juridica" ? "secondary" : "default"}>
+                {cliente.tipo_pessoa === "Juridica" ? "Jurídica" : "Física"}
+              </Badge>
+              <Badge variant={cliente.ativo ? "success" : "secondary"}>
+                {cliente.ativo ? "Ativo" : "Inativo"}
+              </Badge>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="space-y-2">
-              <Skeleton className="h-4 w-64" />
-              <Skeleton className="h-4 w-48" />
+              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-4 w-full" />)}
             </div>
           ) : (
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+            <div className="space-y-5">
+              {/* Identificação */}
               <div>
-                <dt className="text-[--color-text-muted]">CPF/CNPJ</dt>
-                <dd className="text-[--color-text-primary]">{cliente?.cpf_cnpj ?? "—"}</dd>
+                <p className="text-xs font-semibold uppercase tracking-wide text-[--color-text-muted] mb-2">
+                  Identificação
+                </p>
+                <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-3">
+                  <Campo label="CPF/CNPJ" value={cliente?.cpf_cnpj} />
+                  <Campo label="RG" value={cliente?.rg} />
+                  <Campo label="Sexo" value={cliente?.sexo} />
+                </dl>
               </div>
+
+              {/* Contato */}
               <div>
-                <dt className="text-[--color-text-muted]">Telefone</dt>
-                <dd className="text-[--color-text-primary]">{cliente?.telefone ?? "—"}</dd>
+                <p className="text-xs font-semibold uppercase tracking-wide text-[--color-text-muted] mb-2">
+                  Contato
+                </p>
+                <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-3">
+                  <Campo label="Telefone" value={cliente?.telefone} />
+                  <Campo label="Celular" value={cliente?.celular} />
+                  <Campo label="E-mail" value={cliente?.email} />
+                </dl>
               </div>
+
+              {/* Endereço */}
               <div>
-                <dt className="text-[--color-text-muted]">E-mail</dt>
-                <dd className="text-[--color-text-primary]">{cliente?.email ?? "—"}</dd>
+                <p className="text-xs font-semibold uppercase tracking-wide text-[--color-text-muted] mb-2">
+                  Endereço
+                </p>
+                <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-3">
+                  <Campo label="Endereço" value={cliente?.endereco} />
+                  <Campo label="CEP" value={cliente?.cep} />
+                  <Campo label="Cidade/UF" value={cliente?.cidade && cliente?.uf ? `${cliente.cidade}/${cliente.uf}` : (cliente?.cidade ?? cliente?.uf ?? null)} />
+                </dl>
               </div>
+
+              {/* Fiscal */}
               <div>
-                <dt className="text-[--color-text-muted]">Endereço</dt>
-                <dd className="text-[--color-text-primary]">{cliente?.endereco ?? "—"}</dd>
+                <p className="text-xs font-semibold uppercase tracking-wide text-[--color-text-muted] mb-2">
+                  Fiscal
+                </p>
+                <dl className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-3">
+                  <Campo label="Inscrição Estadual" value={cliente?.inscricao_estadual} />
+                  <Campo label="Indicador IE" value={cliente?.indicador_ie} />
+                  <Campo label="Consumidor Final" value={cliente?.consumidor_final ? "Sim" : "Não"} />
+                </dl>
               </div>
-            </dl>
+
+              {/* Observações */}
+              {cliente?.observacoes && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[--color-text-muted] mb-1">
+                    Observações
+                  </p>
+                  <p className="text-sm text-[--color-text-secondary] whitespace-pre-wrap">{cliente.observacoes}</p>
+                </div>
+              )}
+            </div>
           )}
         </CardContent>
       </Card>
 
+      {/* Veículos */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Veículos</CardTitle>
+          <CardTitle>
+            Veículos
+            {!loadingVeiculos && veiculos && (
+              <span className="ml-2 text-sm font-normal text-[--color-text-muted]">
+                ({ativos.length} ativo{ativos.length !== 1 ? "s" : ""})
+              </span>
+            )}
+          </CardTitle>
           <Button size="sm" variant="outline" onClick={() => setShowVincular((v) => !v)}>
             {showVincular ? "Cancelar" : "+ Vincular"}
           </Button>
@@ -160,52 +312,36 @@ function ClienteDetalhe() {
           {showVincular && (
             <VincularVeiculoForm clienteId={clienteId} onClose={() => setShowVincular(false)} />
           )}
+
           {loadingVeiculos ? (
-            <div className="space-y-2 mt-4">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
+            <div className="space-y-3 mt-4">
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-20 w-full" />
             </div>
           ) : veiculos?.length === 0 ? (
-            <p className="text-sm text-[--color-text-muted] py-4 text-center">
+            <p className="text-sm text-[--color-text-muted] py-6 text-center">
               Nenhum veículo vinculado.
             </p>
           ) : (
-            <table className="w-full text-sm mt-4">
-              <thead>
-                <tr className="border-b border-[--color-border] text-left text-[--color-text-muted]">
-                  <th className="pb-2 pr-4 font-medium">Veículo ID</th>
-                  <th className="pb-2 pr-4 font-medium">Desde</th>
-                  <th className="pb-2 pr-4 font-medium">Status</th>
-                  <th className="pb-2 font-medium" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[--color-border]">
-                {veiculos?.map((v) => (
-                  <tr key={v.id}>
-                    <td className="py-3 pr-4 font-mono text-xs text-[--color-text-secondary]">
-                      {v.veiculo_id.slice(0, 8)}…
-                    </td>
-                    <td className="py-3 pr-4 text-[--color-text-secondary]">{v.data_inicio}</td>
-                    <td className="py-3 pr-4">
-                      <Badge variant={v.ativo ? "success" : "secondary"}>
-                        {v.ativo ? "Ativo" : "Encerrado"}
-                      </Badge>
-                    </td>
-                    <td className="py-3 text-right">
-                      {v.ativo && (
-                        <button
-                          type="button"
-                          onClick={() => desassociar.mutate(v.veiculo_id)}
-                          className="text-xs text-[--color-error] hover:underline"
-                        >
-                          Desassociar
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="space-y-3 mt-4">
+              {ativos.map((v) => (
+                <VeiculoCard
+                  key={v.id}
+                  v={v}
+                  onDesassociar={() => desassociar.mutate(v.veiculo_id)}
+                />
+              ))}
+              {inativos.length > 0 && (
+                <>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[--color-text-muted] pt-2">
+                    Histórico
+                  </p>
+                  {inativos.map((v) => (
+                    <VeiculoCard key={v.id} v={v} onDesassociar={() => {}} />
+                  ))}
+                </>
+              )}
+            </div>
           )}
         </CardContent>
       </Card>
