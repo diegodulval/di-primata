@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     # Claude AI (agente)
     anthropic_api_key: str = ""
 
+    # SINESP — proxy SOCKS5 para ambientes com IP fora do Brasil
+    # Exemplo: socks5://user:pass@host:1080  ou  http://host:3128
+    sinesp_proxy_url: str | None = None
+
     # Fiscal
     cert_a1_path: str = "/secrets/cert.pfx"
     cert_a1_password: str = ""

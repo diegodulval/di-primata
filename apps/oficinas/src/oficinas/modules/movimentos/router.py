@@ -77,7 +77,8 @@ async def listar_movimentos(
         outer_conditions.append(
             "(LOWER(m.numero) LIKE :q OR LOWER(m.cliente_nome) LIKE :q)"
         )
-        params["q"] = f"%{q.lower()}%"
+        safe_q = q.lower().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        params["q"] = f"%{safe_q}%"
     if data_inicial:
         outer_conditions.append("m.criado_em >= :data_inicial")
         params["data_inicial"] = data_inicial

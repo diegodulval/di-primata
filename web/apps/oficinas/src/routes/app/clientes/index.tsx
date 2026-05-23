@@ -483,7 +483,7 @@ function ClientesPage() {
             value={qInput}
             onChange={(e) => setQInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && pesquisar()}
-            placeholder="Nome, CPF, celular, apelido..."
+            placeholder="Nome, CPF, celular, placa..."
             className="rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary] w-64"
           />
           <Button size="sm" variant="outline" onClick={pesquisar}>Buscar</Button>
@@ -588,6 +588,13 @@ function ClientesPage() {
                               className="text-xs text-[--color-primary] hover:underline whitespace-nowrap"
                             >
                               Ver
+                            </Link>
+                            <Link
+                              to="/app/os/nova"
+                              search={{ cliente_id: c.id }}
+                              className="text-xs text-[--color-primary] hover:underline whitespace-nowrap"
+                            >
+                              Nova OS
                             </Link>
                             {(c.celular ?? c.telefone) && (
                               <a

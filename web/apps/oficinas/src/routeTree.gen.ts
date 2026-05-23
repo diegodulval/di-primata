@@ -21,6 +21,7 @@ import { Route as AppFornecedoresIndexRouteImport } from './routes/app/fornecedo
 import { Route as AppEstoqueIndexRouteImport } from './routes/app/estoque/index'
 import { Route as AppClientesIndexRouteImport } from './routes/app/clientes/index'
 import { Route as AppVendasNovaRouteImport } from './routes/app/vendas/nova'
+import { Route as AppVeiculosPlacaRouteImport } from './routes/app/veiculos/$placa'
 import { Route as AppOsNovaRouteImport } from './routes/app/os/nova'
 import { Route as AppOsOsIdRouteImport } from './routes/app/os/$osId'
 import { Route as AppFornecedoresFornecedorIdRouteImport } from './routes/app/fornecedores/$fornecedorId'
@@ -89,6 +90,11 @@ const AppVendasNovaRoute = AppVendasNovaRouteImport.update({
   path: '/vendas/nova',
   getParentRoute: () => AppRoute,
 } as any)
+const AppVeiculosPlacaRoute = AppVeiculosPlacaRouteImport.update({
+  id: '/veiculos/$placa',
+  path: '/veiculos/$placa',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppOsNovaRoute = AppOsNovaRouteImport.update({
   id: '/os/nova',
   path: '/os/nova',
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/app/fornecedores/$fornecedorId': typeof AppFornecedoresFornecedorIdRoute
   '/app/os/$osId': typeof AppOsOsIdRoute
   '/app/os/nova': typeof AppOsNovaRoute
+  '/app/veiculos/$placa': typeof AppVeiculosPlacaRoute
   '/app/vendas/nova': typeof AppVendasNovaRoute
   '/app/clientes/': typeof AppClientesIndexRoute
   '/app/estoque/': typeof AppEstoqueIndexRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/app/fornecedores/$fornecedorId': typeof AppFornecedoresFornecedorIdRoute
   '/app/os/$osId': typeof AppOsOsIdRoute
   '/app/os/nova': typeof AppOsNovaRoute
+  '/app/veiculos/$placa': typeof AppVeiculosPlacaRoute
   '/app/vendas/nova': typeof AppVendasNovaRoute
   '/app/clientes': typeof AppClientesIndexRoute
   '/app/estoque': typeof AppEstoqueIndexRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/app/fornecedores/$fornecedorId': typeof AppFornecedoresFornecedorIdRoute
   '/app/os/$osId': typeof AppOsOsIdRoute
   '/app/os/nova': typeof AppOsNovaRoute
+  '/app/veiculos/$placa': typeof AppVeiculosPlacaRoute
   '/app/vendas/nova': typeof AppVendasNovaRoute
   '/app/clientes/': typeof AppClientesIndexRoute
   '/app/estoque/': typeof AppEstoqueIndexRoute
@@ -203,6 +212,7 @@ export interface FileRouteTypes {
     | '/app/fornecedores/$fornecedorId'
     | '/app/os/$osId'
     | '/app/os/nova'
+    | '/app/veiculos/$placa'
     | '/app/vendas/nova'
     | '/app/clientes/'
     | '/app/estoque/'
@@ -223,6 +233,7 @@ export interface FileRouteTypes {
     | '/app/fornecedores/$fornecedorId'
     | '/app/os/$osId'
     | '/app/os/nova'
+    | '/app/veiculos/$placa'
     | '/app/vendas/nova'
     | '/app/clientes'
     | '/app/estoque'
@@ -244,6 +255,7 @@ export interface FileRouteTypes {
     | '/app/fornecedores/$fornecedorId'
     | '/app/os/$osId'
     | '/app/os/nova'
+    | '/app/veiculos/$placa'
     | '/app/vendas/nova'
     | '/app/clientes/'
     | '/app/estoque/'
@@ -348,6 +360,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppVendasNovaRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/veiculos/$placa': {
+      id: '/app/veiculos/$placa'
+      path: '/veiculos/$placa'
+      fullPath: '/app/veiculos/$placa'
+      preLoaderRoute: typeof AppVeiculosPlacaRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/os/nova': {
       id: '/app/os/nova'
       path: '/os/nova'
@@ -407,6 +426,7 @@ interface AppRouteChildren {
   AppFornecedoresFornecedorIdRoute: typeof AppFornecedoresFornecedorIdRoute
   AppOsOsIdRoute: typeof AppOsOsIdRoute
   AppOsNovaRoute: typeof AppOsNovaRoute
+  AppVeiculosPlacaRoute: typeof AppVeiculosPlacaRoute
   AppVendasNovaRoute: typeof AppVendasNovaRoute
   AppClientesIndexRoute: typeof AppClientesIndexRoute
   AppEstoqueIndexRoute: typeof AppEstoqueIndexRoute
@@ -426,6 +446,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppFornecedoresFornecedorIdRoute: AppFornecedoresFornecedorIdRoute,
   AppOsOsIdRoute: AppOsOsIdRoute,
   AppOsNovaRoute: AppOsNovaRoute,
+  AppVeiculosPlacaRoute: AppVeiculosPlacaRoute,
   AppVendasNovaRoute: AppVendasNovaRoute,
   AppClientesIndexRoute: AppClientesIndexRoute,
   AppEstoqueIndexRoute: AppEstoqueIndexRoute,

@@ -10,12 +10,34 @@ from oficinas.core.enums import StatusOS, TipoItem, TipoMovimentacao
 from oficinas.core.exceptions import NaoEncontrado, OSJaFechada, TransicaoInvalida
 from oficinas.modules.estoque.service import EstoqueService
 from oficinas.modules.ordens_servico.models import ApontamentoOS, ItemOS, OrdemServico
-from oficinas.modules.ordens_servico.schemas import ApontamentoCreate, FecharOS, ItemOSAdd, OSCreate
+from oficinas.modules.ordens_servico.schemas import ApontamentoCreate, FecharOS, HistoricoEntrada, ItemOSAdd, ItemOSHistorico, OSCreate
 from oficinas.shared.veiculo_global.models import HistoricoVeiculo, Veiculo
 
 log = structlog.get_logger()
 
 _EDITAVEIS = {StatusOS.ABERTA, StatusOS.EM_EXECUCAO, StatusOS.AGUARDANDO_PECA}
+
+
+def _montar_detalhe(os: "OrdemServico", itens: list["ItemOS"]) -> str:
+    linhas = [f"Problema: {os.descricao_problema}"]
+    if os.km_entrada:
+        linhas.append(f"KM: {os.km_entrada:,}")
+    servicos = [i for i in itens if TipoItem(i.tipo) == TipoItem.SERVICO]
+    pecas    = [i for i in itens if TipoItem(i.tipo) == TipoItem.PECA]
+    if servicos:
+        linhas.append("Serviços: " + "; ".join(
+            f"{i.descricao} ({i.quantidade:g}x)" for i in servicos
+        ))
+    if pecas:
+        linhas.append("Peças: " + "; ".join(
+            f"{i.descricao} ({i.quantidade:g}x @ R${i.preco_unitario:.2f})" for i in pecas
+        ))
+    if os.total_servicos:
+        linhas.append(f"Total serviços: R$ {os.total_servicos:.2f}")
+    if os.total_pecas:
+        linhas.append(f"Total peças: R$ {os.total_pecas:.2f}")
+    linhas.append(f"Total final: R$ {os.total_final:.2f}")
+    return "\n".join(linhas)
 
 _TRANSICOES: dict[StatusOS, set[StatusOS]] = {
     StatusOS.ABERTA:          {StatusOS.EM_EXECUCAO, StatusOS.AGUARDANDO_PECA},
@@ -208,7 +230,7 @@ class OrdensServicoService:
             data_servico=date.today(),
             km_entrada=os.km_entrada,
             resumo_publico=payload.resumo_publico if payload.compartilhar_historico else None,
-            detalhe_privado=os.descricao_problema,
+            detalhe_privado=_montar_detalhe(os, itens),
         ))
 
         os.status = StatusOS.FECHADA
@@ -284,6 +306,48 @@ class OrdensServicoService:
             .order_by(ApontamentoOS.data_apontamento.desc(), ApontamentoOS.criado_em.desc())
         )
         return list((await self.db.execute(stmt)).scalars().all())
+
+    async def historico_por_veiculo(
+        self, veiculo_id: uuid.UUID, tenant_id: uuid.UUID
+    ) -> list[HistoricoEntrada]:
+        stmt = (
+            select(OrdemServico)
+            .where(
+                OrdemServico.veiculo_id == veiculo_id,
+                OrdemServico.tenant_id == tenant_id,
+                OrdemServico.status == StatusOS.FECHADA,
+            )
+            .order_by(OrdemServico.fechada_em.desc())
+        )
+        os_list = list((await self.db.execute(stmt)).scalars().all())
+
+        if not os_list:
+            return []
+
+        os_ids = [o.id for o in os_list]
+        stmt_itens = select(ItemOS).where(ItemOS.os_id.in_(os_ids))
+        todos_itens = list((await self.db.execute(stmt_itens)).scalars().all())
+
+        itens_por_os: dict[uuid.UUID, list[ItemOS]] = {}
+        for item in todos_itens:
+            itens_por_os.setdefault(item.os_id, []).append(item)
+
+        result = []
+        for os in os_list:
+            itens = itens_por_os.get(os.id, [])
+            result.append(HistoricoEntrada(
+                os_id=os.id,
+                numero_os=os.numero_os,
+                data_servico=os.fechada_em.date() if os.fechada_em else date.today(),
+                km_entrada=os.km_entrada,
+                descricao_problema=os.descricao_problema,
+                total_pecas=os.total_pecas,
+                total_servicos=os.total_servicos,
+                total_final=os.total_final,
+                compartilhar_historico=os.compartilhar_historico,
+                itens=[ItemOSHistorico.model_validate(i) for i in itens],
+            ))
+        return result
 
     async def remover_apontamento(
         self, os_id: uuid.UUID, apt_id: uuid.UUID, tenant_id: uuid.UUID

@@ -7,10 +7,30 @@ from oficinas.core.exceptions import NaoEncontrado
 from oficinas.core.security import requer_atendente_acima, requer_autenticado
 from oficinas.modules.cadastros.models import Cliente, ClienteVeiculo
 from oficinas.modules.cadastros.schemas import ClienteResponse
-from oficinas.shared.veiculo_global.schemas import VeiculoComHistorico, VeiculoCreate, VeiculoResponse
+from oficinas.modules.ordens_servico.schemas import HistoricoEntrada
+from oficinas.modules.ordens_servico.service import OrdensServicoService
+from oficinas.shared.veiculo_global.schemas import (
+    ConsultaVeiculoResponse,
+    VeiculoComHistorico,
+    VeiculoCreate,
+    VeiculoResponse,
+)
 from oficinas.shared.veiculo_global.service import VeiculoService
 
 router = APIRouter(prefix="/veiculos", tags=["veiculos"])
+
+
+@router.get(
+    "/{placa}/consultar",
+    response_model=ConsultaVeiculoResponse,
+    summary="Consulta DB local + SINESP para pré-preencher formulário de cadastro",
+)
+async def consultar_veiculo(
+    placa: str,
+    _usuario=Depends(requer_autenticado),
+    db: AsyncSession = Depends(get_raw_db),
+):
+    return await VeiculoService(db).consultar(placa)
 
 
 @router.get(
@@ -58,6 +78,20 @@ async def cliente_atual_do_veiculo(
     if not cliente:
         raise NaoEncontrado(f"Cliente do vínculo não encontrado")
     return ClienteResponse.model_validate(cliente)
+
+
+@router.get(
+    "/{placa}/historico",
+    response_model=list[HistoricoEntrada],
+    summary="Histórico de OS fechadas do veículo neste tenant (ATENDENTE/ADMIN)",
+)
+async def historico_veiculo(
+    placa: str,
+    usuario=Depends(requer_atendente_acima),
+    db: AsyncSession = Depends(make_db(requer_atendente_acima)),
+):
+    veiculo = await VeiculoService(db).buscar_por_placa(placa)
+    return await OrdensServicoService(db).historico_por_veiculo(veiculo.id, usuario.tenant_id)
 
 
 @router.post(

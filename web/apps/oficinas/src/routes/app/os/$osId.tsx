@@ -1,7 +1,7 @@
 import { api } from "@/lib/api";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Skeleton } from "@di-mata/ui";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
 
 export const Route = createFileRoute("/app/os/$osId")({
@@ -675,7 +675,13 @@ function OSDetalhePage() {
           <p className="text-sm text-[--color-text-muted] mt-1">
             {os.cliente_nome ?? "Cliente não identificado"}
             {os.veiculo_placa && (
-              <span className="font-mono ml-2 text-[--color-text-primary]">{os.veiculo_placa}</span>
+              <Link
+                to="/app/veiculos/$placa"
+                params={{ placa: os.veiculo_placa }}
+                className="font-mono ml-2 text-[--color-primary] hover:underline"
+              >
+                {os.veiculo_placa}
+              </Link>
             )}
             {os.km_entrada != null && (
               <span className="ml-2">{os.km_entrada.toLocaleString()} km</span>

@@ -37,19 +37,28 @@ class CadastroService:
         tipo_pessoa: str | None = None,
         ativo: bool | None = None,
         uf: str | None = None,
+        placa: str | None = None,
         page: int = 1,
         page_size: int = 20,
     ) -> tuple[list[Cliente], int]:
         base = select(Cliente).where(Cliente.tenant_id == tenant_id)
 
         if q:
-            pattern = f"%{q}%"
+            safe = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            pattern = f"%{safe}%"
+            placa_subq = (
+                select(ClienteVeiculo.cliente_id)
+                .join(Veiculo, Veiculo.id == ClienteVeiculo.veiculo_id)
+                .where(Veiculo.placa.ilike(pattern))
+                .scalar_subquery()
+            )
             base = base.where(or_(
                 Cliente.nome.ilike(pattern),
                 Cliente.cpf_cnpj.ilike(pattern),
                 Cliente.telefone.ilike(pattern),
                 Cliente.celular.ilike(pattern),
                 Cliente.apelido.ilike(pattern),
+                Cliente.id.in_(placa_subq),
             ))
         if tipo_pessoa:
             base = base.where(Cliente.tipo_pessoa == tipo_pessoa)
@@ -57,6 +66,16 @@ class CadastroService:
             base = base.where(Cliente.ativo.is_(ativo))
         if uf:
             base = base.where(Cliente.uf == uf.upper())
+        if placa:
+            base = (
+                base
+                .join(ClienteVeiculo, ClienteVeiculo.cliente_id == Cliente.id)
+                .join(Veiculo, Veiculo.id == ClienteVeiculo.veiculo_id)
+                .where(Veiculo.placa.ilike(
+                    "%{}%".format(placa.strip().upper().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_"))
+                ))
+                .distinct()
+            )
 
         total = (await self.db.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
         offset = (page - 1) * page_size

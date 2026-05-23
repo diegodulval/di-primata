@@ -2,9 +2,13 @@ import { ApiError, api } from "@/lib/api";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@di-mata/ui";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 
 export const Route = createFileRoute("/app/os/nova")({
+  validateSearch: (search: Record<string, unknown>): { cliente_id?: string; placa?: string } => ({
+    ...(typeof search.cliente_id === "string" && { cliente_id: search.cliente_id }),
+    ...(typeof search.placa === "string" && { placa: search.placa }),
+  }),
   component: NovaOSPage,
 });
 
@@ -23,21 +27,47 @@ interface Veiculo {
   tipo: string | null;
 }
 
+interface ConsultaVeiculo {
+  fonte: "db" | "sinesp" | "nao_encontrado";
+  id: string | null;
+  placa: string;
+  marca: string | null;
+  modelo: string | null;
+  ano_fab: number | null;
+  ano_mod: number | null;
+  cor: string | null;
+  tipo: string | null;
+  municipio: string | null;
+  uf: string | null;
+  situacao: string | null;
+}
+
 interface OS {
   id: string;
+}
+
+interface ClienteVeiculoLink {
+  id: string;
+  ativo: boolean;
+  veiculo: { placa: string; marca: string | null; modelo: string | null; ano_fab: number | null; tipo: string | null } | null;
 }
 
 const TIPOS_VEICULO = ["carro", "moto", "caminhao", "van"] as const;
 
 function NovaOSPage() {
   const navigate = useNavigate();
+  const { cliente_id: clienteIdParam, placa: placaParam } = Route.useSearch();
 
   // ── 1. Veículo ────────────────────────────────────────────────────────────
-  const [placaInput, setPlacaInput] = useState("");
-  const [placaBusca, setPlacaBusca] = useState("");
+  const preserveCliente = useRef(false);
+  const [showVehiclePicker, setShowVehiclePicker] = useState(false);
+  const [placaInput, setPlacaInput] = useState(placaParam ?? "");
+  const [placaBusca, setPlacaBusca] = useState(placaParam ?? "");
   const [veiculoEncontrado, setVeiculoEncontrado] = useState<Veiculo | null>(null);
   const [veiculoNaoEncontrado, setVeiculoNaoEncontrado] = useState(false);
   const [criandoVeiculo, setCriandoVeiculo] = useState(false);
+  const [sinespPreenchido, setSinespPreenchido] = useState(false);
+  const [sinespSituacao, setSinespSituacao] = useState<string | null>(null);
   const [vMarca, setVMarca] = useState("");
   const [vModelo, setVModelo] = useState("");
   const [vAnoFab, setVAnoFab] = useState("");
@@ -55,6 +85,19 @@ function NovaOSPage() {
   const [km, setKm] = useState("");
   const [descricao, setDescricao] = useState("");
   const [erro, setErro] = useState<string | null>(null);
+
+  // ── Pre-preenche cliente vindo da listagem ────────────────────────────────
+  const { data: clienteParam } = useQuery({
+    queryKey: ["cliente-pre-os", clienteIdParam],
+    queryFn: () => api.get<Cliente>(`/clientes/${clienteIdParam}`),
+    enabled: !!clienteIdParam,
+  });
+
+  useEffect(() => {
+    if (clienteParam && !clienteSelecionado) {
+      setClienteSelecionado(clienteParam);
+    }
+  }, [clienteParam, clienteSelecionado]);
 
   // ── Auto-fetch do dono do veículo ao confirmar placa ──────────────────────
   const { data: clienteAtual, isLoading: carregandoCliente } = useQuery({
@@ -97,22 +140,69 @@ function NovaOSPage() {
     mutationFn: async (placa: string) => {
       setVeiculoNaoEncontrado(false);
       setVeiculoEncontrado(null);
-      setClienteSelecionado(null);
-      setClienteAutoFetch(false);
-      try {
-        return await api.get<Veiculo>(`/veiculos/${encodeURIComponent(placa)}`);
-      } catch (err) {
-        if (err instanceof ApiError && err.status === 404) {
-          setVeiculoNaoEncontrado(true);
-          return null;
-        }
-        throw err;
+      setSinespPreenchido(false);
+      setSinespSituacao(null);
+      if (!preserveCliente.current) {
+        setClienteSelecionado(null);
+        setClienteAutoFetch(false);
+      }
+      preserveCliente.current = false;
+      return api.get<ConsultaVeiculo>(`/veiculos/${encodeURIComponent(placa)}/consultar`);
+    },
+    onSuccess: (res) => {
+      if (res.fonte === "db" && res.id) {
+        setVeiculoEncontrado({ id: res.id, placa: res.placa, marca: res.marca, modelo: res.modelo, tipo: res.tipo });
+      } else if (res.fonte === "sinesp") {
+        // Pré-preenche o form com os dados do SINESP
+        setVMarca(res.marca ?? "");
+        setVModelo(res.modelo ?? "");
+        setVAnoFab(res.ano_fab != null ? String(res.ano_fab) : "");
+        setVAnoMod(res.ano_mod != null ? String(res.ano_mod) : "");
+        setVCor(res.cor ?? "");
+        setSinespPreenchido(true);
+        setSinespSituacao(res.situacao);
+        setVeiculoNaoEncontrado(true);
+        setCriandoVeiculo(true);
+      } else {
+        setVeiculoNaoEncontrado(true);
       }
     },
-    onSuccess: (v) => {
-      if (v) setVeiculoEncontrado(v);
-    },
   });
+
+  // Dispara busca automática quando placa veio via search param
+  const placaParamSearched = useRef(false);
+  useEffect(() => {
+    if (placaParam && !placaParamSearched.current) {
+      placaParamSearched.current = true;
+      buscarVeiculo.mutate(placaParam);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Veículos do cliente para picker ──────────────────────────────────────
+  const { data: clienteVeiculos } = useQuery({
+    queryKey: ["cliente-veiculos-os", clienteIdParam],
+    queryFn: () => api.get<ClienteVeiculoLink[]>(`/clientes/${clienteIdParam}/veiculos`),
+    enabled: !!clienteIdParam && !placaParam,
+  });
+
+  const veiculosAtivos = (clienteVeiculos ?? []).filter((v) => v.ativo && v.veiculo?.placa);
+
+  useEffect(() => {
+    if (!clienteVeiculos || veiculoEncontrado) return;
+    if (veiculosAtivos.length === 1) {
+      const [primeiro] = veiculosAtivos;
+      const placa = primeiro?.veiculo?.placa;
+      if (!placa) return;
+      setPlacaInput(placa);
+      setPlacaBusca(placa);
+      preserveCliente.current = true;
+      buscarVeiculo.mutate(placa);
+    } else if (veiculosAtivos.length > 1) {
+      setShowVehiclePicker(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clienteVeiculos]);
 
   function handleBuscarPlaca(e: FormEvent) {
     e.preventDefault();
@@ -173,7 +263,45 @@ function NovaOSPage() {
           <CardTitle>1. Veículo</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {veiculoEncontrado ? (
+          {showVehiclePicker && !veiculoEncontrado ? (
+            <div className="space-y-2">
+              <p className="text-xs text-[--color-text-muted] mb-3">
+                O cliente tem {veiculosAtivos.length} veículos. Selecione qual será usado na OS:
+              </p>
+              {veiculosAtivos.map((v) => (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => {
+                    const placa = v.veiculo!.placa;
+                    setPlacaInput(placa);
+                    setPlacaBusca(placa);
+                    setShowVehiclePicker(false);
+                    preserveCliente.current = true;
+                    buscarVeiculo.mutate(placa);
+                  }}
+                  className="w-full flex items-center gap-3 rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2.5 text-left hover:border-[--color-primary] hover:bg-[--color-primary]/5 transition-colors"
+                >
+                  <span className="font-mono font-bold text-sm tracking-widest text-[--color-primary] shrink-0">
+                    {v.veiculo?.placa}
+                  </span>
+                  <span className="text-sm text-[--color-text-secondary]">
+                    {[v.veiculo?.marca, v.veiculo?.modelo, v.veiculo?.ano_fab].filter(Boolean).join(" ")}
+                    {v.veiculo?.tipo && (
+                      <span className="ml-1 text-xs text-[--color-text-muted] uppercase">{v.veiculo.tipo}</span>
+                    )}
+                  </span>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setShowVehiclePicker(false)}
+                className="text-xs text-[--color-text-muted] hover:text-[--color-text-primary] pt-1"
+              >
+                Buscar outra placa →
+              </button>
+            </div>
+          ) : veiculoEncontrado ? (
             <div className="flex items-center justify-between rounded-md border border-[--color-border] px-3 py-2">
               <div>
                 <p className="text-sm font-medium font-mono text-[--color-text-primary]">
@@ -192,8 +320,12 @@ function NovaOSPage() {
                   setVeiculoNaoEncontrado(false);
                   setPlacaInput("");
                   setCriandoVeiculo(false);
-                  setClienteSelecionado(null);
-                  setClienteAutoFetch(false);
+                  if (veiculosAtivos.length > 1) {
+                    setShowVehiclePicker(true);
+                  } else {
+                    setClienteSelecionado(null);
+                    setClienteAutoFetch(false);
+                  }
                 }}
                 className="text-xs text-[--color-text-muted] hover:text-[--color-error]"
               >
@@ -232,10 +364,17 @@ function NovaOSPage() {
 
               {criandoVeiculo && (
                 <div className="border border-[--color-border] rounded-md p-3 space-y-3">
-                  <p className="text-xs font-medium text-[--color-text-muted]">
-                    Novo veículo —{" "}
-                    <span className="font-mono text-[--color-text-primary]">{placaBusca}</span>
-                  </p>
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <p className="text-xs font-medium text-[--color-text-muted]">
+                      Novo veículo —{" "}
+                      <span className="font-mono text-[--color-text-primary]">{placaBusca}</span>
+                    </p>
+                    {sinespPreenchido && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[--color-primary]/10 px-2 py-0.5 text-[11px] font-medium text-[--color-primary]">
+                        Dados do SINESP{sinespSituacao ? ` · ${sinespSituacao}` : ""}
+                      </span>
+                    )}
+                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     {(
                       [
@@ -285,7 +424,12 @@ function NovaOSPage() {
                       type="button"
                       size="sm"
                       variant="outline"
-                      onClick={() => setCriandoVeiculo(false)}
+                      onClick={() => {
+                        setCriandoVeiculo(false);
+                        setSinespPreenchido(false);
+                        setSinespSituacao(null);
+                        setVMarca(""); setVModelo(""); setVAnoFab(""); setVAnoMod(""); setVCor("");
+                      }}
                     >
                       Cancelar
                     </Button>

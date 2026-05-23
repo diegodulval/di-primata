@@ -114,7 +114,7 @@ function VendasPage() {
           <Link to="/app/vendas/nova">
             <Button variant="outline" size="sm">+ Nova Venda</Button>
           </Link>
-          <Link to="/app/os/nova">
+          <Link to="/app/os/nova" search={{}}>
             <Button size="sm">+ Nova OS</Button>
           </Link>
         </div>

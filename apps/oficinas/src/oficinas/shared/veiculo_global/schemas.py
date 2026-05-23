@@ -67,3 +67,27 @@ class HistoricoPublicoResponse(BaseModel):
 
 class VeiculoComHistorico(VeiculoResponse):
     historico_publico: list[HistoricoPublicoResponse] = []
+
+
+class ConsultaVeiculoResponse(BaseModel):
+    """
+    Resposta do endpoint GET /veiculos/{placa}/consultar.
+    Agrega dados da DB local (se existir) com enriquecimento do SINESP.
+    """
+    fonte: Literal["db", "sinesp", "nao_encontrado"]
+    # Campos do veículo (preenchidos de acordo com a fonte)
+    placa: str
+    chassi: str | None = None
+    marca: str | None = None
+    modelo: str | None = None
+    ano_fab: int | None = None
+    ano_mod: int | None = None
+    cor: str | None = None
+    tipo: str | None = None
+    # Campos extras apenas do SINESP (não persistidos no veículo)
+    municipio: str | None = None
+    uf: str | None = None
+    situacao: str | None = None
+    # Presente apenas quando fonte == "db"
+    id: uuid.UUID | None = None
+    criado_em: datetime | None = None

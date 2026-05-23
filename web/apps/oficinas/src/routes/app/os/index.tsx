@@ -72,7 +72,7 @@ function OSPage() {
     <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-[--color-text-primary]">Ordens de Serviço</h1>
-        <Link to="/app/os/nova">
+        <Link to="/app/os/nova" search={{}}>
           <Button size="sm">+ Nova OS</Button>
         </Link>
       </div>

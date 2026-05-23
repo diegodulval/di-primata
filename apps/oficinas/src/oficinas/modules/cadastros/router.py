@@ -62,12 +62,13 @@ async def criar_cliente(
 
 
 @router.get("", response_model=ClientesPaginados,
-            summary="Listar clientes. Filtros: ?q=, ?tipo_pessoa=, ?ativo=, ?uf=, ?page=, ?page_size=")
+            summary="Listar clientes. Filtros: ?q=, ?tipo_pessoa=, ?ativo=, ?uf=, ?placa=, ?page=, ?page_size=")
 async def listar_clientes(
     q: str | None = None,
     tipo_pessoa: str | None = None,
     ativo: bool | None = None,
     uf: str | None = None,
+    placa: str | None = None,
     page: int = 1,
     page_size: int = 20,
     usuario=Depends(requer_atendente_acima),
@@ -75,7 +76,7 @@ async def listar_clientes(
 ):
     items, total = await CadastroService(db).listar_clientes(
         usuario.tenant_id, q=q, tipo_pessoa=tipo_pessoa, ativo=ativo, uf=uf,
-        page=page, page_size=page_size,
+        placa=placa, page=page, page_size=page_size,
     )
     return ClientesPaginados(
         items=items,

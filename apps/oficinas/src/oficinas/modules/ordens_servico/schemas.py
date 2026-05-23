@@ -73,6 +73,29 @@ class OSListResponse(BaseModel):
     items: list[OSResponse]
 
 
+class ItemOSHistorico(BaseModel):
+    tipo:           str
+    descricao:      str
+    quantidade:     Decimal
+    preco_unitario: Decimal
+    subtotal:       Decimal
+
+    model_config = {"from_attributes": True}
+
+
+class HistoricoEntrada(BaseModel):
+    os_id:                  uuid.UUID
+    numero_os:              str
+    data_servico:           date
+    km_entrada:             int | None
+    descricao_problema:     str
+    total_pecas:            Decimal
+    total_servicos:         Decimal
+    total_final:            Decimal
+    compartilhar_historico: bool
+    itens:                  list[ItemOSHistorico]
+
+
 class ApontamentoCreate(BaseModel):
     usuario_id:       uuid.UUID
     item_os_id:       uuid.UUID | None = None

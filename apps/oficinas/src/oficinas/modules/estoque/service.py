@@ -53,7 +53,8 @@ class EstoqueService:
     ) -> list[Fornecedor]:
         stmt = select(Fornecedor).where(Fornecedor.tenant_id == tenant_id)
         if q:
-            pattern = f"%{q}%"
+            safe = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            pattern = f"%{safe}%"
             from sqlalchemy import or_
             stmt = stmt.where(or_(
                 Fornecedor.razao_social.ilike(pattern),
@@ -181,7 +182,8 @@ class EstoqueService:
             )
         )
         if q:
-            pattern = f"%{q}%"
+            safe = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            pattern = f"%{safe}%"
             from sqlalchemy import or_
             stmt = stmt.where(or_(
                 Produto.codigo.ilike(pattern),
@@ -338,7 +340,8 @@ class EstoqueService:
         from sqlalchemy import func, or_
         base = select(Produto).where(Produto.tenant_id == tenant_id, Produto.ativo.is_(True))
         if q:
-            pattern = f"%{q}%"
+            safe = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            pattern = f"%{safe}%"
             base = base.where(or_(Produto.descricao.ilike(pattern), Produto.codigo.ilike(pattern)))
 
         total = (await self.db.execute(select(func.count()).select_from(base.subquery()))).scalar_one()

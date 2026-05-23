@@ -124,14 +124,24 @@ function VeiculoCard({ v, onDesassociar }: { v: ClienteVeiculo; onDesassociar: (
     >
       <div className="flex items-start gap-4">
         {/* Placa */}
-        <div className="shrink-0 rounded-md border-2 border-[--color-primary] bg-[--color-primary]/10 px-3 py-1.5 text-center min-w-[6rem]">
-          <p className="font-mono font-bold text-base tracking-widest text-[--color-primary]">
-            {vei?.placa ?? "—"}
-          </p>
-          {vei?.tipo && (
-            <p className="text-[10px] uppercase tracking-wide text-[--color-text-muted] mt-0.5">{vei.tipo}</p>
-          )}
-        </div>
+        {vei?.placa ? (
+          <Link
+            to="/app/veiculos/$placa"
+            params={{ placa: vei.placa }}
+            className="shrink-0 rounded-md border-2 border-[--color-primary] bg-[--color-primary]/10 px-3 py-1.5 text-center min-w-[6rem] hover:bg-[--color-primary]/20 transition-colors"
+          >
+            <p className="font-mono font-bold text-base tracking-widest text-[--color-primary]">
+              {vei.placa}
+            </p>
+            {vei.tipo && (
+              <p className="text-[10px] uppercase tracking-wide text-[--color-text-muted] mt-0.5">{vei.tipo}</p>
+            )}
+          </Link>
+        ) : (
+          <div className="shrink-0 rounded-md border-2 border-[--color-primary] bg-[--color-primary]/10 px-3 py-1.5 text-center min-w-[6rem]">
+            <p className="font-mono font-bold text-base tracking-widest text-[--color-primary]">—</p>
+          </div>
+        )}
 
         {/* Detalhes */}
         <div className="space-y-0.5">
