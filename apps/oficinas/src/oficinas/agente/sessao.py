@@ -39,9 +39,9 @@ async def salvar(
         text("""
             INSERT INTO agente_sessao
               (numero_whatsapp, tenant_id, usuario_id, mensagens, atualizado_em)
-            VALUES (:n, :tid::uuid, :uid::uuid, :msgs::jsonb, now())
+            VALUES (:n, CAST(:tid AS uuid), CAST(:uid AS uuid), CAST(:msgs AS jsonb), now())
             ON CONFLICT (numero_whatsapp)
-            DO UPDATE SET mensagens = :msgs::jsonb, atualizado_em = now()
+            DO UPDATE SET mensagens = CAST(:msgs AS jsonb), atualizado_em = now()
         """),
         {"n": numero, "tid": tenant_id, "uid": usuario_id, "msgs": json.dumps(msgs)},
     )

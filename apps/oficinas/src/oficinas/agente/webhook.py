@@ -1,13 +1,18 @@
 """
-Webhook Meta WhatsApp Business Cloud API.
+Webhooks WhatsApp:
 
-GET  /webhook/whatsapp  — verificação do webhook (challenge Meta)
-POST /webhook/whatsapp  — recebe mensagens; chama worker; responde via Graph API
+Meta Business Cloud API:
+  GET  /webhook/whatsapp  — verificação do webhook (challenge Meta)
+  POST /webhook/whatsapp  — recebe mensagens; envia resposta via Graph API
+
+Twilio WhatsApp Sandbox:
+  POST /webhook/twilio    — recebe mensagens; responde com TwiML
 """
 
 import hashlib
 import hmac
 import secrets
+from xml.sax.saxutils import escape as xml_escape
 
 import httpx
 import structlog
@@ -122,6 +127,50 @@ def _extrair_texto(mensagem: dict) -> str | None:
 def _dividir(texto: str, tamanho: int) -> list[str]:
     """Divide texto longo em partes menores."""
     return [texto[i : i + tamanho] for i in range(0, len(texto), tamanho)]
+
+
+# ─── Twilio WhatsApp Sandbox ──────────────────────────────────────────────────
+
+@router.post("/twilio", response_class=PlainTextResponse)
+async def receber_mensagem_twilio(
+    request: Request,
+    db: AsyncSession = Depends(get_raw_db),
+):
+    form = await request.form()
+    numero_raw = str(form.get("From", ""))   # "whatsapp:+5535997660281"
+    texto = str(form.get("Body", "")).strip()
+
+    if not numero_raw.startswith("whatsapp:") or not texto:
+        return PlainTextResponse(_twiml(""), media_type="text/xml")
+
+    numero = numero_raw.removeprefix("whatsapp:")
+    log.info("twilio_mensagem_recebida", numero=numero, chars=len(texto))
+
+    resposta = await worker.processar(db, numero, texto)
+    if resposta is None:
+        resposta = "Número não cadastrado. Fale com seu gestor para registrar seu WhatsApp."
+
+    return PlainTextResponse(_twiml(resposta), media_type="text/xml")
+
+
+@router.post("/twilio/status")
+async def status_twilio(request: Request):
+    form = await request.form()
+    log.info(
+        "twilio_status",
+        sid=form.get("MessageSid"),
+        status=form.get("MessageStatus"),
+        to=form.get("To"),
+        error=form.get("ErrorCode"),
+    )
+    return {"status": "ok"}
+
+
+def _twiml(mensagem: str) -> str:
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        f"<Response><Message>{xml_escape(mensagem)}</Message></Response>"
+    )
 
 
 async def _enviar_mensagem(numero: str, texto: str) -> None:

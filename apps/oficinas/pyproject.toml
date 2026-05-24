@@ -40,7 +40,7 @@ di-mata-utils = { workspace = true }
 packages = ["src/oficinas"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests", "src/oficinas/modules"]
+testpaths = ["tests", "src/oficinas/modules", "src/oficinas/agente", "src/oficinas/shared"]
 asyncio_mode = "auto"
 addopts = "-v --tb=short"
 

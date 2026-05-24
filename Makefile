@@ -6,10 +6,17 @@ SHELL := /bin/bash
         migrate-producao migrate-oficinas \
         web-install web-dev web-dev-oficinas web-build web-check web-generate \
         seed seed-oficinas \
+        agente-wpp _cloudflared \
         docker-up docker-down docker-logs docker-build \
         docker-up-producao docker-down-producao docker-logs-producao \
         docker-up-oficinas docker-down-oficinas docker-logs-oficinas \
         clean
+
+# Número do mecânico — sobrescrever na linha de comando se necessário:
+#   make agente-wpp MECANICO_WHATSAPP=+5511999999999
+MECANICO_WHATSAPP ?= +553597660281
+MECANICO_NOME     ?= Diego
+TENANT_DEMO       := 00000000-0000-0000-0000-000000000001
 
 UV = source $(HOME)/.local/bin/env && uv
 
@@ -98,6 +105,43 @@ web-check:
 
 web-generate:
 	cd web && pnpm generate:api
+
+# ── Agente WhatsApp ────────────────────────────────────────────────────────────
+
+# Garante que o cloudflared está em /tmp/cloudflared
+_cloudflared:
+	@[ -x /tmp/cloudflared ] || ( \
+	  echo "Baixando cloudflared..." && \
+	  curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 \
+	    -o /tmp/cloudflared && chmod +x /tmp/cloudflared \
+	)
+
+# Sobe o agente completo:
+#   1. cadastra mecânico na base (idempotente)
+#   2. abre tunnel cloudflared e exibe URLs para o Twilio
+#   3. sobe o servidor oficinas em :8001
+agente-wpp: _cloudflared
+	@set -a; [ -f .env ] && . .env; set +a; \
+	echo ""; \
+	echo "── 1/3 Cadastrando mecânico ──────────────────────────────────"; \
+	psql "$$OFICINAS_DATABASE_URL" -c \
+	  "INSERT INTO usuario (tenant_id, nome, perfil, senha_hash, numero_whatsapp, ativo) \
+	   VALUES ('$(TENANT_DEMO)', '$(MECANICO_NOME)', 'MECANICO', 'x', '$(MECANICO_WHATSAPP)', true) \
+	   ON CONFLICT (numero_whatsapp) DO NOTHING" 2>&1 | grep -v "^$$" || true; \
+	echo "── 2/3 Abrindo tunnel ────────────────────────────────────────"; \
+	/tmp/cloudflared tunnel --url http://localhost:8001 --no-autoupdate \
+	  > /tmp/cf-agente.log 2>&1 & \
+	sleep 5; \
+	CF_URL=$$(grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' /tmp/cf-agente.log | head -1); \
+	echo ""; \
+	echo "  Twilio Sandbox → Sandbox settings:"; \
+	echo "  When a message comes in:  $${CF_URL}/webhook/twilio"; \
+	echo "  Status callback URL:      $${CF_URL}/webhook/twilio/status"; \
+	echo ""; \
+	echo "── 3/3 Servidor :8001 (Ctrl+C para encerrar) ─────────────────"; \
+	echo ""
+	@source $(HOME)/.local/bin/env && uv run --package oficinas \
+	  fastapi dev apps/oficinas/src/oficinas/main.py --port 8001
 
 # ── Seed e limpeza ─────────────────────────────────────────────────────────────
 

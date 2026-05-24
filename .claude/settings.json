@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(which cloudflared *)",
+      "Read(//home/dd/**)",
+      "Bash(psql \"postgresql://oficinas:oficinas@localhost:5432/oficinas\" -c \"SELECT id, razao_social FROM tenant LIMIT 5;\")"
+    ]
+  }
+}
