@@ -18,8 +18,15 @@ class Settings(BaseSettings):
     # App Secret para validação HMAC-SHA256 do webhook (opcional em dev)
     whatsapp_app_secret: str = ""
 
+    # Twilio (sandbox WhatsApp — download de mídia requer auth)
+    twilio_account_sid: str = ""
+    twilio_auth_token: str = ""
+
     # Claude AI (agente)
     anthropic_api_key: str = ""
+
+    # Groq Whisper (transcrição de áudio dos mecânicos)
+    groq_api_key: str = ""
 
     # SINESP — proxy SOCKS5 para ambientes com IP fora do Brasil
     # Exemplo: socks5://user:pass@host:1080  ou  http://host:3128

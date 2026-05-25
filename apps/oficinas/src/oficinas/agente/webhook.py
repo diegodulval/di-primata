@@ -131,6 +131,50 @@ def _dividir(texto: str, tamanho: int) -> list[str]:
 
 # ─── Twilio WhatsApp Sandbox ──────────────────────────────────────────────────
 
+_AUDIO_EXT: dict[str, str] = {
+    "audio/ogg":  "ogg",
+    "audio/mp4":  "mp4",
+    "audio/mpeg": "mp3",
+    "audio/webm": "webm",
+    "audio/wav":  "wav",
+    "audio/x-wav": "wav",
+}
+
+
+async def _transcrever_audio(media_url: str, content_type: str) -> str | None:
+    """Baixa áudio do Twilio e transcreve via Groq Whisper."""
+    if not settings.groq_api_key:
+        log.warning("groq_api_key_nao_configurado")
+        return None
+
+    mime = content_type.split(";")[0].strip()
+    ext = _AUDIO_EXT.get(mime, "ogg")
+
+    async with httpx.AsyncClient(timeout=30, follow_redirects=True) as client:
+        download = await client.get(
+            media_url,
+            auth=(settings.twilio_account_sid, settings.twilio_auth_token),
+        )
+    if download.status_code != 200:
+        log.error("audio_download_falhou", status=download.status_code, url=media_url)
+        return None
+
+    async with httpx.AsyncClient(timeout=60) as client:
+        transcricao = await client.post(
+            "https://api.groq.com/openai/v1/audio/transcriptions",
+            headers={"Authorization": f"Bearer {settings.groq_api_key}"},
+            files={"file": (f"audio.{ext}", download.content, mime)},
+            data={"model": "whisper-large-v3-turbo", "language": "pt"},
+        )
+    if transcricao.status_code != 200:
+        log.error("transcricao_falhou", status=transcricao.status_code, body=transcricao.text)
+        return None
+
+    texto = transcricao.json().get("text", "").strip()
+    log.info("audio_transcrito", chars=len(texto))
+    return texto or None
+
+
 @router.post("/twilio", response_class=PlainTextResponse)
 async def receber_mensagem_twilio(
     request: Request,
@@ -140,10 +184,24 @@ async def receber_mensagem_twilio(
     numero_raw = str(form.get("From", ""))   # "whatsapp:+5535997660281"
     texto = str(form.get("Body", "")).strip()
 
-    if not numero_raw.startswith("whatsapp:") or not texto:
+    if not numero_raw.startswith("whatsapp:"):
         return PlainTextResponse(_twiml(""), media_type="text/xml")
 
     numero = numero_raw.removeprefix("whatsapp:")
+
+    # Áudio: transcreve se não houver texto
+    if not texto and int(form.get("NumMedia", 0)) > 0:
+        media_url  = str(form.get("MediaUrl0", ""))
+        media_type = str(form.get("MediaContentType0", ""))
+        if media_type.startswith("audio/"):
+            log.info("audio_recebido", numero=numero, tipo=media_type)
+            transcrito = await _transcrever_audio(media_url, media_type)
+            if transcrito:
+                texto = f"[áudio]: {transcrito}"
+
+    if not texto:
+        return PlainTextResponse(_twiml(""), media_type="text/xml")
+
     log.info("twilio_mensagem_recebida", numero=numero, chars=len(texto))
 
     resposta = await worker.processar(db, numero, texto)

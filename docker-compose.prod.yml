@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: oficinas
+      POSTGRES_USER: oficinas
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-oficinas}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oficinas"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  oficinas:
+    build:
+      context: .
+      dockerfile: apps/oficinas/Dockerfile
+    env_file: .env
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql://oficinas:${POSTGRES_PASSWORD:-oficinas}@postgres:5432/oficinas
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./web/apps/oficinas/dist:/usr/share/nginx/html:ro
+      - ./nginx.prod.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - oficinas
+    restart: unless-stopped
+
+  migrations:
+    build:
+      context: .
+      dockerfile: apps/oficinas/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://oficinas:${POSTGRES_PASSWORD:-oficinas}@postgres:5432/oficinas
+    command:
+      - uv
+      - run
+      - --package
+      - oficinas
+      - python
+      - -m
+      - migrations
+    working_dir: /workspace/apps/oficinas
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles: ["migrate"]
+    restart: "no"
+
+volumes:
+  postgres_data:

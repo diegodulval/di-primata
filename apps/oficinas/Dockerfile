@@ -4,13 +4,13 @@ WORKDIR /workspace
 
 RUN pip install --no-cache-dir uv
 
-COPY pyproject.toml .
+COPY pyproject.toml uv.lock ./
 COPY packages/ packages/
 COPY apps/oficinas/ apps/oficinas/
+# uv precisa enxergar todos os membros do workspace para resolver o grafo
+COPY apps/producao/pyproject.toml apps/producao/pyproject.toml
 
 RUN uv sync --package oficinas --no-dev
-
-WORKDIR /workspace/apps/oficinas
 
 CMD ["uv", "run", "--package", "oficinas", \
      "uvicorn", "oficinas.main:app", \

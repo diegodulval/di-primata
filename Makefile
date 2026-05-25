@@ -6,10 +6,11 @@ SHELL := /bin/bash
         migrate-producao migrate-oficinas \
         web-install web-dev web-dev-oficinas web-build web-check web-generate \
         seed seed-oficinas \
-        agente-wpp _cloudflared \
+        agente-wpp tunnel-url _cloudflared \
         docker-up docker-down docker-logs docker-build \
         docker-up-producao docker-down-producao docker-logs-producao \
         docker-up-oficinas docker-down-oficinas docker-logs-oficinas \
+        bootstrap-droplet deploy migrate-droplet logs-droplet \
         clean
 
 # Número do mecânico — sobrescrever na linha de comando se necessário:
@@ -120,6 +121,10 @@ _cloudflared:
 #   1. cadastra mecânico na base (idempotente)
 #   2. abre tunnel cloudflared e exibe URLs para o Twilio
 #   3. sobe o servidor oficinas em :8001
+tunnel-url:
+	@grep -aoP 'https://\S+\.trycloudflare\.com' /tmp/cf-agente.log 2>/dev/null | head -1 \
+	  || echo "Tunnel não está rodando. Execute: make agente-wpp"
+
 agente-wpp: _cloudflared
 	@set -a; [ -f .env ] && . .env; set +a; \
 	echo ""; \
@@ -182,6 +187,28 @@ docker-down-oficinas:
 
 docker-logs-oficinas:
 	docker compose logs -f oficinas
+
+# ── Deploy (Digital Ocean) ─────────────────────────────────────────────────────
+
+DROPLET_IP   := 67.205.129.68
+DROPLET_HOST := root@$(DROPLET_IP)
+DROPLET_KEY  := digital-ocean
+
+bootstrap-droplet:
+	bash scripts/bootstrap-droplet.sh
+
+deploy:
+	bash scripts/deploy.sh
+
+migrate-droplet:
+	ssh -i $(DROPLET_KEY) $(DROPLET_HOST) \
+	  "cd /app && docker compose -f docker-compose.prod.yml --profile migrate run --rm migrations"
+
+logs-droplet:
+	ssh -i $(DROPLET_KEY) $(DROPLET_HOST) \
+	  "cd /app && docker compose -f docker-compose.prod.yml logs -f"
+
+# ── Limpeza ────────────────────────────────────────────────────────────────────
 
 clean:
 	rm -rf .venv __pycache__ .pytest_cache htmlcov .coverage
