@@ -42,7 +42,6 @@ jobs:
           WHATSAPP_TOKEN=${{ secrets.WHATSAPP_TOKEN }}
           WHATSAPP_VERIFY_TOKEN=${{ secrets.WHATSAPP_VERIFY_TOKEN }}
           WHATSAPP_PHONE_ID=${{ secrets.WHATSAPP_PHONE_ID }}
-          WHATSAPP_APP_SECRET=${{ secrets.WHATSAPP_APP_SECRET }}
 
           ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
           GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
@@ -55,9 +54,15 @@ jobs:
           scp /tmp/prod.env ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/app/.env
           rm /tmp/prod.env
 
-      - name: Pull repo
+      - name: Clone or pull repo
         run: |
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "cd /app && git pull origin main"
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
+            if [ -d /app/.git ]; then
+              cd /app && git pull origin main
+            else
+              git clone https://github.com/diegodulval/di-primata.git /app
+            fi
+          "
 
       - name: Build and restart
         run: |
