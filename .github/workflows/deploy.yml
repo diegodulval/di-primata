@@ -12,6 +12,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node + pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Build frontend
+        run: |
+          cd web
+          pnpm install --frozen-lockfile
+          pnpm --filter oficinas build
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -54,6 +68,11 @@ jobs:
           scp /tmp/prod.env ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/app/.env
           rm /tmp/prod.env
 
+      - name: Deploy frontend dist
+        run: |
+          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "mkdir -p /app/web/apps/oficinas/dist"
+          rsync -az --delete web/apps/oficinas/dist/ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/app/web/apps/oficinas/dist/
+
       - name: Clone or pull repo
         run: |
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
@@ -75,7 +94,7 @@ jobs:
         run: |
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
             cd /app &&
-            docker compose -f docker-compose.prod.yml build --no-cache &&
+            docker compose -f docker-compose.prod.yml --profile migrate build --no-cache &&
             docker compose -f docker-compose.prod.yml up -d &&
             docker image prune -f
           "
