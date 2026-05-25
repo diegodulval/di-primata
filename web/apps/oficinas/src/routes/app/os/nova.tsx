@@ -280,7 +280,7 @@ function NovaOSPage() {
                     preserveCliente.current = true;
                     buscarVeiculo.mutate(placa);
                   }}
-                  className="w-full flex items-center gap-3 rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2.5 text-left hover:border-[--color-primary] hover:bg-[--color-primary]/5 transition-colors"
+                  className="w-full flex items-center gap-3 rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2.5 text-left hover:border-[--color-primary] hover:bg-[--color-primary]/5 transition-colors"
                 >
                   <span className="font-mono font-bold text-sm tracking-widest text-[--color-primary] shrink-0">
                     {v.veiculo?.placa}
@@ -340,7 +340,7 @@ function NovaOSPage() {
                   onChange={(e) => setPlacaInput(e.target.value.toUpperCase())}
                   placeholder="ABC1234"
                   maxLength={8}
-                  className="w-36 rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  className="w-36 rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                 />
                 <Button
                   type="submit"
@@ -394,7 +394,7 @@ function NovaOSPage() {
                           value={val}
                           onChange={(e) => setter(e.target.value)}
                           placeholder={ph}
-                          className="w-full rounded border border-[--color-border] bg-[--color-surface] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                          className="w-full rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                         />
                       </div>
                     ))}
@@ -408,7 +408,7 @@ function NovaOSPage() {
                         onChange={(e) =>
                           setVTipo(e.target.value as (typeof TIPOS_VEICULO)[number] | "")
                         }
-                        className="w-full rounded border border-[--color-border] bg-[--color-surface] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                        className="w-full rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                       >
                         <option value="">Selecione</option>
                         {TIPOS_VEICULO.map((t) => (
@@ -499,7 +499,7 @@ function NovaOSPage() {
                   value={qCliente}
                   onChange={(e) => setQCliente(e.target.value)}
                   placeholder="Buscar por nome, CPF ou telefone..."
-                  className="flex-1 rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  className="flex-1 rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                 />
                 <Button type="submit" size="sm" disabled={qCliente.trim().length < 2}>
                   Buscar
@@ -516,7 +516,7 @@ function NovaOSPage() {
                         setQCliente("");
                         setBuscaCliente("");
                       }}
-                      className="w-full px-3 py-2 text-left hover:bg-[--color-background] transition-colors"
+                      className="w-full px-3 py-2 text-left hover:bg-[var(--color-background)] transition-colors"
                     >
                       <p className="text-sm font-medium text-[--color-text-primary]">{c.nome}</p>
                       <p className="text-xs text-[--color-text-muted]">
@@ -547,7 +547,7 @@ function NovaOSPage() {
               value={km}
               onChange={(e) => setKm(e.target.value)}
               placeholder="Ex: 45000"
-              className="w-40 rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+              className="w-40 rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
             />
           </div>
           <div className="space-y-1">
@@ -563,7 +563,7 @@ function NovaOSPage() {
               onChange={(e) => setDescricao(e.target.value)}
               rows={3}
               placeholder="Descreva o problema relatado pelo cliente..."
-              className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary] resize-none"
+              className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary] resize-none"
             />
           </div>
         </CardContent>

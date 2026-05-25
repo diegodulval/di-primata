@@ -24,6 +24,9 @@
   --color-text-muted: #7a8a5a;
 
   --color-success: #718f3f;
+  --color-success-fg: #ffffff;
+  --color-warning-fg: #3d2800;
+  --color-error-fg: #ffffff;
   --color-warning: #d4a017;
   --color-error: #c0392b;
   --color-info: #2980b9;

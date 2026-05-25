@@ -50,7 +50,7 @@ interface ClienteVeiculo {
 }
 
 const INPUT_CLS =
-  "w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]";
+  "w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]";
 
 function VincularVeiculoForm({ clienteId, onClose }: { clienteId: string; onClose: () => void }) {
   const queryClient = useQueryClient();
@@ -118,8 +118,8 @@ function VeiculoCard({ v, onDesassociar }: { v: ClienteVeiculo; onDesassociar: (
     <div
       className={`rounded-lg border p-4 flex items-start justify-between gap-4 ${
         v.ativo
-          ? "border-[--color-border] bg-[--color-surface]"
-          : "border-[--color-border] bg-[--color-background] opacity-60"
+          ? "border-[--color-border] bg-[var(--color-surface)]"
+          : "border-[--color-border] bg-[var(--color-background)] opacity-60"
       }`}
     >
       <div className="flex items-start gap-4">
@@ -160,7 +160,7 @@ function VeiculoCard({ v, onDesassociar }: { v: ClienteVeiculo; onDesassociar: (
       </div>
 
       <div className="flex flex-col items-end gap-2 shrink-0">
-        <Badge variant={v.ativo ? "success" : "secondary"} className="text-xs">
+        <Badge variant={v.ativo ? "success" : "warning"} className="text-xs">
           {v.ativo ? "Ativo" : "Encerrado"}
         </Badge>
         {v.ativo && (
@@ -228,7 +228,7 @@ function ClienteDetalhe() {
               <Badge variant={cliente.tipo_pessoa === "Juridica" ? "secondary" : "default"}>
                 {cliente.tipo_pessoa === "Juridica" ? "Jurídica" : "Física"}
               </Badge>
-              <Badge variant={cliente.ativo ? "success" : "secondary"}>
+              <Badge variant={cliente.ativo ? "success" : "warning"}>
                 {cliente.ativo ? "Ativo" : "Inativo"}
               </Badge>
             </div>

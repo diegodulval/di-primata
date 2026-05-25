@@ -6,7 +6,22 @@
       "Bash(psql \"postgresql://oficinas:oficinas@localhost:5432/oficinas\" -c \"SELECT id, razao_social FROM tenant LIMIT 5;\")",
       "Bash(cat /tmp/cf-agente.log | head -20)",
       "Read(//tmp/**)",
-      "Bash(make tunnel-url *)"
+      "Bash(make tunnel-url *)",
+      "Bash(gh secret *)",
+      "Bash(git -C /home/dd/di-primata add .github/workflows/deploy.yml)",
+      "Bash(git -C /home/dd/di-primata commit -m ' *)",
+      "Bash(git -C /home/dd/di-primata push origin main)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('result',{}\\).get\\('status','error:'\\), d.get\\('errors'\\)\\)\")",
+      "Bash(cat)",
+      "Bash(chmod 600 /tmp/droplet_key)",
+      "Bash(ssh -i /tmp/droplet_key root@67.205.129.68 \"cat /app/nginx.prod.conf | grep -A2 'client_max'\")",
+      "Bash(ssh -i /tmp/droplet_key root@67.205.129.68 \"docker compose -f /app/docker-compose.prod.yml exec nginx nginx -s reload 2>&1\")",
+      "Bash(grep -n \"STATUS_BADGE\" /home/dd/di-primata/web/apps/oficinas/src/routes/app/os/\\\\$osId.tsx | head -10)",
+      "Read(//home/dd/di-primata/web/apps/oficinas/src/routes/app/os/**)",
+      "Bash(sed -i 's/--color-success: #5a8a3a;/--color-success: #5a8a3a;\\\\n  --color-success-fg: #ffffff;\\\\n  --color-warning-fg: #3d2800;\\\\n  --color-error-fg: #ffffff;/' /home/dd/di-primata/web/packages/theme/src/tokens/terra.css)",
+      "Bash(sed -i 's/--color-success: #718f3f;/--color-success: #718f3f;\\\\n  --color-success-fg: #ffffff;\\\\n  --color-warning-fg: #3d2800;\\\\n  --color-error-fg: #ffffff;/' /home/dd/di-primata/web/packages/theme/src/tokens/oliva.css)",
+      "Bash(sed -i 's/--color-success: #4b8e65;/--color-success: #4b8e65;\\\\n  --color-success-fg: #ffffff;\\\\n  --color-warning-fg: #3d2800;\\\\n  --color-error-fg: #ffffff;/' /home/dd/di-primata/web/packages/theme/src/tokens/floresta.css)",
+      "Bash(sed -i 's/--color-success: #357373;/--color-success: #357373;\\\\n  --color-success-fg: #ffffff;\\\\n  --color-warning-fg: #3d2800;\\\\n  --color-error-fg: #ffffff;/' /home/dd/di-primata/web/packages/theme/src/tokens/brisa.css)"
     ]
   }
 }

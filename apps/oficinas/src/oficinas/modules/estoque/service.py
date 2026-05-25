@@ -11,6 +11,7 @@ from oficinas.modules.estoque.models import (
     EntradaNfe,
     Fornecedor,
     ItemEntrada,
+    Marca,
     MovimentacaoEstoque,
     Produto,
 )
@@ -18,6 +19,8 @@ from oficinas.modules.estoque.parser import NFeParseResult, parse_nfe
 from oficinas.modules.estoque.schemas import (
     FornecedorCreate,
     FornecedorUpdate,
+    MarcaCreate,
+    MarcaUpdate,
     ProdutoCreate,
     ProdutoUpdate,
 )
@@ -33,6 +36,58 @@ _SEM_EFEITO = {TipoMovimentacao.SAIDA}
 class EstoqueService:
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
+
+    # ─── Marca ────────────────────────────────────────────────────────────────
+
+    async def criar_marca(self, tenant_id: uuid.UUID, payload: MarcaCreate) -> Marca:
+        from sqlalchemy.exc import IntegrityError
+        m = Marca(tenant_id=tenant_id, nome=payload.nome.strip())
+        self.db.add(m)
+        try:
+            await self.db.commit()
+        except IntegrityError:
+            await self.db.rollback()
+            raise NaoEncontrado(f"Marca '{payload.nome}' já existe.")
+        await self.db.refresh(m)
+        log.info("marca_criada", marca_id=str(m.id), nome=m.nome)
+        return m
+
+    async def listar_marcas(
+        self,
+        tenant_id: uuid.UUID,
+        q: str | None = None,
+        ativo: bool | None = None,
+        page: int = 1,
+        page_size: int = 50,
+    ) -> tuple[list[Marca], int]:
+        from sqlalchemy import func
+        base = select(Marca).where(Marca.tenant_id == tenant_id)
+        if q:
+            safe = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            base = base.where(Marca.nome.ilike(f"%{safe}%"))
+        if ativo is not None:
+            base = base.where(Marca.ativo.is_(ativo))
+        total = (await self.db.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        items = list(
+            (await self.db.execute(
+                base.order_by(Marca.nome).offset((page - 1) * page_size).limit(page_size)
+            )).scalars().all()
+        )
+        return items, total
+
+    async def atualizar_marca(
+        self, tenant_id: uuid.UUID, marca_id: uuid.UUID, payload: MarcaUpdate
+    ) -> Marca:
+        m = (await self.db.execute(
+            select(Marca).where(Marca.id == marca_id, Marca.tenant_id == tenant_id)
+        )).scalar_one_or_none()
+        if not m:
+            raise NaoEncontrado("Marca não encontrada.")
+        for field, value in payload.model_dump(exclude_none=True).items():
+            setattr(m, field, value.strip() if isinstance(value, str) else value)
+        await self.db.commit()
+        await self.db.refresh(m)
+        return m
 
     # ─── Fornecedor ───────────────────────────────────────────────────────────
 
@@ -171,7 +226,7 @@ class EstoqueService:
                 MapeamentoFornecedorProduto.codigo_fornecedor,
                 Produto.codigo,
                 Produto.descricao,
-                Produto.marca,
+                Produto.marca_id,
             )
             .join(Produto, MapeamentoFornecedorProduto.produto_id == Produto.id)
             .where(
@@ -199,7 +254,7 @@ class EstoqueService:
                 "codigo_fornecedor": r[2],
                 "codigo_interno": r[3],
                 "descricao":     r[4],
-                "marca":         r[5],
+                "marca_id":      r[5],
             }
             for r in rows
         ]
@@ -278,8 +333,8 @@ class EstoqueService:
                 status_str = col(row, "status") or "Ativo"
                 ativo = status_str.lower() != "inativo"
 
-                marca = col(row, "marca")
                 localizacao = col(row, "localização", "localizacao")
+                ref_fabricante = col(row, "ref. fabricante", "ref fabricante", "ref_fabricante", "referência do fabricante", "referencia do fabricante")
 
                 valor_str = col(row, "valor")
                 preco = Decimal(str(valor_str).replace(",", ".")) if valor_str else Decimal("0")
@@ -288,10 +343,10 @@ class EstoqueService:
                     p = existentes[codigo]
                     p.descricao = descricao
                     p.ativo = ativo
-                    if marca is not None:
-                        p.marca = marca
                     if localizacao is not None:
                         p.localizacao = localizacao
+                    if ref_fabricante is not None:
+                        p.ref_fabricante = ref_fabricante
                     if preco > 0:
                         p.preco_venda = preco
                         p.preco_custo = preco
@@ -304,8 +359,8 @@ class EstoqueService:
                         tenant_id=tenant_id,
                         codigo=codigo,
                         descricao=descricao,
-                        marca=marca,
                         localizacao=localizacao,
+                        ref_fabricante=ref_fabricante,
                         preco_venda=preco,
                         preco_custo=preco,
                         estoque_atual=estoque,
@@ -354,14 +409,6 @@ class EstoqueService:
         )
         return items, total
 
-    async def listar_marcas(self, tenant_id: uuid.UUID) -> list[str]:
-        stmt = (
-            select(Produto.marca)
-            .where(Produto.tenant_id == tenant_id, Produto.ativo.is_(True), Produto.marca.isnot(None))
-            .distinct()
-            .order_by(Produto.marca)
-        )
-        return [r for r in (await self.db.execute(stmt)).scalars().all() if r]
 
     async def buscar_produto(self, produto_id: uuid.UUID, tenant_id: uuid.UUID) -> Produto:
         stmt = select(Produto).where(Produto.id == produto_id, Produto.tenant_id == tenant_id)

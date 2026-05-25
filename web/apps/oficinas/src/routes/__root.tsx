@@ -30,7 +30,7 @@ function RootLayout() {
 
   if (status === "checking") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[--color-background]">
+      <main className="flex min-h-screen items-center justify-center bg-[var(--color-background)]">
         <Skeleton className="h-6 w-32" />
       </main>
     );

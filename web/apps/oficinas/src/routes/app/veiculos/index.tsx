@@ -145,7 +145,7 @@ function VeiculosPage() {
           onChange={(e) => setPlaca(e.target.value.toUpperCase())}
           placeholder="ABC1234 ou ABC1D23"
           maxLength={8}
-          className="rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm font-mono uppercase w-48 focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+          className="rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm font-mono uppercase w-48 focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
         />
         <Button type="submit" size="sm" disabled={isLoading}>
           {isLoading ? "Buscando..." : "Buscar"}
@@ -184,7 +184,7 @@ function VeiculosPage() {
                   onChange={(e) => setFPlaca(e.target.value.toUpperCase())}
                   maxLength={8}
                   placeholder="ABC1234"
-                  className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                 />
               </div>
               <div className="space-y-1">
@@ -195,7 +195,7 @@ function VeiculosPage() {
                   id="v-tipo"
                   value={fTipo}
                   onChange={(e) => setFTipo(e.target.value as (typeof TIPOS)[number] | "")}
-                  className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                 >
                   <option value="">Selecione...</option>
                   {TIPOS.map((t) => (
@@ -218,7 +218,7 @@ function VeiculosPage() {
                   value={fMarca}
                   onChange={(e) => setFMarca(e.target.value)}
                   placeholder="Toyota"
-                  className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                 />
                 <datalist id="marcas-lista">
                   {MARCAS_VEICULOS.map((m) => (
@@ -238,7 +238,7 @@ function VeiculosPage() {
                   value={fModelo}
                   onChange={(e) => setFModelo(e.target.value)}
                   placeholder="Corolla"
-                  className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                 />
               </div>
               <div className="space-y-1">
@@ -254,7 +254,7 @@ function VeiculosPage() {
                   value={fAnoFab}
                   onChange={(e) => setFAnoFab(e.target.value)}
                   placeholder="2020"
-                  className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                 />
               </div>
               <div className="space-y-1">
@@ -270,7 +270,7 @@ function VeiculosPage() {
                   value={fAnoMod}
                   onChange={(e) => setFAnoMod(e.target.value)}
                   placeholder="2021"
-                  className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                 />
               </div>
               <div className="space-y-1">
@@ -282,7 +282,7 @@ function VeiculosPage() {
                   value={fCor}
                   onChange={(e) => setFCor(e.target.value)}
                   placeholder="Prata"
-                  className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                 />
               </div>
             </div>

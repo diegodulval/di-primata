@@ -27,6 +27,7 @@ import { Route as AppOsOsIdRouteImport } from './routes/app/os/$osId'
 import { Route as AppFornecedoresFornecedorIdRouteImport } from './routes/app/fornecedores/$fornecedorId'
 import { Route as AppEstoqueEntradasRouteImport } from './routes/app/estoque/entradas'
 import { Route as AppClientesClienteIdRouteImport } from './routes/app/clientes/$clienteId'
+import { Route as AppCadastrosMarcasRouteImport } from './routes/app/cadastros/marcas'
 import { Route as AppEstoqueNfeRevisaoRascunhoIdRouteImport } from './routes/app/estoque/nfe-revisao.$rascunhoId'
 import { Route as AppEstoqueEntradaEntradaIdRouteImport } from './routes/app/estoque/entrada/$entradaId'
 
@@ -121,6 +122,11 @@ const AppClientesClienteIdRoute = AppClientesClienteIdRouteImport.update({
   path: '/clientes/$clienteId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCadastrosMarcasRoute = AppCadastrosMarcasRouteImport.update({
+  id: '/cadastros/marcas',
+  path: '/cadastros/marcas',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppEstoqueNfeRevisaoRascunhoIdRoute =
   AppEstoqueNfeRevisaoRascunhoIdRouteImport.update({
     id: '/estoque/nfe-revisao/$rascunhoId',
@@ -139,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/app/': typeof AppIndexRoute
+  '/app/cadastros/marcas': typeof AppCadastrosMarcasRoute
   '/app/clientes/$clienteId': typeof AppClientesClienteIdRoute
   '/app/estoque/entradas': typeof AppEstoqueEntradasRoute
   '/app/fornecedores/$fornecedorId': typeof AppFornecedoresFornecedorIdRoute
@@ -160,6 +167,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/app': typeof AppIndexRoute
+  '/app/cadastros/marcas': typeof AppCadastrosMarcasRoute
   '/app/clientes/$clienteId': typeof AppClientesClienteIdRoute
   '/app/estoque/entradas': typeof AppEstoqueEntradasRoute
   '/app/fornecedores/$fornecedorId': typeof AppFornecedoresFornecedorIdRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/app/': typeof AppIndexRoute
+  '/app/cadastros/marcas': typeof AppCadastrosMarcasRoute
   '/app/clientes/$clienteId': typeof AppClientesClienteIdRoute
   '/app/estoque/entradas': typeof AppEstoqueEntradasRoute
   '/app/fornecedores/$fornecedorId': typeof AppFornecedoresFornecedorIdRoute
@@ -207,6 +216,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/login'
     | '/app/'
+    | '/app/cadastros/marcas'
     | '/app/clientes/$clienteId'
     | '/app/estoque/entradas'
     | '/app/fornecedores/$fornecedorId'
@@ -228,6 +238,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/app'
+    | '/app/cadastros/marcas'
     | '/app/clientes/$clienteId'
     | '/app/estoque/entradas'
     | '/app/fornecedores/$fornecedorId'
@@ -250,6 +261,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/login'
     | '/app/'
+    | '/app/cadastros/marcas'
     | '/app/clientes/$clienteId'
     | '/app/estoque/entradas'
     | '/app/fornecedores/$fornecedorId'
@@ -402,6 +414,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientesClienteIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/cadastros/marcas': {
+      id: '/app/cadastros/marcas'
+      path: '/cadastros/marcas'
+      fullPath: '/app/cadastros/marcas'
+      preLoaderRoute: typeof AppCadastrosMarcasRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/estoque/nfe-revisao/$rascunhoId': {
       id: '/app/estoque/nfe-revisao/$rascunhoId'
       path: '/estoque/nfe-revisao/$rascunhoId'
@@ -421,6 +440,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
+  AppCadastrosMarcasRoute: typeof AppCadastrosMarcasRoute
   AppClientesClienteIdRoute: typeof AppClientesClienteIdRoute
   AppEstoqueEntradasRoute: typeof AppEstoqueEntradasRoute
   AppFornecedoresFornecedorIdRoute: typeof AppFornecedoresFornecedorIdRoute
@@ -441,6 +461,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
+  AppCadastrosMarcasRoute: AppCadastrosMarcasRoute,
   AppClientesClienteIdRoute: AppClientesClienteIdRoute,
   AppEstoqueEntradasRoute: AppEstoqueEntradasRoute,
   AppFornecedoresFornecedorIdRoute: AppFornecedoresFornecedorIdRoute,

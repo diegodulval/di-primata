@@ -36,7 +36,7 @@ function NovoClienteForm({ onClose }: { onClose: () => void }) {
   });
 
   return (
-    <div className="mb-6 rounded-lg border border-[--color-border] bg-[--color-surface] p-4">
+    <div className="mb-6 rounded-lg border border-[--color-border] bg-[var(--color-surface)] p-4">
       <h2 className="text-sm font-semibold text-[--color-text-primary] mb-3">Novo cliente</h2>
       <form onSubmit={(e: FormEvent) => { e.preventDefault(); criar.mutate(); }} className="space-y-3">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -94,7 +94,7 @@ export const Route = createFileRoute("/app/clientes/")({
 });
 
 const INPUT_CLS =
-  "w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]";
+  "w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]";
 
 const PAGE_SIZE = 20;
 
@@ -197,7 +197,7 @@ function EditarClienteModal({ cliente, onClose }: { cliente: Cliente; onClose: (
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-lg bg-[--color-surface] shadow-xl max-h-[90vh] flex flex-col">
+      <div className="w-full max-w-2xl rounded-lg bg-[var(--color-surface)] shadow-xl max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between border-b border-[--color-border] px-6 py-4 shrink-0">
           <h2 className="text-base font-semibold text-[--color-text-primary]">Editar cliente</h2>
           <button type="button" onClick={onClose} className="text-[--color-text-muted] hover:text-[--color-text-primary]">✕</button>
@@ -484,14 +484,14 @@ function ClientesPage() {
             onChange={(e) => setQInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && pesquisar()}
             placeholder="Nome, CPF, celular, placa..."
-            className="rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary] w-64"
+            className="rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary] w-64"
           />
           <Button size="sm" variant="outline" onClick={pesquisar}>Buscar</Button>
 
           <select
             value={tipoPessoa}
             onChange={(e) => { setTipoPessoa(e.target.value); aplicarFiltro(); }}
-            className="rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           >
             <option value="">Tipo: Todos</option>
             <option value="Fisica">Física</option>
@@ -501,7 +501,7 @@ function ClientesPage() {
           <select
             value={ativoFiltro}
             onChange={(e) => { setAtivoFiltro(e.target.value); aplicarFiltro(); }}
-            className="rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           >
             <option value="">Status: Todos</option>
             <option value="true">Ativo</option>
@@ -513,7 +513,7 @@ function ClientesPage() {
             onChange={(e) => { setUf(e.target.value.toUpperCase()); aplicarFiltro(); }}
             placeholder="UF"
             maxLength={2}
-            className="w-16 rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="w-16 rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
 
           {total > 0 && (
@@ -536,7 +536,7 @@ function ClientesPage() {
               <>
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[--color-border] text-left text-[--color-text-muted]">
+                    <tr className="bg-[var(--color-surface)] border-b border-[--color-border] text-left text-[--color-text-muted]">
                       <th className="pb-2 pr-4 font-medium hidden sm:table-cell">CPF/CNPJ</th>
                       <th className="pb-2 pr-4 font-medium hidden sm:table-cell">Tipo</th>
                       <th className="pb-2 pr-4 font-medium">Nome</th>
@@ -550,7 +550,7 @@ function ClientesPage() {
                     {clientes.map((c) => (
                       <tr
                         key={c.id}
-                        className="cursor-pointer hover:bg-[--color-background]"
+                        className="bg-[var(--color-surface)] cursor-pointer hover:bg-[var(--color-background)] transition-colors"
                         onClick={() => void navigate({ to: "/app/clientes/$clienteId", params: { clienteId: c.id } })}
                         onKeyDown={(e) => {
                           if (e.key === "Enter" || e.key === " ")
@@ -576,7 +576,7 @@ function ClientesPage() {
                           {c.cidade && c.uf ? `${c.cidade}/${c.uf}` : (c.cidade ?? c.uf ?? "—")}
                         </td>
                         <td className="py-3 pr-4">
-                          <Badge variant={c.ativo ? "success" : "secondary"} className="text-xs">
+                          <Badge variant={c.ativo ? "success" : "warning"} className="text-xs">
                             {c.ativo ? "Ativo" : "Inativo"}
                           </Badge>
                         </td>

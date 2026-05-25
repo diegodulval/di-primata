@@ -181,7 +181,7 @@ function EntradaPage() {
           <div className="overflow-x-auto rounded-lg border border-[--color-border]">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[--color-surface] border-b border-[--color-border] text-left text-xs font-medium text-[--color-text-muted]">
+                <tr className="bg-[var(--color-surface)] border-b border-[--color-border] text-left text-xs font-medium text-[--color-text-muted]">
                   <th className="px-3 py-2">#</th>
                   <th className="px-3 py-2">Cód. Fornecedor</th>
                   <th className="px-3 py-2 text-right">Qtd</th>
@@ -192,7 +192,7 @@ function EntradaPage() {
               </thead>
               <tbody className="divide-y divide-[--color-border]">
                 {entrada.itens.map((item, idx) => (
-                  <tr key={item.id} className="bg-[--color-surface]">
+                  <tr key={item.id} className="bg-[var(--color-surface)]">
                     <td className="px-3 py-2.5 text-[--color-text-muted] text-xs">{idx + 1}</td>
                     <td className="px-3 py-2.5 font-mono text-xs text-[--color-text-secondary]">
                       {item.codigo_fornecedor ?? "—"}
@@ -214,14 +214,14 @@ function EntradaPage() {
                           setDatasItens((prev) => ({ ...prev, [item.id]: e.target.value }))
                         }
                         disabled={isProcessada}
-                        className="rounded border border-[--color-border] bg-[--color-surface] px-2 py-1 text-xs text-[--color-text-primary] disabled:opacity-60 focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
+                        className="rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1 text-xs text-[--color-text-primary] disabled:opacity-60 focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
                       />
                     </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t border-[--color-border] bg-[--color-background]">
+                <tr className="border-t border-[--color-border] bg-[var(--color-background)]">
                   <td
                     colSpan={4}
                     className="px-3 py-2.5 text-right text-xs font-medium text-[--color-text-muted]"
@@ -244,7 +244,7 @@ function EntradaPage() {
         <div className="flex items-center justify-between">
           <Link
             to="/app/estoque/entradas"
-            className="px-5 py-2 rounded-md border border-[--color-border] text-sm text-[--color-text-secondary] hover:bg-[--color-background] transition-colors"
+            className="px-5 py-2 rounded-md border border-[--color-border] text-sm text-[--color-text-secondary] hover:bg-[var(--color-background)] transition-colors"
           >
             Cancelar
           </Link>

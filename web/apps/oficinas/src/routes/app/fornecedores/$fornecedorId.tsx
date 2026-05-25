@@ -107,7 +107,7 @@ function ProdutosFornecedorPage() {
           onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && buscar()}
           placeholder="Pesquise pelo Código Interno, Referência do Fabricante ou Descrição"
-          className="flex-1 rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+          className="flex-1 rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
         />
         <Button size="sm" onClick={buscar}>
           Buscar
@@ -142,7 +142,7 @@ function ProdutosFornecedorPage() {
                 </thead>
                 <tbody className="divide-y divide-[--color-border]">
                   {paginados.map((p) => (
-                    <tr key={p.mapeamento_id} className="hover:bg-[--color-surface] transition-colors">
+                    <tr key={p.mapeamento_id} className="hover:bg-[var(--color-surface)] transition-colors">
                       <td className="px-4 py-3 font-mono text-xs text-[--color-text-muted]">
                         {p.codigo_interno}
                       </td>

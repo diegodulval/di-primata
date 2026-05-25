@@ -70,7 +70,7 @@ const STATUS_BADGE: Record<string, "default" | "warning" | "error" | "success" |
   EM_EXECUCAO: "warning",
   AGUARDANDO_PECA: "error",
   FECHADA: "success",
-  CANCELADA: "outline",
+  CANCELADA: "error",
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -140,7 +140,7 @@ function AdicionarItemForm({ osId, onAdded }: { osId: string; onAdded: () => voi
     (tipo === "SERVICO" ? descricao.trim().length > 0 : produto !== null);
 
   return (
-    <div className="border border-[--color-border] rounded-md p-4 space-y-3 bg-[--color-background]">
+    <div className="border border-[--color-border] rounded-md p-4 space-y-3 bg-[var(--color-surface)]">
       <div className="flex gap-2">
         {(["PECA", "SERVICO"] as const).map((t) => (
           <button
@@ -155,7 +155,7 @@ function AdicionarItemForm({ osId, onAdded }: { osId: string; onAdded: () => voi
             className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
               tipo === t
                 ? "bg-[--color-primary] text-[--color-primary-fg]"
-                : "bg-[--color-surface] text-[--color-text-secondary] border border-[--color-border]"
+                : "bg-[var(--color-surface)] text-[--color-text-secondary] border border-[--color-border]"
             }`}
           >
             {t === "PECA" ? "Peça" : "Serviço"}
@@ -190,7 +190,7 @@ function AdicionarItemForm({ osId, onAdded }: { osId: string; onAdded: () => voi
                 value={qProduto}
                 onChange={(e) => setQProduto(e.target.value)}
                 placeholder="Buscar produto..."
-                className="flex-1 rounded border border-[--color-border] bg-[--color-surface] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                className="flex-1 rounded border border-[--color-border] bg-[var(--color-surface)] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
               />
               <Button
                 type="button"
@@ -213,7 +213,7 @@ function AdicionarItemForm({ osId, onAdded }: { osId: string; onAdded: () => voi
                       setQProduto("");
                       setBuscaProduto("");
                     }}
-                    className="w-full px-3 py-2 text-left hover:bg-[--color-surface] flex justify-between gap-4"
+                    className="w-full px-3 py-2 text-left hover:bg-[var(--color-surface)] flex justify-between gap-4"
                   >
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-[--color-text-primary] truncate">
@@ -240,7 +240,7 @@ function AdicionarItemForm({ osId, onAdded }: { osId: string; onAdded: () => voi
             value={descricao}
             onChange={(e) => setDescricao(e.target.value)}
             placeholder="Ex: Troca de óleo e filtro"
-            className="w-full rounded border border-[--color-border] bg-[--color-surface] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="w-full rounded border border-[--color-border] bg-[var(--color-surface)] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
         </div>
       )}
@@ -257,7 +257,7 @@ function AdicionarItemForm({ osId, onAdded }: { osId: string; onAdded: () => voi
             step="1"
             value={quantidade}
             onChange={(e) => setQuantidade(e.target.value)}
-            className="w-20 rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="w-20 rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
         </div>
         <div className="space-y-0.5">
@@ -271,7 +271,7 @@ function AdicionarItemForm({ osId, onAdded }: { osId: string; onAdded: () => voi
             step="0.01"
             value={preco}
             onChange={(e) => setPreco(e.target.value)}
-            className="w-28 rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="w-28 rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
         </div>
         <Button
@@ -319,7 +319,7 @@ function FecharDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-[--color-surface] rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
+      <div className="bg-[var(--color-surface)] rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
         <h2 className="text-base font-semibold text-[--color-text-primary]">Fechar OS</h2>
         <div className="flex items-center gap-2">
           <input
@@ -344,7 +344,7 @@ function FecharDialog({
               onChange={(e) => setResumo(e.target.value)}
               rows={3}
               placeholder="O que foi feito (visível a qualquer pessoa que consultar a placa)..."
-              className="w-full rounded-md border border-[--color-border] bg-[--color-background] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary] resize-none"
+              className="w-full rounded-md border border-[--color-border] bg-[var(--color-background)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary] resize-none"
             />
           </div>
         )}
@@ -514,7 +514,7 @@ function ApontamentosSection({ osId, itens }: { osId: string; itens: ItemOS[] })
                   value={usuarioId}
                   onChange={(e) => setUsuarioId(e.target.value)}
                   required
-                  className="w-full rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  className="w-full rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                 >
                   <option value="">Selecionar...</option>
                   {(usuarios ?? []).map((u) => (
@@ -527,7 +527,7 @@ function ApontamentosSection({ osId, itens }: { osId: string; itens: ItemOS[] })
                 <select
                   value={itemOsId}
                   onChange={(e) => { setItemOsId(e.target.value); setDescricao(""); }}
-                  className="w-full rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  className="w-full rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                 >
                   <option value="">Nenhum (descrever abaixo)</option>
                   {itens.map((i) => (
@@ -543,7 +543,7 @@ function ApontamentosSection({ osId, itens }: { osId: string; itens: ItemOS[] })
                     onChange={(e) => setDescricao(e.target.value)}
                     required={!itemOsId}
                     placeholder="O que foi realizado..."
-                    className="w-full rounded border border-[--color-border] bg-[--color-surface] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                    className="w-full rounded border border-[--color-border] bg-[var(--color-surface)] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                   />
                 </div>
               )}
@@ -556,7 +556,7 @@ function ApontamentosSection({ osId, itens }: { osId: string; itens: ItemOS[] })
                     max="99"
                     value={horas}
                     onChange={(e) => setHoras(e.target.value)}
-                    className="w-20 rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                    className="w-20 rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                   />
                   <span className="text-xs text-[--color-text-muted]">h</span>
                   <input
@@ -565,7 +565,7 @@ function ApontamentosSection({ osId, itens }: { osId: string; itens: ItemOS[] })
                     max="59"
                     value={minutos}
                     onChange={(e) => setMinutos(e.target.value)}
-                    className="w-20 rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                    className="w-20 rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                   />
                   <span className="text-xs text-[--color-text-muted]">min</span>
                 </div>
@@ -577,7 +577,7 @@ function ApontamentosSection({ osId, itens }: { osId: string; itens: ItemOS[] })
                   value={dataApt}
                   onChange={(e) => setDataApt(e.target.value)}
                   required
-                  className="rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                  className="rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                 />
               </div>
             </div>

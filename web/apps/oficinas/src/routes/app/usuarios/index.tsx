@@ -68,7 +68,7 @@ function UsuariosPage() {
                       <Badge variant="outline">{PERFIL_LABEL[u.perfil] ?? u.perfil}</Badge>
                     </td>
                     <td className="py-3">
-                      <Badge variant={u.ativo ? "success" : "secondary"}>
+                      <Badge variant={u.ativo ? "success" : "warning"}>
                         {u.ativo ? "Ativo" : "Inativo"}
                       </Badge>
                     </td>

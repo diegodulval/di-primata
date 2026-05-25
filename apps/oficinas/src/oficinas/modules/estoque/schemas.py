@@ -8,6 +8,32 @@ from pydantic import BaseModel, Field
 from oficinas.core.enums import TipoMovimentacao
 
 
+class MarcaCreate(BaseModel):
+    nome: str
+
+
+class MarcaUpdate(BaseModel):
+    nome:  str | None = None
+    ativo: bool | None = None
+
+
+class MarcaResponse(BaseModel):
+    id:        uuid.UUID
+    tenant_id: uuid.UUID
+    nome:      str
+    ativo:     bool
+
+    model_config = {"from_attributes": True}
+
+
+class MarcasPaginadas(BaseModel):
+    items:     list[MarcaResponse]
+    total:     int
+    page:      int
+    page_size: int
+    pages:     int
+
+
 class FornecedorCreate(BaseModel):
     razao_social:       str
     nome_fantasia:      str | None = None
@@ -54,7 +80,7 @@ class ProdutoFornecedorResponse(BaseModel):
     codigo_interno:    str
     codigo_fornecedor: str
     descricao:         str
-    marca:             str | None
+    marca_id:          uuid.UUID | None
 
 
 class ImportacaoResponse(BaseModel):
@@ -71,7 +97,7 @@ class ProdutoCreate(BaseModel):
     codigo:            str
     descricao:         str
     ncm:               str | None = None
-    marca:             str | None = None
+    marca_id:          uuid.UUID | None = None
     localizacao:       str | None = None
     ean:               str | None = None
     ref_fabricante:    str | None = None
@@ -89,7 +115,7 @@ class ProdutoCreate(BaseModel):
 class ProdutoUpdate(BaseModel):
     descricao:         str | None = None
     ncm:               str | None = None
-    marca:             str | None = None
+    marca_id:          uuid.UUID | None = None
     localizacao:       str | None = None
     ean:               str | None = None
     ref_fabricante:    str | None = None
@@ -111,7 +137,7 @@ class ProdutoResponse(BaseModel):
     codigo:            str
     descricao:         str
     ncm:               str | None
-    marca:             str | None
+    marca_id:          uuid.UUID | None
     localizacao:       str | None
     ean:               str | None
     ref_fabricante:    str | None
@@ -196,15 +222,15 @@ class EntradaUpdate(BaseModel):
 class VincularItemPayload(BaseModel):
     acao:       Literal["vincular", "criar_novo"]
     produto_id: uuid.UUID | None = None
-    marca:      str | None = None
+    marca_id:   uuid.UUID | None = None
 
 
 class ItemRascunhoResponse(BaseModel):
     id:                uuid.UUID
     rascunho_id:       uuid.UUID
     produto_id:        uuid.UUID | None
-    codigo_produto:    str | None = None   # produto.codigo — populado via join
-    marca_produto:     str | None = None   # produto.marca  — populado via join
+    codigo_produto:    str | None = None
+    marca_id_produto:  uuid.UUID | None = None
     codigo_fornecedor: str
     codigo_ref:        str | None
     ean:               str | None

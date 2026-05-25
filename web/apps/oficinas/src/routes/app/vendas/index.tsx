@@ -39,7 +39,7 @@ const STATUS_MAP: Record<string, { label: string; variant: "default" | "warning"
   EM_EXECUCAO:     { label: "Em execução",    variant: "warning" },
   AGUARDANDO_PECA: { label: "Aguard. peça",   variant: "error" },
   FECHADA:         { label: "Fechada",         variant: "success" },
-  CANCELADA:       { label: "Cancelado",       variant: "secondary" },
+  CANCELADA:       { label: "Cancelado",       variant: "error" },
   CONCLUIDA:       { label: "Concluída",       variant: "success" },
 };
 
@@ -127,14 +127,14 @@ function VendasPage() {
           value={busca}
           onChange={(e) => { setBusca(e.target.value); setPagina(1); }}
           placeholder="Buscar por número, cliente ou placa..."
-          className="flex-1 min-w-48 rounded border border-[--color-border] bg-[--color-surface] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+          className="flex-1 min-w-48 rounded border border-[--color-border] bg-[var(--color-surface)] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
         />
         <div className="flex items-center gap-2 shrink-0">
           <label className="text-xs text-[--color-text-muted]">Tipo:</label>
           <select
             value={filtroTipo}
             onChange={(e) => { setFiltroTipo(e.target.value); setPagina(1); }}
-            className="rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           >
             {["Todos", "OS", "VENDA"].map((t) => (
               <option key={t} value={t}>{t === "VENDA" ? "Venda" : t}</option>
@@ -146,7 +146,7 @@ function VendasPage() {
           <select
             value={filtroStatus}
             onChange={(e) => { setFiltroStatus(e.target.value); setPagina(1); }}
-            className="rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           >
             {STATUS_FILTROS.map((s) => <option key={s}>{s}</option>)}
           </select>
@@ -161,7 +161,7 @@ function VendasPage() {
             type="date"
             value={dataInicial}
             onChange={(e) => { setDataInicial(e.target.value); setPagina(1); }}
-            className="rounded border border-[--color-border] bg-[--color-surface] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -170,7 +170,7 @@ function VendasPage() {
             type="date"
             value={dataFinal}
             onChange={(e) => { setDataFinal(e.target.value); setPagina(1); }}
-            className="rounded border border-[--color-border] bg-[--color-surface] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
         </div>
         {temFiltro && (
@@ -188,7 +188,7 @@ function VendasPage() {
       <div className="rounded-lg border border-[--color-border] overflow-x-auto">
         <table className="w-full text-sm min-w-[700px]">
           <thead>
-            <tr className="bg-[--color-surface] border-b border-[--color-border] text-xs font-medium text-[--color-text-muted] text-left">
+            <tr className="bg-[var(--color-surface)] border-b border-[--color-border] text-xs font-medium text-[--color-text-muted] text-left">
               <th className="px-4 py-3">Tipo</th>
               <th className="px-4 py-3">Número</th>
               <th className="px-4 py-3">Cliente</th>
@@ -221,7 +221,7 @@ function VendasPage() {
                 return (
                   <tr
                     key={m.id}
-                    className="bg-[--color-surface] hover:bg-[--color-background] transition-colors"
+                    className="bg-[var(--color-surface)] hover:bg-[var(--color-background)] transition-colors"
                   >
                     <td className="px-4 py-3">
                       {m.tipo === "OS" ? (
@@ -284,7 +284,7 @@ function VendasPage() {
             type="button"
             disabled={pagina === 1}
             onClick={() => setPagina((p) => p - 1)}
-            className="px-4 py-2 rounded border border-[--color-border] bg-[--color-surface] text-[--color-text-secondary] hover:bg-[--color-background] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded border border-[--color-border] bg-[var(--color-surface)] text-[--color-text-secondary] hover:bg-[var(--color-background)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Anterior
           </button>
@@ -295,7 +295,7 @@ function VendasPage() {
             <select
               value={tamPagina}
               onChange={(e) => { setTamPagina(Number(e.target.value)); setPagina(1); }}
-              className="rounded border border-[--color-border] bg-[--color-surface] px-2 py-1 text-sm focus:outline-none"
+              className="rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1 text-sm focus:outline-none"
             >
               {[10, 25, 50].map((n) => (
                 <option key={n} value={n}>{n} linhas</option>
@@ -306,7 +306,7 @@ function VendasPage() {
             type="button"
             disabled={pagina === totalPaginas}
             onClick={() => setPagina((p) => p + 1)}
-            className="px-4 py-2 rounded border border-[--color-border] bg-[--color-surface] text-[--color-text-secondary] hover:bg-[--color-background] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded border border-[--color-border] bg-[var(--color-surface)] text-[--color-text-secondary] hover:bg-[var(--color-background)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Próximo
           </button>

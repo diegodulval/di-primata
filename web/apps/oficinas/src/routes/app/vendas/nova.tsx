@@ -136,7 +136,7 @@ function NovaVendaPage() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Código ou descrição..."
-              className="flex-1 rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+              className="flex-1 rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
             />
             <Button type="submit" size="sm" disabled={q.trim().length < 2}>
               Buscar
@@ -156,7 +156,7 @@ function NovaVendaPage() {
                   key={p.id}
                   type="button"
                   onClick={() => adicionarAoCart(p)}
-                  className="w-full px-3 py-2 text-left hover:bg-[--color-background] transition-colors flex items-center justify-between gap-4"
+                  className="w-full px-3 py-2 text-left hover:bg-[var(--color-background)] transition-colors flex items-center justify-between gap-4"
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-[--color-text-primary] truncate">
@@ -213,7 +213,7 @@ function NovaVendaPage() {
                         step="1"
                         value={item.quantidade}
                         onChange={(e) => atualizarItem(idx, "quantidade", e.target.value)}
-                        className="w-20 rounded-md border border-[--color-border] bg-[--color-surface] px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                        className="w-20 rounded-md border border-[--color-border] bg-[var(--color-surface)] px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                       />
                     </div>
                     <div className="space-y-0.5">
@@ -227,7 +227,7 @@ function NovaVendaPage() {
                         step="0.01"
                         value={item.preco_unitario}
                         onChange={(e) => atualizarItem(idx, "preco_unitario", e.target.value)}
-                        className="w-28 rounded-md border border-[--color-border] bg-[--color-surface] px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                        className="w-28 rounded-md border border-[--color-border] bg-[var(--color-surface)] px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
                       />
                     </div>
                     <div className="ml-auto text-right">

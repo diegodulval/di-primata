@@ -33,11 +33,11 @@ function fmtBrl(v: string | null): string {
   return Number.parseFloat(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-const STATUS_MAP: Record<string, { label: string; variant: "success" | "warning" | "secondary" }> =
+const STATUS_MAP: Record<string, { label: string; variant: "success" | "warning" | "secondary" | "error" }> =
   {
     PENDENTE: { label: "Em andamento", variant: "warning" },
     CONFIRMADA: { label: "Finalizado", variant: "success" },
-    CANCELADA: { label: "Cancelado", variant: "secondary" },
+    CANCELADA: { label: "Cancelado", variant: "error" },
   };
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -151,14 +151,14 @@ function EntradasPage() {
           value={busca}
           onChange={(e) => { setBusca(e.target.value); setPagina(1); }}
           placeholder="Pesquisa por Compra, Nota, Pedido ou Fornecedor"
-          className="flex-1 min-w-48 rounded border border-[--color-border] bg-[--color-surface] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+          className="flex-1 min-w-48 rounded border border-[--color-border] bg-[var(--color-surface)] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
         />
         <div className="flex items-center gap-2 shrink-0">
           <label className="text-xs text-[--color-text-muted]">Status:</label>
           <select
             value={filtroStatus}
             onChange={(e) => { setFiltroStatus(e.target.value); setPagina(1); }}
-            className="rounded border border-[--color-border] bg-[--color-surface] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           >
             {["Todos", "Em andamento", "Finalizado", "Cancelado"].map((s) => (
               <option key={s}>{s}</option>
@@ -175,7 +175,7 @@ function EntradasPage() {
             type="date"
             value={dataInicial}
             onChange={(e) => { setDataInicial(e.target.value); setPagina(1); }}
-            className="rounded border border-[--color-border] bg-[--color-surface] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -184,7 +184,7 @@ function EntradasPage() {
             type="date"
             value={dataFinal}
             onChange={(e) => { setDataFinal(e.target.value); setPagina(1); }}
-            className="rounded border border-[--color-border] bg-[--color-surface] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
         </div>
         {temFiltro && (
@@ -204,7 +204,7 @@ function EntradasPage() {
       <div className="rounded-lg border border-[--color-border] overflow-x-auto">
         <table className="w-full text-sm min-w-[800px]">
           <thead>
-            <tr className="bg-[--color-surface] border-b border-[--color-border] text-xs font-medium text-[--color-text-muted] text-left">
+            <tr className="bg-[var(--color-surface)] border-b border-[--color-border] text-xs font-medium text-[--color-text-muted] text-left">
               <th className="px-4 py-3">Dt. NF</th>
               <th className="px-4 py-3">Dt. Entrada</th>
               <th className="px-4 py-3 text-right">Compra</th>
@@ -239,7 +239,7 @@ function EntradasPage() {
                 return (
                   <tr
                     key={r.id}
-                    className="bg-[--color-surface] hover:bg-[--color-background] transition-colors"
+                    className="bg-[var(--color-surface)] hover:bg-[var(--color-background)] transition-colors"
                   >
                     <td className="px-4 py-3 text-[--color-text-secondary]">
                       {fmtData(r.data_emissao)}
@@ -314,7 +314,7 @@ function EntradasPage() {
             type="button"
             disabled={pagina === 1}
             onClick={() => setPagina((p) => p - 1)}
-            className="px-4 py-2 rounded border border-[--color-border] bg-[--color-surface] text-[--color-text-secondary] hover:bg-[--color-background] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded border border-[--color-border] bg-[var(--color-surface)] text-[--color-text-secondary] hover:bg-[var(--color-background)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Anterior
           </button>
@@ -325,7 +325,7 @@ function EntradasPage() {
             <select
               value={tamPagina}
               onChange={(e) => { setTamPagina(Number(e.target.value)); setPagina(1); }}
-              className="rounded border border-[--color-border] bg-[--color-surface] px-2 py-1 text-sm focus:outline-none"
+              className="rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1 text-sm focus:outline-none"
             >
               {[10, 25, 50].map((n) => (
                 <option key={n} value={n}>
@@ -338,7 +338,7 @@ function EntradasPage() {
             type="button"
             disabled={pagina === totalPaginas}
             onClick={() => setPagina((p) => p + 1)}
-            className="px-4 py-2 rounded border border-[--color-border] bg-[--color-surface] text-[--color-text-secondary] hover:bg-[--color-background] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded border border-[--color-border] bg-[var(--color-surface)] text-[--color-text-secondary] hover:bg-[var(--color-background)] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Próximo
           </button>

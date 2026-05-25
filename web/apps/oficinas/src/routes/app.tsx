@@ -26,10 +26,10 @@ function NavLinkItem({ node }: { node: NavLink }) {
     <Link
       to={node.to}
       activeOptions={{ exact: node.exact ?? false }}
-      className="block px-3 py-1.5 rounded-md text-sm text-[--color-text-secondary] hover:bg-[--color-background] hover:text-[--color-text-primary] transition-colors"
+      className="block px-3 py-1.5 rounded-md text-sm text-[--color-text-secondary] hover:bg-[var(--color-background)] hover:text-[--color-text-primary] transition-colors"
       activeProps={{
         className:
-          "block px-3 py-1.5 rounded-md text-sm bg-[--color-background] text-[--color-text-primary] font-medium",
+          "block px-3 py-1.5 rounded-md text-sm bg-[var(--color-background)] text-[--color-text-primary] font-medium",
       }}
     >
       {node.label}
@@ -111,14 +111,21 @@ function AppLayout() {
       ],
     },
     { type: "link", to: "/app/fornecedores", label: "Fornecedores" },
+    {
+      type: "group",
+      label: "Cadastrar",
+      children: [
+        { type: "link", to: "/app/cadastros/marcas", label: "Marcas" },
+      ],
+    },
     ...(perfil === "ADMIN"
       ? ([{ type: "link", to: "/app/usuarios", label: "Usuários" }] as NavNode[])
       : []),
   ];
 
   return (
-    <div className="flex min-h-screen bg-[--color-background]">
-      <aside className="w-56 shrink-0 border-r border-[--color-border] bg-[--color-surface] flex flex-col">
+    <div className="flex min-h-screen bg-[var(--color-background)]">
+      <aside className="w-56 shrink-0 border-r border-[--color-border] bg-[var(--color-surface)] flex flex-col">
         <div className="px-5 py-4 border-b border-[--color-border]">
           <span className="font-semibold text-sm text-[--color-text-primary]">
             {tenant.brandName}
@@ -134,7 +141,7 @@ function AppLayout() {
               clearSession();
               void navigate({ to: "/login" });
             }}
-            className="w-full px-3 py-2 rounded-md text-sm text-left text-[--color-text-muted] hover:bg-[--color-background] hover:text-[--color-error] transition-colors"
+            className="w-full px-3 py-2 rounded-md text-sm text-left text-[--color-text-muted] hover:bg-[var(--color-background)] hover:text-[--color-error] transition-colors"
           >
             Sair
           </button>

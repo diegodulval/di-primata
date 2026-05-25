@@ -111,9 +111,9 @@ function EntradaTimeline({ entrada }: { entrada: HistoricoEntrada }) {
     <div className="relative pl-8">
       {/* linha vertical + ponto */}
       <div className="absolute left-0 top-2 h-full w-px bg-[--color-border]" />
-      <div className="absolute left-[-5px] top-2 h-3 w-3 rounded-full border-2 border-[--color-primary] bg-[--color-surface]" />
+      <div className="absolute left-[-5px] top-2 h-3 w-3 rounded-full border-2 border-[--color-primary] bg-[var(--color-surface)]" />
 
-      <div className="rounded-lg border border-[--color-border] bg-[--color-surface] p-4 mb-6">
+      <div className="rounded-lg border border-[--color-border] bg-[var(--color-surface)] p-4 mb-6">
         {/* Cabeçalho */}
         <div className="flex items-start justify-between gap-4 mb-3">
           <div>
@@ -122,7 +122,7 @@ function EntradaTimeline({ entrada }: { entrada: HistoricoEntrada }) {
                 {DATA(entrada.data_servico)}
               </span>
               {entrada.km_entrada && (
-                <span className="text-xs text-[--color-text-muted] bg-[--color-background] rounded px-1.5 py-0.5">
+                <span className="text-xs text-[--color-text-muted] bg-[var(--color-background)] rounded px-1.5 py-0.5">
                   {entrada.km_entrada.toLocaleString("pt-BR")} km
                 </span>
               )}
@@ -323,7 +323,7 @@ function VeiculoDetalhe() {
               {veiculo.historico_publico.map((h) => (
                 <div
                   key={h.id}
-                  className="rounded-md border border-[--color-border] bg-[--color-background] p-3 text-sm"
+                  className="rounded-md border border-[--color-border] bg-[var(--color-background)] p-3 text-sm"
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-medium text-[--color-text-primary]">{DATA(h.data_servico)}</span>

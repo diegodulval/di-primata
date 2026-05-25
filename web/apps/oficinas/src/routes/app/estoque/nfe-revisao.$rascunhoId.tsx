@@ -144,16 +144,16 @@ function MarcaCombobox({
         onChange={(e) => { setFiltro(e.target.value); setOpen(true); }}
         onFocus={() => setOpen(true)}
         placeholder="Marca..."
-        className="w-full min-w-[80px] rounded border border-[--color-border] bg-[--color-surface] px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-[--color-primary] disabled:opacity-50"
+        className="w-full min-w-[80px] rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-0.5 text-xs focus:outline-none focus:ring-1 focus:ring-[--color-primary] disabled:opacity-50"
       />
       {open && !disabled && (
-        <div className="absolute z-50 mt-0.5 w-44 max-h-40 overflow-y-auto rounded-md border border-[--color-border] bg-[--color-surface] shadow-md">
+        <div className="absolute z-50 mt-0.5 w-44 max-h-40 overflow-y-auto rounded-md border border-[--color-border] bg-[var(--color-surface)] shadow-md">
           {opcoes.map((m) => (
             <button
               key={m}
               type="button"
               onMouseDown={() => selecionar(m)}
-              className="w-full px-3 py-1.5 text-left text-xs hover:bg-[--color-background] transition-colors"
+              className="w-full px-3 py-1.5 text-left text-xs hover:bg-[var(--color-background)] transition-colors"
             >
               {m}
             </button>
@@ -162,7 +162,7 @@ function MarcaCombobox({
             <button
               type="button"
               onMouseDown={() => selecionar(filtro.trim())}
-              className="w-full px-3 py-1.5 text-left text-xs text-[--color-primary] hover:bg-[--color-background] transition-colors"
+              className="w-full px-3 py-1.5 text-left text-xs text-[--color-primary] hover:bg-[var(--color-background)] transition-colors"
             >
               + Adicionar &ldquo;{filtro.trim()}&rdquo;
             </button>
@@ -266,7 +266,7 @@ function EditarProdutoPanel({ produtoId, onDone }: { produtoId: string; onDone: 
   if (!produto) return null;
 
   return (
-    <div className="space-y-3 p-3 bg-[--color-background] rounded-md border border-[--color-border]">
+    <div className="space-y-3 p-3 bg-[var(--color-surface)] rounded-md border border-[--color-border]">
       <p className="text-xs text-[--color-text-muted]">
         Produto: <span className="font-mono text-[--color-text-secondary]">{produto.codigo}</span>
         {" · "}estoque atual: {fmtQtd(produto.estoque_atual)}
@@ -365,13 +365,13 @@ function CodigoEstoqueInput({
         className="w-full min-w-[90px] rounded border border-amber-300 bg-amber-50 px-2 py-0.5 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-amber-500 placeholder:text-amber-400"
       />
       {open && (
-        <div className="absolute z-50 mt-0.5 w-72 max-h-48 overflow-y-auto rounded-md border border-[--color-border] bg-[--color-surface] shadow-lg">
+        <div className="absolute z-50 mt-0.5 w-72 max-h-48 overflow-y-auto rounded-md border border-[--color-border] bg-[var(--color-surface)] shadow-lg">
           {(produtos ?? []).map((p) => (
             <button
               key={p.id}
               type="button"
               onMouseDown={() => { vincular.mutate(p.id); setBusca(p.codigo); setOpen(false); }}
-              className="w-full px-3 py-2 text-left text-xs hover:bg-[--color-background] transition-colors"
+              className="w-full px-3 py-2 text-left text-xs hover:bg-[var(--color-background)] transition-colors"
             >
               <span className="font-mono text-[--color-text-primary] mr-2">{p.codigo}</span>
               <span className="text-[--color-text-muted]">{p.descricao}</span>
@@ -644,7 +644,7 @@ function PassoProdutos({
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           placeholder="Pesquisa por Código / Descrição / Ref. Fab / Código de Barras"
-          className="flex-1 min-w-48 rounded border border-[--color-border] bg-[--color-surface] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+          className="flex-1 min-w-48 rounded border border-[--color-border] bg-[var(--color-surface)] px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
         />
         <div className="flex items-center gap-2 ml-auto shrink-0">
           <span className="text-xs text-[--color-text-muted]">Margem Padrão:</span>
@@ -654,7 +654,7 @@ function PassoProdutos({
             step="0.01"
             value={margemPadrao}
             onChange={(e) => setMargemPadrao(e.target.value)}
-            className="w-20 rounded border border-[--color-border] bg-[--color-surface] px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="w-20 rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-1 text-sm text-right focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
           <span className="text-xs text-[--color-text-muted]">%</span>
           <Button size="sm" variant="outline" onClick={aplicarMargem}>
@@ -676,7 +676,7 @@ function PassoProdutos({
       <div className="overflow-x-auto rounded-lg border border-[--color-border]">
         <table className="w-full text-sm min-w-[900px]">
           <thead>
-            <tr className="bg-[--color-surface] border-b border-[--color-border] text-left text-xs font-medium text-[--color-text-muted]">
+            <tr className="bg-[var(--color-surface)] border-b border-[--color-border] text-left text-xs font-medium text-[--color-text-muted]">
               <th className="px-2 py-2 w-8" />
               <th className="px-3 py-2">Ordem</th>
               <th className="px-3 py-2">Cód. Estoque</th>
@@ -705,7 +705,7 @@ function PassoProdutos({
                 <>
                   <tr
                     key={item.id}
-                    className={`bg-[--color-surface] hover:bg-[--color-background] transition-colors ${
+                    className={`bg-[var(--color-surface)] hover:bg-[var(--color-background)] transition-colors ${
                       item.status_item === "PENDENTE" ? "border-l-2 border-l-amber-400" : ""
                     }`}
                   >
@@ -776,7 +776,7 @@ function PassoProdutos({
                         onChange={(e) =>
                           setMargemItens((prev) => ({ ...prev, [item.id]: e.target.value }))
                         }
-                        className="w-16 rounded border border-[--color-border] bg-[--color-surface] px-2 py-0.5 text-xs text-right focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
+                        className="w-16 rounded border border-[--color-border] bg-[var(--color-surface)] px-2 py-0.5 text-xs text-right focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
                       />
                       <span className="text-xs text-[--color-text-muted] ml-0.5">%</span>
                     </td>

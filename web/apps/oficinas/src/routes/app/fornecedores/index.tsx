@@ -84,7 +84,7 @@ function FornecedorForm({
             required
             value={razaoSocial}
             onChange={(e) => setRazaoSocial(e.target.value)}
-            className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
         </div>
         <div className="space-y-1">
@@ -92,7 +92,7 @@ function FornecedorForm({
           <input
             value={nomeFantasia}
             onChange={(e) => setNomeFantasia(e.target.value)}
-            className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
         </div>
         <div className="space-y-1">
@@ -100,7 +100,7 @@ function FornecedorForm({
           <select
             value={tipoPessoa}
             onChange={(e) => setTipoPessoa(e.target.value as TipoPessoa)}
-            className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           >
             <option value="Juridica">Jurídica</option>
             <option value="Fisica">Física</option>
@@ -112,7 +112,7 @@ function FornecedorForm({
             value={cnpj}
             onChange={(e) => setCnpj(e.target.value)}
             placeholder="00.000.000/0000-00"
-            className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
         </div>
         <div className="space-y-1">
@@ -122,7 +122,7 @@ function FornecedorForm({
           <input
             value={inscricaoEstadual}
             onChange={(e) => setInscricaoEstadual(e.target.value)}
-            className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
         </div>
         <div className="space-y-1">
@@ -131,7 +131,7 @@ function FornecedorForm({
             value={telefone}
             onChange={(e) => setTelefone(e.target.value)}
             placeholder="(00) 0000-0000"
-            className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
         </div>
         <div className="space-y-1">
@@ -140,7 +140,7 @@ function FornecedorForm({
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           />
         </div>
         <div className="flex items-center gap-2 pt-4">
@@ -192,7 +192,7 @@ function EditarModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-[--color-surface] rounded-lg shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto space-y-4">
+      <div className="bg-[var(--color-surface)] rounded-lg shadow-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto space-y-4">
         <h2 className="text-base font-semibold text-[--color-text-primary]">Editar Fornecedor</h2>
         <FornecedorForm
           initial={fornecedor}
@@ -344,14 +344,14 @@ function FornecedoresPage() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Pesquise por Nome Fantasia, CPF/CNPJ ou Razão Social"
-          className="flex-1 min-w-56 rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+          className="flex-1 min-w-56 rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
         />
         <div className="flex items-center gap-2">
           <label className="text-xs text-[--color-text-muted]">Status:</label>
           <select
             value={filtroAtivo}
             onChange={(e) => setFiltroAtivo(e.target.value as FiltroAtivo)}
-            className="rounded-md border border-[--color-border] bg-[--color-surface] px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="rounded-md border border-[--color-border] bg-[var(--color-surface)] px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           >
             <option value="todos">Todos</option>
             <option value="ativo">Ativo</option>
@@ -363,7 +363,7 @@ function FornecedoresPage() {
           <select
             value={filtroTipo}
             onChange={(e) => setFiltroTipo(e.target.value as "todos" | TipoPessoa)}
-            className="rounded-md border border-[--color-border] bg-[--color-surface] px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+            className="rounded-md border border-[--color-border] bg-[var(--color-surface)] px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
           >
             <option value="todos">Todos</option>
             <option value="Juridica">Jurídica</option>
@@ -390,7 +390,7 @@ function FornecedoresPage() {
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[--color-border] text-xs font-medium text-[--color-text-muted] text-left">
+                <tr className="bg-[var(--color-surface)] border-b border-[--color-border] text-xs font-medium text-[--color-text-muted] text-left">
                   <th className="px-4 py-3">CPF/CNPJ</th>
                   <th className="px-4 py-3">Tipo</th>
                   <th className="px-4 py-3">Nome/Razão Social</th>
@@ -402,7 +402,7 @@ function FornecedoresPage() {
               </thead>
               <tbody className="divide-y divide-[--color-border]">
                 {fornecedores.map((f) => (
-                  <tr key={f.id} className="hover:bg-[--color-surface] transition-colors">
+                  <tr key={f.id} className="bg-[var(--color-surface)] hover:bg-[var(--color-background)] transition-colors">
                     <td className="px-4 py-3 font-mono text-xs text-[--color-text-muted]">
                       {f.cnpj ?? "—"}
                     </td>

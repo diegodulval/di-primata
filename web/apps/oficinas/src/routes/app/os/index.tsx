@@ -25,7 +25,7 @@ const STATUS_BADGE: Record<string, "default" | "warning" | "error" | "success" |
   EM_EXECUCAO: "warning",
   AGUARDANDO_PECA: "error",
   FECHADA: "success",
-  CANCELADA: "outline",
+  CANCELADA: "error",
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -84,7 +84,7 @@ function OSPage() {
           onChange={(e) => setPlacaInput(e.target.value.toUpperCase())}
           placeholder="Buscar por placa…"
           maxLength={8}
-          className="w-40 rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+          className="w-40 rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
         />
         <Button type="submit" size="sm" disabled={placaInput.trim().length < 7}>
           Buscar
@@ -117,7 +117,7 @@ function OSPage() {
               className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                 filtro === f
                   ? "bg-[--color-primary] text-[--color-primary-fg]"
-                  : "bg-[--color-background] text-[--color-text-secondary] hover:text-[--color-text-primary]"
+                  : "bg-[var(--color-background)] text-[--color-text-secondary] hover:text-[--color-text-primary]"
               }`}
             >
               {f === "Todas" ? "Todas" : STATUS_LABEL[f]}
@@ -144,7 +144,7 @@ function OSPage() {
                 key={os.id}
                 to="/app/os/$osId"
                 params={{ osId: os.id }}
-                className="block px-4 py-3 border-b border-[--color-border] last:border-0 hover:bg-[--color-background] transition-colors"
+                className="block px-4 py-3 border-b border-[--color-border] last:border-0 hover:bg-[var(--color-background)] transition-colors"
               >
                 <div className="flex items-center justify-between gap-4">
                   <div className="min-w-0">
@@ -156,7 +156,7 @@ function OSPage() {
                         {STATUS_LABEL[os.status] ?? os.status}
                       </Badge>
                       {os.veiculo_placa && (
-                        <span className="text-xs font-mono text-[--color-text-muted] bg-[--color-background] px-1.5 py-0.5 rounded">
+                        <span className="text-xs font-mono text-[--color-text-muted] bg-[var(--color-background)] px-1.5 py-0.5 rounded">
                           {os.veiculo_placa}
                         </span>
                       )}

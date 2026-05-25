@@ -186,7 +186,7 @@ class RascunhoService:
                 descricao=item.descricao_nfe,
                 ncm=item.ncm,
                 ean=item.ean,
-                marca=payload.marca or None,
+                marca_id=payload.marca_id,
                 preco_custo=item.preco_unitario,
                 preco_venda=item.preco_unitario,
                 estoque_atual=Decimal("0"),

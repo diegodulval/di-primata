@@ -56,7 +56,7 @@ def produto(tenant_id) -> Produto:
         codigo="FLT001",
         descricao="FILTRO DE OLEO MANN",
         ncm="84212300",
-        marca=None,
+        marca_id=None,
         localizacao=None,
         preco_custo=Decimal("25.50"),
         preco_venda=Decimal("35.00"),

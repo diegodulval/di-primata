@@ -46,7 +46,7 @@ function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[--color-background] p-4">
+    <main className="flex min-h-screen items-center justify-center bg-[var(--color-background)] p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <CardTitle>{tenant.brandName}</CardTitle>
@@ -68,7 +68,7 @@ function LoginPage() {
                 value={identificador}
                 onChange={(e) => setIdentificador(e.target.value)}
                 placeholder="email@exemplo.com ou +5511999990000"
-                className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
               />
             </div>
             <div className="space-y-1">
@@ -81,7 +81,7 @@ function LoginPage() {
                 required
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
-                className="w-full rounded-md border border-[--color-border] bg-[--color-surface] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
+                className="w-full rounded-md border border-[--color-border] bg-[var(--color-surface)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[--color-primary]"
               />
             </div>
             {error && <p className="text-sm text-[--color-error]">{error}</p>}

@@ -86,6 +86,15 @@ migrate-oficinas:
 	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/004_seed.sql
 	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/005_iam_adjustments.sql
 	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/006_nfe_rascunho.sql
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/007_entrada_data_entrada.sql
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/008_fornecedor_expanded.sql
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/009_apontamento_os.sql
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/010_fornecedor_ativo_tipo.sql
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/011_produto_campos_extras.sql
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/012_cliente_campos_extras.sql
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/013_marcas.sql
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/014_normaliza_marca_produto.sql
+	psql "$(OFICINAS_DATABASE_URL)" -f apps/oficinas/migrations/015_remove_marca_texto.sql
 
 # ── Web (frontend) ─────────────────────────────────────────────────────────────
 

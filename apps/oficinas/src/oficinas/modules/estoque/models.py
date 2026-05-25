@@ -9,6 +9,16 @@ from sqlalchemy.orm import Mapped, mapped_column
 from oficinas.core.database import Base
 
 
+class Marca(Base):
+    __tablename__ = "marca"
+    __table_args__ = (UniqueConstraint("tenant_id", "nome"),)
+
+    id:        Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    tenant_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("tenant.id"))
+    nome:      Mapped[str] = mapped_column(Text, nullable=False)
+    ativo:     Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+
 class Fornecedor(Base):
     __tablename__ = "fornecedor"
 
@@ -33,7 +43,7 @@ class Produto(Base):
     codigo:            Mapped[str] = mapped_column(Text, nullable=False)
     descricao:         Mapped[str] = mapped_column(Text, nullable=False)
     ncm:               Mapped[str | None] = mapped_column(String(8), nullable=True)
-    marca:             Mapped[str | None] = mapped_column(Text, nullable=True)
+    marca_id:          Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("marca.id"), nullable=True)
     localizacao:       Mapped[str | None] = mapped_column(Text, nullable=True)
     ean:               Mapped[str | None] = mapped_column(String(14), nullable=True)
     ref_fabricante:    Mapped[str | None] = mapped_column(Text, nullable=True)

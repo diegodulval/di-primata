@@ -17,6 +17,10 @@ from oficinas.modules.estoque.schemas import (
     ImportacaoResponse,
     ItemEntradaResponse,
     ItemRascunhoResponse,
+    MarcaCreate,
+    MarcaResponse,
+    MarcasPaginadas,
+    MarcaUpdate,
     MovimentacaoResponse,
     ProdutoCreate,
     ProdutoFornecedorResponse,
@@ -28,9 +32,54 @@ from oficinas.modules.estoque.schemas import (
 )
 from oficinas.modules.estoque.service import EstoqueService
 
+marcas_router      = APIRouter(prefix="/marcas",      tags=["estoque"])
 produtos_router    = APIRouter(prefix="/produtos",    tags=["estoque"])
 fornecedores_router = APIRouter(prefix="/fornecedores", tags=["estoque"])
 entradas_router    = APIRouter(prefix="/entradas",    tags=["estoque"])
+
+
+# ─── Marcas ───────────────────────────────────────────────────────────────────
+
+@marcas_router.post("", response_model=MarcaResponse, status_code=status.HTTP_201_CREATED,
+                    summary="Criar marca (ADMIN)")
+async def criar_marca(
+    payload: MarcaCreate,
+    usuario=Depends(requer_admin),
+    db: AsyncSession = Depends(make_db(requer_admin)),
+):
+    return await EstoqueService(db).criar_marca(usuario.tenant_id, payload)
+
+
+@marcas_router.get("", response_model=MarcasPaginadas,
+                   summary="Listar marcas. Use ?q=, ?ativo=, ?page=, ?page_size=")
+async def listar_marcas(
+    q: str | None = None,
+    ativo: bool | None = None,
+    page: int = 1,
+    page_size: int = 20,
+    usuario=Depends(requer_atendente_acima),
+    db: AsyncSession = Depends(make_db(requer_atendente_acima)),
+):
+    import math
+    items, total = await EstoqueService(db).listar_marcas(usuario.tenant_id, q, ativo, page, page_size)
+    return MarcasPaginadas(
+        items=items,
+        total=total,
+        page=page,
+        page_size=page_size,
+        pages=max(1, math.ceil(total / page_size)),
+    )
+
+
+@marcas_router.patch("/{marca_id}", response_model=MarcaResponse,
+                     summary="Atualizar marca (ADMIN)")
+async def atualizar_marca(
+    marca_id: uuid.UUID,
+    payload: MarcaUpdate,
+    usuario=Depends(requer_admin),
+    db: AsyncSession = Depends(make_db(requer_admin)),
+):
+    return await EstoqueService(db).atualizar_marca(usuario.tenant_id, marca_id, payload)
 
 
 def _build_entrada_response(entrada, itens) -> EntradaNfeResponse:
@@ -49,7 +98,7 @@ def _build_rascunho_response(rascunho, itens_com_produto) -> RascunhoResponse:
         r = ItemRascunhoResponse.model_validate(item)
         if produto is not None:
             r.codigo_produto = produto.codigo
-            r.marca_produto = produto.marca
+            r.marca_id_produto = produto.marca_id
         item_responses.append(r)
     resp = RascunhoResponse.model_validate(rascunho)
     resp.itens = item_responses
@@ -102,15 +151,6 @@ async def listar_produtos(
         page_size=page_size,
         pages=max(1, math.ceil(total / page_size)),
     )
-
-
-@produtos_router.get("/marcas", response_model=list[str],
-                     summary="Listar marcas distintas dos produtos ativos (ATENDENTE/ADMIN)")
-async def listar_marcas(
-    usuario=Depends(requer_atendente_acima),
-    db: AsyncSession = Depends(make_db(requer_atendente_acima)),
-):
-    return await EstoqueService(db).listar_marcas(usuario.tenant_id)
 
 
 @produtos_router.get("/{produto_id}", response_model=ProdutoResponse,

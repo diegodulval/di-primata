@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 
 from oficinas.agente.webhook import router as webhook_router
 from oficinas.modules.cadastros.router import router as cadastros_router
-from oficinas.modules.estoque.router import entradas_router, fornecedores_router, produtos_router
+from oficinas.modules.estoque.router import entradas_router, fornecedores_router, marcas_router, produtos_router
 from oficinas.modules.iam.router import router as auth_router, usuarios_router
 from oficinas.modules.movimentos.router import router as movimentos_router
 from oficinas.modules.ordens_servico.router import router as os_router
@@ -88,6 +88,7 @@ app.include_router(auth_router)
 app.include_router(usuarios_router)
 app.include_router(veiculos_router)
 app.include_router(cadastros_router)
+app.include_router(marcas_router)
 app.include_router(produtos_router)
 app.include_router(fornecedores_router)
 app.include_router(entradas_router)
