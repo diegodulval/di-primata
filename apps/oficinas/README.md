@@ -1,4 +1,4 @@
-# Di Mata — Oficinas
+# Di Auto — Oficinas
 
 API de gestão de oficina mecânica e auto peças. Roda na porta **8001**.
 

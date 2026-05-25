@@ -1,5 +1,5 @@
 """
-Seed de desenvolvimento — Di Mata Oficinas
+Seed de desenvolvimento — Di Auto 
 Valida o admin criado pelo SQL (004_seed.sql) e popula dados de exemplo:
   - 2 clientes
   - 2 veículos vinculados
@@ -50,7 +50,7 @@ def post(c: httpx.Client, path: str, body: dict, expected: int = 201) -> dict:
 def main() -> None:
     global _token
 
-    print("Di Mata Oficinas — seed de desenvolvimento\n")
+    print("Di Auto — seed de desenvolvimento\n")
 
     with httpx.Client(base_url=BASE, timeout=15) as c:
         # Verifica saúde da API

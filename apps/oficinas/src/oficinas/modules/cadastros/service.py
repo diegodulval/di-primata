@@ -140,6 +140,29 @@ class CadastroService:
                     return s if s else None
             return None
 
+        def col_date(row: tuple, *nomes: str):
+            from datetime import date as _date
+            from datetime import datetime as _dt
+            for nome in nomes:
+                idx = cabecalhos.get(nome.lower())
+                if idx is not None and idx < len(row):
+                    val = row[idx]
+                    if val is None:
+                        continue
+                    if isinstance(val, _dt):
+                        return val.date()
+                    if isinstance(val, _date):
+                        return val
+                    s = str(val).strip()
+                    if not s:
+                        continue
+                    for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d"):
+                        try:
+                            return _dt.strptime(s, fmt).date()
+                        except ValueError:
+                            continue
+            return None
+
         # Pré-carrega por CPF/CNPJ para upsert eficiente
         stmt = select(Cliente).where(
             Cliente.tenant_id == tenant_id, Cliente.cpf_cnpj.isnot(None)
@@ -210,6 +233,10 @@ class CadastroService:
                     "uf":                 col(row, "estado(principal)", "uf", "estado"),
                     "apelido":            col(row, "apelido", "nome fantasia"),
                     "sexo":               col(row, "sexo"),
+                    "data_nascimento":    col_date(
+                        row, "data de nascimento", "data nascimento",
+                        "nascimento", "dt nascimento", "dt. nascimento",
+                    ),
                     "observacoes":        col(row, "observações", "observacoes", "obs"),
                     "ativo":              ativo,
                 }

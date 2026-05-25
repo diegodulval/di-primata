@@ -1005,19 +1005,19 @@ Legenda: ✅ concluído · 🔧 parcial · ⬜ pendente
 
 | # | Entrega | Critério de saída | Status |
 |---|---------|------------------|--------|
-| 1 | `migrations/` | DDL + RLS rodando, `psql` retorna tabelas | ✅ 009 migrations aplicadas |
+| 1 | `migrations/` | DDL + RLS rodando, `psql` retorna tabelas | ✅ 015 migrations aplicadas |
 | 2 | `core/` | Config, DB, security, enums, exceptions | ✅ enums.py, exceptions.py, main.py, db/ |
 | 3 | `modules/iam/` | Login retorna JWT, RBAC bloqueia rota errada | ✅ login, usuários, perfis ADMIN/ATENDENTE/MECANICO |
 | 4 | `shared/veiculo_global/` | Upsert por placa, histórico append-only | ✅ schema global, upsert idempotente, historico_veiculo |
 | 5 | `modules/cadastros/` | CRUD cliente, vínculo cliente-veículo | ✅ clientes, veículos, cliente-veículo, busca por placa |
-| 6 | `modules/estoque/` | Produto, movimentação, parser XML NF-e | ✅ produtos, fornecedores, entrada NF-e, rascunho, movimentações |
+| 6 | `modules/estoque/` | Produto, movimentação, parser XML NF-e | ✅ produtos, fornecedores, entrada NF-e, rascunho, movimentações, marcas (013-015: tabela marca, vínculo produto.marca_id) |
 | 7 | `modules/ordens_servico/` | Ciclo completo: abrir → itens → fechar | ✅ ciclo ABERTA→FECHADA, itens peça/serviço, apontamentos |
 | 7b | `modules/movimentos/` | View unificada OS + Venda | ✅ endpoint /movimentos agregando os dois tipos |
 | 8 | `agente/` | Mecânico abre OS pelo WhatsApp | ⬜ não iniciado |
 | 9 | `shared/fiscal/` | NF-e saída autorizada em homologação | ⬜ não iniciado |
 | 10 | `modules/vendas/` | PDV balcão + NFCe | 🔧 frontend básico, backend pendente |
-| 11 | `frontend/` | React por módulo | ✅ 15 telas: login, OS, estoque, clientes, veículos, movimentos, vendas |
-| 12 | Infra | docker-compose + nginx + CI/CD rodando na VPS | ⬜ não iniciado |
+| 11 | `frontend/` | React por módulo | ✅ 19 telas: login, dashboard, OS (lista/nova/detalhe), estoque (produtos, entradas, detalhe entrada, revisão NF-e), clientes (lista/detalhe), fornecedores (lista/detalhe), veículos (lista/detalhe), usuários, vendas (lista/nova), cadastros/marcas |
+| 12 | Infra | docker-compose + nginx + CI/CD rodando na VPS | ✅ docker-compose.prod.yml + nginx + GitHub Actions: build frontend no CI, rsync dist para VPS, rebuild migrations image com `--profile migrate`, deploy via SSH |
 
 ---
 

@@ -44,6 +44,7 @@ logger = logging.getLogger(__name__)
 
 from oficinas.agente.webhook import router as webhook_router
 from oficinas.modules.cadastros.router import router as cadastros_router
+from oficinas.modules.dashboard.router import router as dashboard_router
 from oficinas.modules.estoque.router import entradas_router, fornecedores_router, marcas_router, produtos_router
 from oficinas.modules.iam.router import router as auth_router, usuarios_router
 from oficinas.modules.movimentos.router import router as movimentos_router
@@ -60,7 +61,7 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(
-    title="Di Mata — Oficinas",
+    title="Di Auto — Oficinas",
     version="0.1.0",
     description="Gerenciamento de oficinas e manutenção",
     lifespan=lifespan,
@@ -86,6 +87,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(usuarios_router)
+app.include_router(dashboard_router)
 app.include_router(veiculos_router)
 app.include_router(cadastros_router)
 app.include_router(marcas_router)

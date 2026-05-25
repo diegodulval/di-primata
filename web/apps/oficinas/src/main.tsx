@@ -21,7 +21,7 @@ if (!rootEl) throw new Error("Root element não encontrado");
 createRoot(rootEl).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider config={{ palette: "terra", brandName: "Di Mata Oficinas" }}>
+      <ThemeProvider config={{ palette: "terra", brandName: "Di Auto" }}>
         <RouterProvider router={router} />
       </ThemeProvider>
     </QueryClientProvider>

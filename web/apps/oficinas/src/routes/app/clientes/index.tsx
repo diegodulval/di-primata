@@ -10,6 +10,7 @@ function NovoClienteForm({ onClose }: { onClose: () => void }) {
   const [nome, setNome] = useState("");
   const [tipoPessoa, setTipoPessoa] = useState("Fisica");
   const [cpfCnpj, setCpfCnpj] = useState("");
+  const [dataNascimento, setDataNascimento] = useState("");
   const [telefone, setTelefone] = useState("");
   const [celular, setCelular] = useState("");
   const [email, setEmail] = useState("");
@@ -22,6 +23,7 @@ function NovoClienteForm({ onClose }: { onClose: () => void }) {
       api.post("/clientes", {
         nome, tipo_pessoa: tipoPessoa,
         cpf_cnpj: cpfCnpj || null,
+        data_nascimento: dataNascimento || null,
         telefone: telefone || null,
         celular: celular || null,
         email: email || null,
@@ -54,6 +56,10 @@ function NovoClienteForm({ onClose }: { onClose: () => void }) {
           <div className="space-y-1">
             <label className="text-xs font-medium text-[--color-text-primary]">CPF/CNPJ</label>
             <input value={cpfCnpj} onChange={(e) => setCpfCnpj(e.target.value)} className={INPUT_CLS} />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-[--color-text-primary]">Data de nascimento</label>
+            <input type="date" value={dataNascimento} onChange={(e) => setDataNascimento(e.target.value)} className={INPUT_CLS} />
           </div>
           <div className="space-y-1">
             <label className="text-xs font-medium text-[--color-text-primary]">Telefone</label>
@@ -163,6 +169,7 @@ function EditarClienteModal({ cliente, onClose }: { cliente: Cliente; onClose: (
   const [cpfCnpj, setCpfCnpj] = useState(cliente.cpf_cnpj ?? "");
   const [rg, setRg] = useState(cliente.rg ?? "");
   const [apelido, setApelido] = useState(cliente.apelido ?? "");
+  const [dataNascimento, setDataNascimento] = useState(cliente.data_nascimento ?? "");
   const [telefone, setTelefone] = useState(cliente.telefone ?? "");
   const [celular, setCelular] = useState(cliente.celular ?? "");
   const [email, setEmail] = useState(cliente.email ?? "");
@@ -182,6 +189,7 @@ function EditarClienteModal({ cliente, onClose }: { cliente: Cliente; onClose: (
       api.patch(`/clientes/${cliente.id}`, {
         nome, tipo_pessoa: tipoPessoa,
         cpf_cnpj: cpfCnpj || null, rg: rg || null, apelido: apelido || null,
+        data_nascimento: dataNascimento || null,
         telefone: telefone || null, celular: celular || null, email: email || null,
         cep: cep || null, endereco: endereco || null, cidade: cidade || null,
         uf: uf || null, inscricao_estadual: ie || null,
@@ -232,6 +240,10 @@ function EditarClienteModal({ cliente, onClose }: { cliente: Cliente; onClose: (
               <div className="space-y-1">
                 <label className="text-sm font-medium text-[--color-text-primary]">Apelido</label>
                 <input value={apelido} onChange={(e) => setApelido(e.target.value)} className={INPUT_CLS} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-[--color-text-primary]">Data de nascimento</label>
+                <input type="date" value={dataNascimento} onChange={(e) => setDataNascimento(e.target.value)} className={INPUT_CLS} />
               </div>
               <div className="space-y-1">
                 <label className="text-sm font-medium text-[--color-text-primary]">Telefone</label>
