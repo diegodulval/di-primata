@@ -60,13 +60,14 @@ jobs:
             git config --global --add safe.directory /app
             mkdir -p /app
             if git -C /app remote get-url origin > /dev/null 2>&1; then
-              git -C /app pull origin main
+              git -C /app fetch origin main
+              git -C /app reset --hard origin/main
             else
               rm -rf /app/.git
               git -C /app init
               git -C /app remote add origin https://github.com/diegodulval/di-primata.git
               git -C /app fetch origin main
-              git -C /app checkout -B main origin/main
+              git -C /app checkout -fB main origin/main
             fi
           "
 
