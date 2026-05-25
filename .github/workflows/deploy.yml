@@ -57,11 +57,12 @@ jobs:
       - name: Clone or pull repo
         run: |
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
+            git config --global --add safe.directory /app
             if [ -d /app/.git ]; then
               cd /app && git pull origin main
             else
               cd /app &&
-              git init &&
+              git init -b main &&
               git remote add origin https://github.com/diegodulval/di-primata.git &&
               git fetch origin main &&
               git checkout -t origin/main
