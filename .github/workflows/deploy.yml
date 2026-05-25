@@ -60,7 +60,11 @@ jobs:
             if [ -d /app/.git ]; then
               cd /app && git pull origin main
             else
-              git clone https://github.com/diegodulval/di-primata.git /app
+              cd /app &&
+              git init &&
+              git remote add origin https://github.com/diegodulval/di-primata.git &&
+              git fetch origin main &&
+              git checkout -t origin/main
             fi
           "
 
