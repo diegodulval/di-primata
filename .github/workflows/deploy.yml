@@ -58,14 +58,15 @@ jobs:
         run: |
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
             git config --global --add safe.directory /app
-            if [ -d /app/.git ]; then
-              cd /app && git pull origin main
+            mkdir -p /app
+            if git -C /app remote get-url origin > /dev/null 2>&1; then
+              git -C /app pull origin main
             else
-              cd /app &&
-              git init -b main &&
-              git remote add origin https://github.com/diegodulval/di-primata.git &&
-              git fetch origin main &&
-              git checkout -t origin/main
+              rm -rf /app/.git
+              git -C /app init
+              git -C /app remote add origin https://github.com/diegodulval/di-primata.git
+              git -C /app fetch origin main
+              git -C /app checkout -B main origin/main
             fi
           "
 
